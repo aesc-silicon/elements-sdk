@@ -1,0 +1,12 @@
+bootloader
+build
+modules
+tools
+venv
+zephyr
+zephyr-*
+zibal
+vexriscv
+openocd
+.repo
+.west
