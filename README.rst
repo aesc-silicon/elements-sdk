@@ -47,7 +47,7 @@ Installation
 
 - Install the RISC-V toolchain::
 
-        wget wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.4/zephyr-toolchain-riscv64-0.11.4-setup.run
+        wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.4/zephyr-toolchain-riscv64-0.11.4-setup.run
         chmod +x zephyr-toolchain-riscv64-0.11.4-setup.run
         ./zephyr-toolchain-riscv64-0.11.4-setup.run -- -d $PWD/zephyr-sdk-0.11.4 -y
 
