@@ -168,13 +168,13 @@ the optional parameter ``--toolchain``. The Xilinx toolchain is selected by defa
 
 .. code-block:: text
 
-    python elements.py sim <board> [--toolchain <xilinx>]
+    python elements.py simulate <board> [--toolchain <xilinx>]
 
 Example to simulate TH-283:
 
 .. code-block:: text
 
-    python elements.py sim TH-283
+    python elements.py simulate TH-283
 
 Synthesize
 ----------
@@ -184,13 +184,13 @@ the synthesized design.
 
 .. code-block:: text
 
-    python elements.py synth <board> [--toolchain <xilinx>] [-sim]
+    python elements.py synthesize <board> [--toolchain <xilinx>] [-sim]
 
 Example to simulate TH-283:
 
 .. code-block:: text
 
-    python elements.py synth TH-283
+    python elements.py synthesize TH-283
 
 Flash
 *****

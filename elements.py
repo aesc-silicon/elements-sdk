@@ -39,7 +39,7 @@ def parse_args():
     parser_zibal.set_defaults(func=zibal)
     parser_zibal.add_argument('soc', help="Name of the SOC")
 
-    parser_sim = subparsers.add_parser('sim', help='Simulates the design')
+    parser_sim = subparsers.add_parser('simulate', help='Simulates the design')
     parser_sim.set_defaults(func=sim)
     parser_sim.add_argument('board', help="Name of the board")
     parser_sim.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
@@ -47,7 +47,7 @@ def parse_args():
     parser_sim.add_argument('-synthesized', action='store_true',
                             help="Simulate an already syntheized design")
 
-    parser_syn = subparsers.add_parser('syn', help='Synthesizes the design')
+    parser_syn = subparsers.add_parser('synthesize', help='Synthesizes the design')
     parser_syn.set_defaults(func=syn)
     parser_syn.add_argument('board', help="Name of the board")
     parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
