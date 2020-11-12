@@ -50,7 +50,7 @@ def parse_args():
     parser_syn = subparsers.add_parser('synthesize', help='Synthesizes the design')
     parser_syn.set_defaults(func=syn)
     parser_syn.add_argument('board', help="Name of the board")
-    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
+    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'cadence'],
                             help="Choose between differen toolchains.")
 
     parser_flash = subparsers.add_parser('flash', help='Flashes parts of the SDK')
@@ -159,17 +159,17 @@ def syn(args, env, cwd):
     if not 'common' in board:
         raise SystemExit("No common definitions in board {}".format(args.board))
     common = board.get('common')
+    env['BOARD'] = args.board
+    env['BOARD_NAME'] = name
+    env['SOC'] = common.get('SOC', '')
+    env['TOP'] = common.get('top', '')
+    env['TOP_NAME'] = common.get('top', '').replace('-', '')
+    env['TESTBENCH'] = common.get('testbench', '')
+    env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
 
     if args.toolchain == 'xilinx':
         if not 'xilinx' in board:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
-        env['BOARD'] = args.board
-        env['BOARD_NAME'] = name
-        env['SOC'] = common.get('SOC', '')
-        env['TOP'] = common.get('top', '')
-        env['TOP_NAME'] = common.get('top', '').replace('-', '')
-        env['TESTBENCH'] = common.get('testbench', '')
-        env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
         env['PART'] = board['xilinx'].get('part', '')
 
         xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/syn")
@@ -177,6 +177,16 @@ def syn(args, env, cwd):
                   "-journal ./output/logs/vivado.jou"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
+
+    if args.toolchain == 'cadence':
+        if not 'cadence' in board:
+            raise SystemExit("No cadence definitions in board {}".format(args.board))
+        env['PROCESS'] = board['cadence'].get('process', '')
+
+        cadence_cwd = os.path.join(cwd, "zibal/eda/cadence")
+        command = "genus -f tcl/frontend.tcl -log ./output/logs/"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
 
 def flash(args, env, cwd):
