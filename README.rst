@@ -164,11 +164,13 @@ Simulation
 
 Since a board is always built on a specific SOC design, simulations can be done on board-level.
 The ``sim`` command takes as parameter the name of the board. The toolchain can be passed with
-the optional parameter ``--toolchain``. The Xilinx toolchain is selected by default.
+the optional parameter ``--toolchain``. The Xilinx toolchain is selected by default. A further
+flag ``-synthesized`` can be used to simulate a synthesized design. This flag is currently only
+available for the Xilinx toolchain.
 
 .. code-block:: text
 
-    python elements.py simulate <board> [--toolchain <xilinx>]
+    python elements.py simulate <board> [--toolchain <xilinx>] [-synthesized]
 
 Example to simulate TH-283:
 
@@ -179,12 +181,12 @@ Example to simulate TH-283:
 Synthesize
 ----------
 
-The synthesize is similiar to the simulation but a further flag ``-sim`` can be used to simulate
+The synthesize is similiar to the simulation. It can synthesize a SOC design on board-level.
 the synthesized design.
 
 .. code-block:: text
 
-    python elements.py synthesize <board> [--toolchain <xilinx>] [-sim]
+    python elements.py synthesize <board> [--toolchain <xilinx>]
 
 Example to simulate TH-283:
 
