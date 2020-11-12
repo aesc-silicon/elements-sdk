@@ -3,11 +3,23 @@ import argparse
 import subprocess
 import os
 import logging
+import yaml
 
 
 _FORMAT = "%(asctime)s - %(message)s"
 ZEPHYR_SDK_VERSION = "0.11.4"
 VIVADO_PATH = "/opt/xilinx/Vivado/2019.2/bin/"
+
+def open_yaml(path):
+    """Opens a YAML file and returns the content as dictionary."""
+    try:
+        with open(path, 'r') as stream:
+            return list(yaml.load_all(stream, Loader=yaml.FullLoader))
+    except yaml.YAMLError as exc:
+        raise SystemExit(exc)
+    except FileNotFoundError as exc:
+        raise SystemExit(exc)
+    raise SystemExit("Unable to open {}".format(path))
 
 
 def parse_args():
@@ -30,24 +42,22 @@ def parse_args():
     parser_sim = subparsers.add_parser('sim', help='Simulates the design')
     parser_sim.set_defaults(func=sim)
     parser_sim.add_argument('board', help="Name of the board")
-    parser_sim.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
+    parser_sim.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
                             help="Choose between differen toolchains.")
+    parser_sim.add_argument('-synthesized', action='store_true',
+                            help="Simulate an already syntheized design")
 
-    parser_synth = subparsers.add_parser('synth', help='Synthesizes the design')
-    parser_synth.set_defaults(func=synth)
-    parser_synth.add_argument('board', help="Name of the board")
-    parser_synth.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
-                              help="Choose between differen toolchains.")
-    parser_synth.add_argument('-sim', action='store_true',
-                              help="Simulate the design after synthesized")
+    parser_syn = subparsers.add_parser('syn', help='Synthesizes the design')
+    parser_syn.set_defaults(func=syn)
+    parser_syn.add_argument('board', help="Name of the board")
+    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
+                            help="Choose between differen toolchains.")
 
     parser_flash = subparsers.add_parser('flash', help='Flashes parts of the SDK')
     parser_flash.set_defaults(func=flash)
     parser_flash.add_argument('board', help="Name of the board")
     parser_flash.add_argument('--destination', default='fpga', choices=['fpga', 'spi'],
                               help="Destination of the bitstream")
-    parser_flash.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
-                              help="Choose between differen toolchains.")
 
     parser_gdb = subparsers.add_parser('GDB', help='Debugs the firmware')
     parser_gdb.set_defaults(func=gdb)
@@ -99,37 +109,88 @@ def zibal(args, env, cwd):
 
 def sim(args, env, cwd):
     """Command to simulate a SOC on a virtual board."""
-    # TODO toolchain
-    xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/sim")
-    command = "vivado -mode tcl -source tcl/{}.tcl -log ./output/logs/vivado.log " \
-              "-journal ./output/logs/vivado.jou".format(args.board)
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
+    name = args.board.replace('-', '')
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
+    if not 'common' in board:
+        raise SystemExit("No common definitions in board {}".format(args.board))
+    common = board.get('common')
+
+    if args.toolchain == 'oss':
+        oss_cwd = os.path.join(cwd, "zibal/eda/OSS")
+        build_cwd = os.path.join(cwd, "build/zibal")
+        top_rep = common.get('top', '').replace('-', '')
+        command = "iverilog -Wall -g2009 {0}.v ../testbenches/{1}.sv ../../../build/zibal/{2}.v " \
+                  " -I../testbenches -o ../../../build/zibal/{3}.out".format(common.get('top', ''),
+                                                                  common.get('testbench', ''),
+                                                                  common.get('SOC', ''),
+                                                                  top_rep)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=oss_cwd, check=True)
+        command = "vvp -l{0}.log {0}.out".format(top_rep)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True)
+        command = "gtkwave {0}.vcd".format(top_rep)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True)
+    if args.toolchain == 'xilinx':
+        if not 'xilinx' in board:
+            raise SystemExit("No xilinx definitions in board {}".format(args.board))
+        env['BOARD'] = args.board
+        env['BOARD_NAME'] = name
+        env['SOC'] = common.get('SOC', '')
+        env['TOP'] = common.get('top', '')
+        env['TOP_NAME'] = common.get('top', '').replace('-', '')
+        env['TESTBENCH'] = common.get('testbench', '')
+        env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
+        env['PART'] = board['xilinx'].get('part', '')
+
+        xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/sim".format(
+            "syn" if args.synthesized else "sim"))
+        command = "vivado -mode tcl -source tcl/sim.tcl -log ./output/logs/vivado.log " \
+                  "-journal ./output/logs/vivado.jou"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
 
 
-def synth(args, env, cwd):
+def syn(args, env, cwd):
     """Command to synthesize a SOC for a board."""
-    # TODO toolchain
-    xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/syn")
-    sim_flag = "_sim" if args.sim else ""
-    command = "vivado -mode tcl -source tcl/{}{}.tcl -log ./output/logs/vivado.log " \
-              "-journal ./output/logs/vivado.jou".format(args.board, sim_flag)
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
+    name = args.board.replace('-', '')
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
+    if not 'common' in board:
+        raise SystemExit("No common definitions in board {}".format(args.board))
+    common = board.get('common')
+
+    if args.toolchain == 'xilinx':
+        if not 'xilinx' in board:
+            raise SystemExit("No xilinx definitions in board {}".format(args.board))
+        env['BOARD'] = args.board
+        env['BOARD_NAME'] = name
+        env['SOC'] = common.get('SOC', '')
+        env['TOP'] = common.get('top', '')
+        env['TOP_NAME'] = common.get('top', '').replace('-', '')
+        env['TESTBENCH'] = common.get('testbench', '')
+        env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
+        env['PART'] = board['xilinx'].get('part', '')
+
+        xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/syn")
+        command = "vivado -mode tcl -source tcl/syn.tcl -log ./output/logs/vivado.log " \
+                  "-journal ./output/logs/vivado.jou"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
 
 
 def flash(args, env, cwd):
     """Command to flash the design to a fpga or spi nor."""
-    # TODO toolchain
     openocd_cwd = os.path.join(cwd, "openocd")
-    if args.destination == 'spi':
-        destination = 'spi'
-    if args.destination == 'fpga':
-        destination = "xc7"
-    board = args.board.replace('-', '')
-    command = ['src/openocd', '-c', 'set BOARD {}'.format(board),
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
+    if not args.destination in board.get('destinations', {}):
+        raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
+                                                                          args.board))
+    name = args.board.replace('-', '')
+    destination = board['destinations'][args.destination]
+    command = ['src/openocd', '-c', 'set BOARD {}'.format(name),
                '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
-               '-f', '../zibal/eda/Xilinx/configs/flash_{}.cfg'.format(destination)]
+               '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
 

@@ -19,6 +19,7 @@ Installation
 
         sudo apt install ssh git repo libtool-bin autotools-dev automake pkg-config libyaml-dev
         sudo apt install python3 python3.8-dev pyhton3-pip virtualenv gdb
+        sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
 
 - Download the repository::
 
