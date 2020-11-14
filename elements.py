@@ -239,9 +239,10 @@ def test(args, env, cwd):
 def environment():
     """Reads the OS environment and adds extra variables for Elements."""
     env = os.environ.copy()
-    env['ELEMENTS_BASE'] = os.path.dirname(os.path.abspath(__file__))
+    base = os.path.dirname(os.path.abspath(__file__))
+    env['ELEMENTS_BASE'] = base
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
-    env['ZEPHYR_SDK_INSTALL_DIR'] = 'zephyr-sdk-{}'.format(ZEPHYR_SDK_VERSION)
+    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(ZEPHYR_SDK_VERSION))
     env['PATH'] += os.pathsep + VIVADO_PATH
     env['VIVADO_PATH'] = VIVADO_PATH
     return env
