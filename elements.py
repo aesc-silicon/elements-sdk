@@ -216,7 +216,7 @@ def gdb(args, env, cwd):
                                        stdout=subprocess.DEVNULL)
 
     toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
-    command = ['./{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
+    command = ['{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
                '-x', 'zibal/gdb/{}.cmd'.format(args.type),
                'build/zephyr/zephyr/zephyr.elf']
     logging.debug(command)
