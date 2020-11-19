@@ -58,7 +58,6 @@ Installation
         ./bootstrap
         ./configure
         make -j8
-        sudo make install
         cd ../
 
 Vivado
