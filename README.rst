@@ -118,7 +118,7 @@ the flow. However, the help text can also support with the built-in commands.
 .. code-block:: text
 
     . venv/bin/activate
-    python elements.py -h
+    python3 elements.py -h
 
 You can leave the virtualenv by running ``deactivate`` in the bash. Do not forget to source the
 virtualenv next time you want to use ``elements.py`` in a new shell session.
@@ -132,13 +132,13 @@ entirely new.
 
 .. code-block:: text
 
-    python elements.py zephyr <board> <application> [-f]
+    python3 elements.py zephyr <board> <application> [-f]
 
 Example to compile the LED demo for DH-006:
 
 .. code-block:: text
 
-    python elements.py zephyr DH-006 zephyr-samples/demo/leds
+    python3 elements.py zephyr DH-006 zephyr-samples/demo/leds
 
 Zibal
 *****
@@ -150,13 +150,13 @@ Hint: FPGA based SOC designs will add the compiled Zephyr output into the memory
 
 .. code-block:: text
 
-    python elements.py zibal <soc>
+    python3 elements.py zibal <soc>
 
 Example to build the Hydrogen-1 SOC:
 
 .. code-block:: text
 
-    python elements.py zibal Hydrogen1
+    python3 elements.py zibal Hydrogen1
 
 Simulation
 ----------
@@ -169,13 +169,13 @@ available for the Xilinx toolchain.
 
 .. code-block:: text
 
-    python elements.py simulate <board> [--toolchain <xilinx>] [-synthesized]
+    python3 elements.py simulate <board> [--toolchain <xilinx>] [-synthesized]
 
 Example to simulate DH-006:
 
 .. code-block:: text
 
-    python elements.py simulate DH-006
+    python3 elements.py simulate DH-006
 
 Synthesize
 ----------
@@ -185,13 +185,13 @@ the synthesized design.
 
 .. code-block:: text
 
-    python elements.py synthesize <board> [--toolchain <xilinx>]
+    python3 elements.py synthesize <board> [--toolchain <xilinx>]
 
 Example to simulate DH-006:
 
 .. code-block:: text
 
-    python elements.py synthesize DH-006
+    python3 elements.py synthesize DH-006
 
 Flash
 *****
@@ -201,13 +201,13 @@ destination is set by default.
 
 .. code-block:: text
 
-    python elements.py flash <board> [--destination <fpga/spi>]
+    python3 elements.py flash <board> [--destination <fpga/spi>]
 
 Example to flash the FPGA:
 
 .. code-block:: text
 
-    python elements.py flash DH-006
+    python3 elements.py flash DH-006
 
 GDB
 ***
@@ -217,13 +217,13 @@ start address or open a debugging before starting.
 
 .. code-block:: text
 
-    python elements.py GDB <flash/debug>
+    python3 elements.py GDB <flash/debug>
 
 Example to flash the firmware into the memory and start at the start address:
 
 .. code-block:: text
 
-    python elements.py GDB flash
+    python3 elements.py GDB flash
 
 License
 #######
