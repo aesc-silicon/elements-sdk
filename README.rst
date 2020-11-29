@@ -138,7 +138,7 @@ Example to compile the LED demo for DH-006:
 
 .. code-block:: text
 
-    python3 lements.py zephyr DH-006 zephyr-samples/demo/leds
+    python elements.py zephyr DH-006 zephyr-samples/demo/leds
 
 Zibal
 *****
