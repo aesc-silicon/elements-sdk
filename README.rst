@@ -134,11 +134,11 @@ entirely new.
 
     python elements.py zephyr <board> <application> [-f]
 
-Example to compile the LED demo for TH-283:
+Example to compile the LED demo for DH-006:
 
 .. code-block:: text
 
-    python3 lements.py zephyr TH-283 zephyr-samples/demo/leds
+    python3 lements.py zephyr DH-006 zephyr-samples/demo/leds
 
 Zibal
 *****
@@ -171,11 +171,11 @@ available for the Xilinx toolchain.
 
     python elements.py simulate <board> [--toolchain <xilinx>] [-synthesized]
 
-Example to simulate TH-283:
+Example to simulate DH-006:
 
 .. code-block:: text
 
-    python elements.py simulate TH-283
+    python elements.py simulate DH-006
 
 Synthesize
 ----------
@@ -187,11 +187,11 @@ the synthesized design.
 
     python elements.py synthesize <board> [--toolchain <xilinx>]
 
-Example to simulate TH-283:
+Example to simulate DH-006:
 
 .. code-block:: text
 
-    python elements.py synthesize TH-283
+    python elements.py synthesize DH-006
 
 Flash
 *****
@@ -207,7 +207,7 @@ Example to flash the FPGA:
 
 .. code-block:: text
 
-    python elements.py flash TH-283
+    python elements.py flash DH-006
 
 GDB
 ***
