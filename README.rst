@@ -8,7 +8,7 @@ tool to easily generate all parts and helps to debug.
 Prerequisites
 #############
 
-* Linux host system (Ubuntu 18.04 recommended)
+* Linux host system (Ubuntu 20.04 recommended)
 * Python 3 (python3.8-dev)
 * Vivado for Xilinx platforms (optional)
 
@@ -20,6 +20,7 @@ Installation
         sudo apt install ssh git repo libtool-bin autotools-dev automake pkg-config libyaml-dev
         sudo apt install python3 python3.8-dev pyhton3-pip virtualenv gdb
         sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
+        sudo apt install libtinfo5 libncurses5
 
 - Download the repository::
 
@@ -65,8 +66,15 @@ Vivado
 
 The Vivado toolchain is not part of this SDK and needs to be installed separatly for Xilinx
 platforms from `Xilinx's homepage`. Download the Linux Self Extracting Web Installer for Version
-2020.1 and install it. You can disable everything except the Artix-7 Platform to save disk storage.
-Elements excepts to find the Vivado toolchain under ``/opt/xilinx/Vivado/``.
+2019.2 and install it. Ignore the warnings about the Not Supported Linux OS and do not install the
+latest version. You can use the Vivado HL WebPACK license for free and disable everything
+except the Artix-7 Platform to save disk storage. Elements excepts to find the Vivado toolchain
+under ``/opt/xilinx``.
+
+.. code-block:: text
+
+    chmod +x ~/Downloads/Xilinx_Unified_2019.2_1106_2127_Lin64.bin
+    ~/Downloads/Xilinx_Unified_2019.2_1106_2127_Lin64.bin
 
 .. _Xilinx's homepage: https://www.xilinx.com/support/download.html
 
