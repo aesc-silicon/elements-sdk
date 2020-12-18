@@ -48,9 +48,9 @@ Installation
 
 - Install the RISC-V toolchain::
 
-        wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.11.4/zephyr-toolchain-riscv64-0.11.4-setup.run
-        chmod +x zephyr-toolchain-riscv64-0.11.4-setup.run
-        ./zephyr-toolchain-riscv64-0.11.4-setup.run -- -d $PWD/zephyr-sdk-0.11.4 -y
+        wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.12.0/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
+        chmod +x zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
+        ./zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y -nocmake
 
 - Compile the VexRiscv OpenOCD fork::
 

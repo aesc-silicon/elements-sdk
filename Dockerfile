@@ -42,6 +42,9 @@ RUN west init -l zephyr
 RUN west update
 
 # download toolchain
+RUN https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.12.0/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
+RUN chmod +x zephyr-toolchain-riscv64-0.12.0-setup.run
+RUN ./zephyr-toolchain-riscv64-0.12.0-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y
 
 WORKDIR openocd
 RUN ./bootstrap

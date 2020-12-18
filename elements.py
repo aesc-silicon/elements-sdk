@@ -7,7 +7,7 @@ import yaml
 
 
 _FORMAT = "%(asctime)s - %(message)s"
-ZEPHYR_SDK_VERSION = "0.11.4"
+ZEPHYR_SDK_VERSION = "0.12.0"
 VIVADO_PATH = "/opt/xilinx/Vivado/2019.2/bin/"
 
 def open_yaml(path):
