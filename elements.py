@@ -29,15 +29,15 @@ def parse_args():
 
     subparsers = parser.add_subparsers(help='Elements commands')
 
-    parser_zephyr = subparsers.add_parser('zephyr', help='Builds the firmware')
-    parser_zephyr.set_defaults(func=zephyr)
-    parser_zephyr.add_argument('board', help="Name of the board")
-    parser_zephyr.add_argument('application', help="Name of the application")
-    parser_zephyr.add_argument('-f', action='store_true', help="Force build")
+    parser_compile = subparsers.add_parser('compile', help='Compiles the firmware')
+    parser_compile.set_defaults(func=compile)
+    parser_compile.add_argument('board', help="Name of the board")
+    parser_compile.add_argument('application', help="Name of the application")
+    parser_compile.add_argument('-f', action='store_true', help="Force build")
 
-    parser_zibal = subparsers.add_parser('zibal', help='Builds the MCU')
-    parser_zibal.set_defaults(func=zibal)
-    parser_zibal.add_argument('soc', help="Name of the SOC")
+    parser_generate = subparsers.add_parser('generate', help='Generates the MCU')
+    parser_generate.set_defaults(func=generate)
+    parser_generate.add_argument('soc', help="Name of the SOC")
 
     parser_sim = subparsers.add_parser('simulate', help='Simulates the design')
     parser_sim.set_defaults(func=sim)
@@ -56,12 +56,11 @@ def parse_args():
     parser_flash = subparsers.add_parser('flash', help='Flashes parts of the SDK')
     parser_flash.set_defaults(func=flash)
     parser_flash.add_argument('board', help="Name of the board")
-    parser_flash.add_argument('--destination', default='fpga', choices=['fpga', 'spi'],
-                              help="Destination of the bitstream")
+    parser_flash.add_argument('--destination', default='fpga', choices=['fpga', 'spi', 'memory'],
+                              help="Destination of the bitstream or firmware")
 
-    parser_gdb = subparsers.add_parser('GDB', help='Debugs the firmware')
-    parser_gdb.set_defaults(func=gdb)
-    parser_gdb.add_argument('type', choices=['flash', 'debug'], help="Type of GDB connection")
+    parser_debug = subparsers.add_parser('debug', help='Debugs the firmware with GDB.')
+    parser_debug.set_defaults(func=debug)
 
     parser_test = subparsers.add_parser('test', help='Tests the SDK')
     parser_test.set_defaults(func=test)
@@ -70,8 +69,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def zephyr(args, env, cwd):
-    """Command to build a Zephyr binary for a board and application."""
+def compile(args, env, cwd):
+    """Command to compile a Zephyr binary for a board and application."""
     force = "always" if args.f else "auto"
     board = args.board.replace('-', '').lower()
     command = "west build -p {} -b {} -d ./build/zephyr/ {}".format(force, board,
@@ -80,8 +79,8 @@ def zephyr(args, env, cwd):
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
 
-def zibal(args, env, cwd):
-    """Command to build a Microcontroller desig for a SOC."""
+def generate(args, env, cwd):
+    """Command to generate a Microcontroller design for a SOC."""
     subprocess.run("mkdir -p build/zibal/".split(' '), env=env, cwd=cwd,
                    stdout=subprocess.DEVNULL, check=True)
 
@@ -193,20 +192,23 @@ def flash(args, env, cwd):
     """Command to flash the design to a fpga or spi nor."""
     openocd_cwd = os.path.join(cwd, "openocd")
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
-    if not args.destination in board.get('destinations', {}):
-        raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
-                                                                          args.board))
-    name = args.board.replace('-', '')
-    destination = board['destinations'][args.destination]
-    command = ['src/openocd', '-c', 'set BOARD {}'.format(name),
-               '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
-               '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
-    logging.debug(command)
-    subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
+    if args.destination == 'memory':
+        debug(args, env, cwd, type_="flash")
+    else:
+        if not args.destination in board.get('destinations', {}):
+            raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
+                                                                              args.board))
+        name = args.board.replace('-', '')
+        destination = board['destinations'][args.destination]
+        command = ['src/openocd', '-c', 'set BOARD {}'.format(name),
+                   '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
+                   '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
+        logging.debug(command)
+        subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
 
 
-def gdb(args, env, cwd):
-    """Command to debug the firmware."""
+def debug(args, env, cwd, type_="debug"):
+    """Command to debug the firmware with GDB"""
     openocd_cwd = os.path.join(cwd, "openocd")
     command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML ../build/zibal/VexRiscv.yaml',
                '-f', 'tcl/interface/jlink.cfg',
@@ -217,7 +219,7 @@ def gdb(args, env, cwd):
 
     toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
     command = ['{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
-               '-x', 'zibal/gdb/{}.cmd'.format(args.type),
+               '-x', 'zibal/gdb/{}.cmd'.format(type_),
                'build/zephyr/zephyr/zephyr.elf']
     logging.debug(command)
     subprocess.run(command, env=env, cwd=cwd, check=True)
