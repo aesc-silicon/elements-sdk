@@ -67,9 +67,9 @@ Vivado
 The Vivado toolchain is not part of this SDK and needs to be installed separatly for Xilinx
 platforms from `Xilinx's homepage`. Download the Linux Self Extracting Web Installer for Version
 2019.2 and install it. Ignore the warnings about the Not Supported Linux OS and do not install the
-latest version. You can use the Vivado HL WebPACK license for free and disable everything
-except the Artix-7 Platform to save disk storage. Elements excepts to find the Vivado toolchain
-under ``/opt/xilinx``.
+latest version. You can use the Vivado HL WebPACK license for free if you do not sell the bitsream
+and disable everything except the Artix-7 Platform to save disk storage. Elements excepts to find
+the Vivado toolchain under ``/opt/xilinx``.
 
 .. code-block:: text
 
@@ -87,7 +87,7 @@ Application
 ***********
 
 An application is the user-level software. It's build in the firmware and will be started by
-Zephyr. Custom applications for boards will be added as application during the Zyphr compile
+Zephyr. Custom applications for boards will be added as application during the Zephyr compile
 process.
 
 SOC
@@ -111,10 +111,10 @@ The SDK has some stages to generate a MCU and its firmware from sources. This se
    :width: 800
 
 Entry point for this flow is Zephyr. The compiled output will be stored in a build directoy and can
-immediately used by GDB. The Zephyr output is a dependency for FPGA based designs can need to be
-run before. The next stage generates the MCU files for the specific SOC and places these again in
-the build storage. A simulator can than be used to run the design on the local machine without any
-hardware. The last stage is the synthesizing of the design files into the specific hardware
+immediately used by GDB. The Zephyr output is a dependency for FPGA based designs and need to be
+compiled before. The next stage generates the MCU files for the specific SOC and places these again
+in the build storage. A simulator can than be used to run the design on the local machine without
+any hardware. The last stage is the synthesizing of the design files into the specific hardware
 architecture. The synthesized design can be simulated again or flashed to the hardware.
 
 Usage
@@ -125,113 +125,108 @@ the flow. However, the help text can also support with the built-in commands.
 
 .. code-block:: text
 
-    . venv/bin/activate
-    python3 elements.py -h
+    ./elements.py -h
 
-You can leave the virtualenv by running ``deactivate`` in the bash. Do not forget to source the
-virtualenv next time you want to use ``elements.py`` in a new shell session.
+Compile (Zephyr)
+****************
 
-Zephyr
-******
-
-The ``zephyr`` command can compile an application for a board. Both values must be passed as
+The ``compile`` command compiles an application for a board. Both values must be passed as
 mandatory argument. An optional flag ``-f`` can force to not use the build cache and compile
 entirely new.
 
 .. code-block:: text
 
-    python3 elements.py zephyr <board> <application> [-f]
+    ./elements.py compile <board> <application> [-f]
 
 Example to compile the LED demo for DH-006:
 
 .. code-block:: text
 
-    python3 elements.py zephyr DH-006 zephyr-samples/demo/leds
+    ./elements.py compile DH-006 zephyr-samples/demo/leds
 
-Zibal
-*****
+Generate (Zibal)
+****************
 
-The ``zibal`` command can build various different SOC designs. It only takes the name of the
+The ``generate`` command can build various different SOC designs. It only takes the name of the
 SOC as parameter.
 
 Hint: FPGA based SOC designs will add the compiled Zephyr output into the memory.
 
 .. code-block:: text
 
-    python3 elements.py zibal <soc>
+    ./elements.py generate <soc>
 
 Example to build the Hydrogen-1 SOC:
 
 .. code-block:: text
 
-    python3 elements.py zibal Hydrogen1
+    ./elements.py generate Hydrogen1
 
 Simulation
 ----------
 
 Since a board is always built on a specific SOC design, simulations can be done on board-level.
-The ``sim`` command takes as parameter the name of the board. The toolchain can be passed with
+The ``simulate`` command takes as parameter the name of the board. The toolchain can be passed with
 the optional parameter ``--toolchain``. The Xilinx toolchain is selected by default. A further
 flag ``-synthesized`` can be used to simulate a synthesized design. This flag is currently only
 available for the Xilinx toolchain.
 
 .. code-block:: text
 
-    python3 elements.py simulate <board> [--toolchain <xilinx>] [-synthesized]
+    ./elements.py simulate <board> [--toolchain <xilinx/oss>] [-synthesized]
 
 Example to simulate DH-006:
 
 .. code-block:: text
 
-    python3 elements.py simulate DH-006
+    ./elements.py simulate DH-006
 
 Synthesize
 ----------
 
 The synthesize is similiar to the simulation. It can synthesize a SOC design on board-level.
-the synthesized design.
 
 .. code-block:: text
 
-    python3 elements.py synthesize <board> [--toolchain <xilinx>]
+    ./elements.py synthesize <board> [--toolchain <xilinx>]
 
 Example to simulate DH-006:
 
 .. code-block:: text
 
-    python3 elements.py synthesize DH-006
+    ./elements.py synthesize DH-006
 
 Flash
 *****
 
-This command flashes a bitsream directly into a FPGA or permantly into a SPI NOR. The FPGA
-destination is set by default.
+This command flashes a bitsream directly into a FPGA or permantly into a SPI NOR. Alternatively,
+it can also flash a firmware into the memory of the MCU. The FPGA destination is set by default.
 
 .. code-block:: text
 
-    python3 elements.py flash <board> [--destination <fpga/spi>]
+    ./elements.py flash <board> [--destination <fpga/spi/memory>]
 
 Example to flash the FPGA:
 
 .. code-block:: text
 
-    python3 elements.py flash DH-006
+    ./elements.py flash DH-006
 
-GDB
-***
+Debug
+*****
 
-The GDB command supports debugging the firmware. It can flash a new firmware and either start at
-start address or open a debugging before starting.
+The debug command supports debugging the firmware. It flashes a new firmware and opens a debugger
+(GDB) before starting at start address.
 
 .. code-block:: text
 
-    python3 elements.py GDB <flash/debug>
+    ./elements.py debug
 
 Example to flash the firmware into the memory and start at the start address:
 
 .. code-block:: text
 
-    python3 elements.py GDB flash
+    ./elements.py debug
 
 License
 #######
