@@ -1,3 +1,4 @@
+#!venv/bin/python3
 """Tool to handle all projects in the elements SDK."""
 import argparse
 import subprocess
