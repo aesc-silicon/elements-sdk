@@ -17,7 +17,7 @@ Installation
 
 - Install required packages::
 
-        sudo apt install ssh git libtool-bin autotools-dev automake pkg-config libyaml-dev
+        sudo apt install ssh git libtool-bin autotools-dev automake pkg-config libyaml-dev cmake
         sudo apt install python3 python3.8-dev python3-pip virtualenv gdb
         sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
         sudo apt install libtinfo5 libncurses5
@@ -226,6 +226,19 @@ Example to flash the firmware into the memory and start at the start address:
 .. code-block:: text
 
     ./elements.py debug
+
+Docker
+######
+
+A Dockerfile is provided for systems which do not run with the recommended versions. The Docker
+will have included all required packages for the SDK.
+
+.. code-block:: text
+
+    sudo docker build -t elements-sdk:1.0 .
+    sudo docker run elements-sdk:1.0 ./elements.py compile DH-006 zephyr-samples/demo/leds
+
+Hint: Only ``compile`` and ``generate`` are currently supported.
 
 License
 #######
