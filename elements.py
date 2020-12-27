@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import os
 import logging
+import time
 import yaml
 
 
@@ -223,8 +224,12 @@ def debug(args, env, cwd, type_="debug"):
                '-x', 'zibal/gdb/{}.cmd'.format(type_),
                'build/zephyr/zephyr/zephyr.elf']
     logging.debug(command)
-    subprocess.run(command, env=env, cwd=cwd, check=True)
-
+    if type_ == "flash":
+        gdb_process = subprocess.Popen(command, env=env, cwd=cwd)
+        time.sleep(15)
+        gdb_process.terminate()
+    else:
+        subprocess.run(command, env=env, cwd=cwd, check=True)
     openocd_process.terminate()
 
 
