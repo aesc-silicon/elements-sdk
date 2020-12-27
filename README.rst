@@ -35,11 +35,14 @@ Installation
 - Create a virtualenv::
 
         virtualenv -p python3 venv
-        . venv/bin/activate
+
+- Install west system-wide::
+
+        pip3 install west
 
 - Install packages inside the virtualenv::
 
-        pip3 install west
+        . venv/bin/activate
         pip3 install -r zephyr/scripts/requirements.txt
 
 - Initialize Zephyr::
