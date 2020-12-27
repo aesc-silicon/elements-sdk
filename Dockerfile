@@ -1,11 +1,10 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ARG SSH_KEY
 
 RUN apt-get update && apt-get install -y \
     ssh \
     git \
-    repo \
     libtool-bin \
     autotools-dev \
     automake \
@@ -16,6 +15,9 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     virtualenv \
     gdb
+
+RUN curl https://storage.googleapis.com/git-repo-downloads/repo > /bin/repo
+RUN chmod a+rx /bin/repo
 
 # Authorize SSH Host
 RUN mkdir -p /root/.ssh && \
