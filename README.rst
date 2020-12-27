@@ -165,7 +165,7 @@ Example to build the Hydrogen-1 SOC:
     ./elements.py generate Hydrogen1
 
 Simulation
-----------
+**********
 
 Since a board is always built on a specific SOC design, simulations can be done on board-level.
 The ``simulate`` command takes as parameter the name of the board. The toolchain can be passed with
@@ -184,7 +184,7 @@ Example to simulate DH-006:
     ./elements.py simulate DH-006
 
 Synthesize
-----------
+**********
 
 The synthesize is similiar to the simulation. It can synthesize a SOC design on board-level.
 
@@ -246,6 +246,6 @@ Hint: Only ``compile`` and ``generate`` are currently supported.
 License
 #######
 
-Copyright (c) 2020 PHYTEC Messtechnik GmbH. Released under the `license`_.
+Copyright (c) 2020 PHYTEC Messtechnik GmbH. Released under the `MIT license`_.
 
-.. _license: COPYING.MIT
+.. _MIT license: COPYING.MIT
