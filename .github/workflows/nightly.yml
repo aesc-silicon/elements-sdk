@@ -1,0 +1,110 @@
+name: SDK nightly
+
+on:
+  schedule:
+  - cron: "0 4 * * *"
+
+jobs:
+  prepare:
+    runs-on: self-hosted
+    steps:
+    - name: clone repo
+      run: |
+        git clone git@github.com:phytec-labs/${{ env.repository_name }}.git ${{ env.repository_name }}
+      env:
+        repository_name: elements-sdk
+
+    - name: set-up environment
+      run: |
+        cd ${{ env.repository_name }}
+        python3 /bin/repo init -u git@github.com:phytec-labs/elements-manifest.git -m next.xml
+        python3 /bin/repo sync
+        virtualenv -p python3 venv
+        . venv/bin/activate
+        pip3 install west
+        pip3 install -r zephyr/scripts/requirements.txt
+        west init -l zephyr
+        # Copy instead of download the toolchain to save bandwidth
+        cp /home/inspection/ci/tools/zephyr-sdk/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run .
+        chmod +x zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
+        ./zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y -nocmake
+        cd ../
+      env:
+        repository_name: elements-sdk
+
+    - name: build OpenOCD
+      run: |
+        cd ${{ env.repository_name }}
+        cd openocd
+        ./bootstrap
+        ./configure
+        make || make -j8
+        cd ../
+        cd ../
+      env:
+        repository_name: elements-sdk
+
+  compile:
+    runs-on: self-hosted
+    needs: [prepare]
+    strategy:
+      matrix:
+        board:
+        - "DH-006"
+        - "TH-283"
+        - "TH-294"
+    steps:
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements.py compile ${{ matrix.board }} zephyr-samples/demo/leds
+      env:
+        repository_name: elements-sdk
+
+  generate:
+    runs-on: self-hosted
+    needs: [compile]
+    strategy:
+      matrix:
+        soc:
+        - "Hydrogen1"
+        - "Hydrogen2"
+        - "HydrogenTest"
+    steps:
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements.py generate ${{ matrix.soc }}
+      env:
+        repository_name: elements-sdk
+
+  deploy:
+    runs-on: self-hosted
+    needs: [generate]
+    strategy:
+      matrix:
+        repository:
+        - "openocd"
+        - "vexriscv"
+        - "zephyr"
+    steps:
+    - name: push back to branch
+      run: |
+        cd ${{ env.repository_name }}/${{ matrix.repository }}
+        git remote add origin git@github.com:phytec-labs/elements-${{ matrix.repository }}.git
+        git push origin HEAD:${{ env.branch }} -f
+        cd ../../
+      env:
+        repository_name: elements-sdk
+        branch: stable
+
+  cleanup:
+    runs-on: self-hosted
+    needs: [deploy]
+    if: always()
+    steps:
+    - name: post cleanup
+      run: |
+        rm -rf ${{ env.repository_name}}
+      env:
+        repository_name: elements-sdk
