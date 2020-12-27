@@ -18,9 +18,9 @@ def open_yaml(path):
         with open(path, 'r') as stream:
             return list(yaml.load_all(stream, Loader=yaml.FullLoader))
     except yaml.YAMLError as exc:
-        raise SystemExit(exc)
+        raise SystemExit from exc
     except FileNotFoundError as exc:
-        raise SystemExit(exc)
+        raise SystemExit from exc
     raise SystemExit("Unable to open {}".format(path))
 
 
@@ -32,7 +32,7 @@ def parse_args():
     subparsers = parser.add_subparsers(help='Elements commands')
 
     parser_compile = subparsers.add_parser('compile', help='Compiles the firmware')
-    parser_compile.set_defaults(func=compile)
+    parser_compile.set_defaults(func=compile_)
     parser_compile.add_argument('board', help="Name of the board")
     parser_compile.add_argument('application', help="Name of the application")
     parser_compile.add_argument('-f', action='store_true', help="Force build")
@@ -71,7 +71,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def compile(args, env, cwd):
+def compile_(args, env, cwd):
     """Command to compile a Zephyr binary for a board and application."""
     force = "always" if args.f else "auto"
     board = args.board.replace('-', '').lower()
@@ -145,7 +145,7 @@ def sim(args, env, cwd):
         env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
         env['PART'] = board['xilinx'].get('part', '')
 
-        xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/sim".format(
+        xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/{}".format(
             "syn" if args.synthesized else "sim"))
         command = "vivado -mode tcl -source tcl/sim.tcl -log ./output/logs/vivado.log " \
                   "-journal ./output/logs/vivado.jou"
@@ -209,7 +209,7 @@ def flash(args, env, cwd):
         subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
 
 
-def debug(args, env, cwd, type_="debug"):
+def debug(_, env, cwd, type_="debug"):
     """Command to debug the firmware with GDB"""
     openocd_cwd = os.path.join(cwd, "openocd")
     command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML ../build/zibal/VexRiscv.yaml',
