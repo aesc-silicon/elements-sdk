@@ -45,7 +45,6 @@ Installation
 - Initialize Zephyr::
 
         west init -l zephyr
-        west update
 
 - Install the RISC-V toolchain::
 
