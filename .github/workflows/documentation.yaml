@@ -1,0 +1,46 @@
+name: SDK documentation
+
+on:
+  schedule:
+  - cron: "0 3 * * *"
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+    - name: clone repo
+      run: |
+        git clone git@github.com:phytec-labs/${{ env.repository_name }}.git ${{ env.repository_name }}
+      env:
+        repository_name: elements-sdk
+
+    - name: set-up environment
+      run: |
+        cd ${{ env.repository_name }}
+        mkdir -p docsource/source/docsource/images
+        cp docsource/images/*.png docsource/source/docsource/images/
+        make clean html -C docsource
+        cp -r docsource/build/html docs
+        cd ../
+      env:
+        repository_name: elements-sdk
+
+    steps:
+    - name: push docu to gh-pages
+      run: |
+        cd ${{ env.repository_name }}
+        git add docs/
+        git commit -m "Current docu"
+        git push origin HEAD:${{ env.branch }} -f
+        cd ../
+      env:
+        repository_name: elements-sdk
+        branch: gh-pages
+
+    steps:
+    - name: post cleanup
+      if: always()
+      run: |
+        rm -rf ${{ env.repository_name}}
+      env:
+        repository_name: elements-sdk
