@@ -10,3 +10,4 @@ vexriscv
 openocd
 .repo
 .west
+docsource/source/docsource

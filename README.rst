@@ -5,6 +5,13 @@ The Elements Software Development Kit (SDK) is a bundle with various projects in
 build a complete Open Source Microcontroller Unit (MCU) and firmware. Moveover, it provides a
 tool to easily generate all parts and helps to debug.
 
+The complete documentation is uploaded to `https://phytec-labs.github.io/elements-sdk/`_ or can be
+build manually as described in `Documentation`_.
+
+.. _https://phytec-labs.github.io/elements-sdk/: https://phytec-labs.github.io/elements-sdk/
+
+.. inclusion-start-marker-do-not-remove
+
 Prerequisites
 #############
 
@@ -67,7 +74,7 @@ Vivado
 ******
 
 The Vivado toolchain is not part of this SDK and needs to be installed separatly for Xilinx
-platforms from `Xilinx's homepage`. Download the Linux Self Extracting Web Installer for Version
+platforms from `Xilinx's homepage`_. Download the Linux Self Extracting Web Installer for Version
 2019.2 and install it. Ignore the warnings about the Not Supported Linux OS and do not install the
 latest version. You can use the Vivado HL WebPACK license for free if you do not sell the bitsream
 and disable everything except the Artix-7 Platform to save disk storage. Elements excepts to find
@@ -109,8 +116,8 @@ Flows
 
 The SDK has some stages to generate a MCU and its firmware from sources. This section describes each stage and the flow between them.
 
-.. image:: docs/images/elements_flow.png
-   :width: 800
+.. image:: docsource/images/elements_flow.png
+   :width: 600
 
 Entry point for this flow is Zephyr. The compiled output will be stored in a build directoy and can
 immediately used by GDB. The Zephyr output is a dependency for FPGA based designs and need to be
@@ -242,6 +249,19 @@ will have included all required packages for the SDK.
     sudo docker run elements-sdk:1.0 ./elements.py compile DH-006 zephyr-samples/demo/leds
 
 Hint: Only ``compile`` and ``generate`` are currently supported.
+
+.. inclusion-end-marker-do-not-remove
+
+Documentation
+#############
+
+The documentation can easily build with Sphinx. Therefore, run the Makefile inside the docsource
+folder.
+
+.. code-block:: text
+
+    make clean html -C docsource
+    firefox docsource/build/html/index.html
 
 License
 #######
