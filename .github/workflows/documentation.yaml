@@ -22,12 +22,11 @@ jobs:
         mkdir -p docsource/source/docsource/images
         cp docsource/images/*.png docsource/source/docsource/images/
         make clean html -C docsource
-        cp -r docsource/build/html docs
+        cp -r docsource/build/html/. docs
         cd ../
       env:
         repository_name: elements-sdk
 
-    steps:
     - name: push docu to gh-pages
       run: |
         cd ${{ env.repository_name }}
@@ -39,7 +38,6 @@ jobs:
         repository_name: elements-sdk
         branch: gh-pages
 
-    steps:
     - name: post cleanup
       if: always()
       run: |
