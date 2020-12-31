@@ -3,6 +3,8 @@ name: SDK documentation
 on:
   schedule:
   - cron: "0 3 * * *"
+  push:
+    branches: [ main ]
 
 jobs:
   deploy:
