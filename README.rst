@@ -34,41 +34,13 @@ Installation
         git clone https://github.com/phytec-labs/elements-sdk.git
         cd elements-sdk/
 
-- Download all projects::
-
-        repo init -u https://github.com/phytec-labs/elements-manifest.git
-        repo sync
-
 - Create a virtualenv::
 
         virtualenv -p python3 venv
 
-- Install west system-wide::
+- Initialise the SDK::
 
-        pip3 install west
-
-- Install packages inside the virtualenv::
-
-        . venv/bin/activate
-        pip3 install -r zephyr/scripts/requirements.txt
-
-- Initialize Zephyr::
-
-        west init -l zephyr
-
-- Install the RISC-V toolchain::
-
-        wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.12.0/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
-        chmod +x zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
-        ./zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y -nocmake
-
-- Compile the VexRiscv OpenOCD fork::
-
-        cd openocd
-        ./bootstrap
-        ./configure
-        make -j8
-        cd ../
+        python3 elements.py init
 
 Vivado
 ******

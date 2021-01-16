@@ -30,6 +30,11 @@ def parse_args():
 
     subparsers = parser.add_subparsers(help='Elements commands')
 
+    parser_init = subparsers.add_parser('init', help='Initialise the SDK')
+    parser_init.set_defaults(func=init)
+    parser_init.add_argument('--manifest', help="Repo manifest")
+    parser_init.add_argument('-f', action='store_true', help="Force init")
+
     parser_compile = subparsers.add_parser('compile', help='Compiles the firmware')
     parser_compile.set_defaults(func=compile_)
     parser_compile.add_argument('board', help="Name of the board")
@@ -68,6 +73,32 @@ def parse_args():
     parser_test.add_argument('-zibal', action='store_true', help="Run all Zibal tests")
 
     return parser.parse_args()
+
+
+def init(args, env, cwd):
+    """Clones all repositories, installs and/or build all packages."""
+    if args.f:
+        command = "rm -rf .repo"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+    if os.path.exists(".repo"):
+        raise SystemExit("Repo exists! Either the SDK is already initialized or force init.")
+
+    command = "repo init -u https://github.com/phytec-labs/elements-manifest.git"
+    if args.manifest:
+        command = command + " -m {}".format(args.manifest)
+    logging.debug(command)
+    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+
+    command = "repo sync"
+    logging.debug(command)
+    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+
+    command = "./.init.sh {}".format(env['ZEPHYR_SDK_VERSION'])
+    logging.debug(command)
+    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+
+    print("Initialization finished")
 
 
 def compile_(args, env, cwd):
@@ -268,6 +299,7 @@ def environment():
 
     env['ELEMENTS_BASE'] = base
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
+    env['ZEPHYR_SDK_VERSION'] = zephyr_sdk_version
     env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(zephyr_sdk_version))
     env['PATH'] += os.pathsep + vivado_path
     env['VIVADO_PATH'] = vivado_path
