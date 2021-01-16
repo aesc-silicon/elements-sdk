@@ -9,8 +9,7 @@ import yaml
 
 
 _FORMAT = "%(asctime)s - %(message)s"
-ZEPHYR_SDK_VERSION = "0.12.0"
-VIVADO_PATH = "/opt/xilinx/Vivado/2019.2/bin/"
+
 
 def open_yaml(path):
     """Opens a YAML file and returns the content as dictionary."""
@@ -244,15 +243,34 @@ def test(args, env, cwd):
             raise SystemExit("Zibal failed")
 
 
+def get_variable(env, localenv, key):
+    """Searchs for a variable in the bash env or in a file env."""
+    if key in env:
+        return env[key]
+    if key in localenv:
+        return localenv[key]
+    raise SystemExit("Variable {} has no value".format(key))
+
+
 def environment():
     """Reads the OS environment and adds extra variables for Elements."""
     env = os.environ.copy()
     base = os.path.dirname(os.path.abspath(__file__))
+    localenv = {}
+    if os.path.exists("env.txt"):
+        with open("env.txt", 'r') as stream:
+            for line in stream.readlines():
+                tmp = line.split('=')
+                localenv[tmp[0]] = tmp[1].replace('"', '').replace('\n', '')
+
+    zephyr_sdk_version = get_variable(env, localenv, 'ZEPHYR_SDK_VERSION')
+    vivado_path = get_variable(env, localenv, 'VIVADO_PATH')
+
     env['ELEMENTS_BASE'] = base
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
-    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(ZEPHYR_SDK_VERSION))
-    env['PATH'] += os.pathsep + VIVADO_PATH
-    env['VIVADO_PATH'] = VIVADO_PATH
+    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(zephyr_sdk_version))
+    env['PATH'] += os.pathsep + vivado_path
+    env['VIVADO_PATH'] = vivado_path
     return env
 
 
