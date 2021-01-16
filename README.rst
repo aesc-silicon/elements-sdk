@@ -45,7 +45,7 @@ Installation
 Vivado
 ******
 
-The Vivado toolchain is not part of this SDK and needs to be installed separatly for Xilinx
+The Vivado toolchain is not part of this SDK and needs to be installed separately for Xilinx
 platforms from `Xilinx's homepage`_. Download the Linux Self Extracting Web Installer for Version
 2019.2 and install it. Ignore the warnings about the Not Supported Linux OS and do not install the
 latest version. You can use the Vivado HL WebPACK license for free if you do not sell the bitsream
