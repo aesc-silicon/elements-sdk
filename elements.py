@@ -213,6 +213,7 @@ def syn(args, env, cwd):
         if not 'cadence' in board:
             raise SystemExit("No cadence definitions in board {}".format(args.board))
         env['PROCESS'] = board['cadence'].get('process', '')
+        env['PDK'] = board['cadence'].get('pdk', '')
 
         cadence_cwd = os.path.join(cwd, "zibal/eda/cadence")
         command = "genus -f tcl/frontend.tcl -log ./output/logs/"
