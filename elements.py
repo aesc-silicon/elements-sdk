@@ -127,6 +127,10 @@ def generate(args, env, cwd):
     subprocess.run("mkdir -p build/zibal/".split(' '), env=env, cwd=cwd,
                    stdout=subprocess.DEVNULL, check=True)
 
+    if not os.path.exists("build/zephyr/zephyr.bin"):
+        raise SystemExit("No Zephyr binary found. "
+                         "Run \"./elements.py compile <board> <app>\" before.")
+
     cwd = os.path.join(cwd, "zibal")
     command = ['sbt', 'runMain zibal.soc.{}'.format(args.soc)]
     logging.debug(command)
@@ -156,6 +160,11 @@ def sim(args, env, cwd):
     if not 'common' in board:
         raise SystemExit("No common definitions in board {}".format(args.board))
     common = board.get('common')
+
+    soc = common.get('SOC', None)
+    if not os.path.exists("build/zibal/{}.v".format(soc)):
+        raise SystemExit("No SOC design found. Run \"./elements.py generate {}\" before.".format(
+                         soc))
 
     if args.toolchain == 'oss':
         oss_cwd = os.path.join(cwd, "zibal/eda/OSS")
@@ -209,6 +218,11 @@ def syn(args, env, cwd):
     env['TESTBENCH'] = common.get('testbench', '')
     env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
 
+    soc = common.get('SOC', None)
+    if not os.path.exists("build/zibal/{}.v".format(soc)):
+        raise SystemExit("No SOC design found. Run \"./elements.py generate {}\" before.".format(
+                         soc))
+
     if args.toolchain == 'xilinx':
         if not 'xilinx' in board:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
@@ -242,7 +256,13 @@ def flash(args, env, cwd):
         if not args.destination in board.get('destinations', {}):
             raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
                                                                               args.board))
+
         name = args.board.replace('-', '')
+        if not os.path.exists("build/zibal/{}_top.bit".format(name)):
+            raise SystemExit("No bitstream found. "
+                             "Run \"./elements.py synthesize {}\" before.".format(args.board))
+
+
         destination = board['destinations'][args.destination]
         command = ['src/openocd', '-c', 'set BOARD {}'.format(name),
                    '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
@@ -253,6 +273,10 @@ def flash(args, env, cwd):
 
 def debug(_, env, cwd, type_="debug"):
     """Command to debug the firmware with GDB"""
+    if not os.path.exists("build/zephyr/zephyr.elf"):
+        raise SystemExit("No Zephyr elf found. "
+                         "Run \"./elements.py compile <board> <app>\" before.")
+
     openocd_cwd = os.path.join(cwd, "openocd")
     command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML ../build/zibal/VexRiscv.yaml',
                '-f', 'tcl/interface/jlink.cfg',
