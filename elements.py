@@ -5,6 +5,7 @@ import subprocess
 import os
 import logging
 import time
+import shutil
 import yaml
 
 
@@ -34,6 +35,9 @@ def parse_args():
     parser_init.set_defaults(func=init)
     parser_init.add_argument('--manifest', help="Repo manifest")
     parser_init.add_argument('-f', action='store_true', help="Force init")
+
+    parser_clean = subparsers.add_parser('clean', help='Cleans all builds')
+    parser_clean.set_defaults(func=clean)
 
     parser_compile = subparsers.add_parser('compile', help='Compiles the firmware')
     parser_compile.set_defaults(func=compile_)
@@ -100,6 +104,13 @@ def init(args, env, cwd):
 
     print("Initialization finished")
 
+
+def clean(args, env, cwd):
+    """Cleans all build by remove the build directory."""
+    if os.path.exists("build/"):
+        shutil.rmtree("build/")
+    else:
+        print("Nothing to do!")
 
 def compile_(args, env, cwd):
     """Command to compile a Zephyr binary for a board and application."""
