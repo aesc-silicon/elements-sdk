@@ -5,9 +5,10 @@ if [ "$#" -ne 1 ]; then
 	exit
 fi
 
-ZEPHYR_SDK_VERSION = $1
+ZEPHYR_SDK_VERSION=$1
 
-pip3 install west
+python3 -m pip install west
+python3 -m pip install pyelftools
 . venv/bin/activate
 pip3 install -r zephyr/scripts/requirements.txt
 
