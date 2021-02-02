@@ -127,7 +127,7 @@ def generate(args, env, cwd):
     subprocess.run("mkdir -p build/zibal/".split(' '), env=env, cwd=cwd,
                    stdout=subprocess.DEVNULL, check=True)
 
-    if not os.path.exists("build/zephyr/zephyr.bin"):
+    if not os.path.exists("build/zephyr/zephyr/zephyr.bin"):
         raise SystemExit("No Zephyr binary found. "
                          "Run \"./elements.py compile <board> <app>\" before.")
 
@@ -273,7 +273,7 @@ def flash(args, env, cwd):
 
 def debug(_, env, cwd, type_="debug"):
     """Command to debug the firmware with GDB"""
-    if not os.path.exists("build/zephyr/zephyr.elf"):
+    if not os.path.exists("build/zephyr/zephyr/zephyr.elf"):
         raise SystemExit("No Zephyr elf found. "
                          "Run \"./elements.py compile <board> <app>\" before.")
 
