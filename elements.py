@@ -264,8 +264,10 @@ def flash(args, env, cwd):
 
 
         destination = board['destinations'][args.destination]
+        transport = board['destinations']["transport"]
         command = ['src/openocd', '-c', 'set BOARD {}'.format(name),
                    '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
+                   '-c', 'set TRANSPORT {}'.format(transport),
                    '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
         logging.debug(command)
         subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
