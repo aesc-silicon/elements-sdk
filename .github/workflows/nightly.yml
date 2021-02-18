@@ -53,6 +53,7 @@ jobs:
         - "DH-006"
         - "TH-283"
         - "TH-294"
+        - "Nexys4-DDR"
     steps:
     - name: compile
       run: |
@@ -69,6 +70,7 @@ jobs:
         soc:
         - "Hydrogen1"
         - "Hydrogen2"
+        - "Hydrogen3"
         - "HydrogenTest"
     steps:
     - name: compile
