@@ -80,9 +80,20 @@ jobs:
       env:
         repository_name: elements-sdk
 
-  deploy:
+  test:
     runs-on: self-hosted
     needs: [generate]
+    steps:
+    - name: zibal
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements.py test -zibal
+      env:
+        repository_name: elements-sdk
+
+  deploy:
+    runs-on: self-hosted
+    needs: [test]
     strategy:
       matrix:
         repository:
