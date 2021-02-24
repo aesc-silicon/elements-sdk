@@ -105,7 +105,7 @@ def init(args, env, cwd):
     print("Initialization finished")
 
 
-def clean(args, env, cwd):
+def clean(args, env, cwd):  # pylint: disable=unused-argument
     """Cleans all build by remove the build directory."""
     if os.path.exists("build/"):
         shutil.rmtree("build/")
@@ -186,6 +186,11 @@ def sim(args, env, cwd):
     if args.toolchain == 'xilinx':
         if not 'xilinx' in board:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
+
+        sim_type = "syn" if args.synthesized else "sim"
+        subprocess.run("mkdir -p build/vivado/{}/logs".format(sim_type).split(' '), env=env,
+                       cwd=cwd, stdout=subprocess.DEVNULL, check=True)
+
         env['BOARD'] = args.board
         env['BOARD_NAME'] = name
         env['SOC'] = common.get('SOC', '')
@@ -194,11 +199,11 @@ def sim(args, env, cwd):
         env['TESTBENCH'] = common.get('testbench', '')
         env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
         env['PART'] = board['xilinx'].get('part', '')
+        env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/{}".format(sim_type))
 
-        xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/{}".format(
-            "syn" if args.synthesized else "sim"))
-        command = "vivado -mode tcl -source tcl/sim.tcl -log ./output/logs/vivado.log " \
-                  "-journal ./output/logs/vivado.jou"
+        xilinx_cwd = os.path.join(cwd, "build/vivado/{}".format(sim_type))
+        command = "vivado -mode batch -source ../../../zibal/eda/Xilinx/vivado/{}/sim.tcl " \
+                  " -log ./logs/vivado.log -journal ./logs/vivado.jou".format(sim_type)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
 
@@ -227,10 +232,14 @@ def syn(args, env, cwd):
         if not 'xilinx' in board:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
         env['PART'] = board['xilinx'].get('part', '')
+        env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/syn")
 
-        xilinx_cwd = os.path.join(cwd, "zibal/eda/Xilinx/syn")
-        command = "vivado -mode tcl -source tcl/syn.tcl -log ./output/logs/vivado.log " \
-                  "-journal ./output/logs/vivado.jou"
+        subprocess.run("mkdir -p build/vivado/syn/logs".split(' '), env=env,
+                       cwd=cwd, stdout=subprocess.DEVNULL, check=True)
+
+        xilinx_cwd = os.path.join(cwd, "build/vivado/syn")
+        command = "vivado -mode batch -source ../../../zibal/eda/Xilinx/vivado/syn/syn.tcl " \
+                  " -log ./logs/vivado.log -journal ./logs/vivado.jou"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
 
