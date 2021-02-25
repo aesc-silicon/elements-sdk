@@ -136,22 +136,6 @@ def generate(args, env, cwd):
     logging.debug(command)
     subprocess.run(command, env=env, cwd=cwd, check=True)
 
-    xilinx_cwd = os.path.join(cwd, "eda/Xilinx/sim")
-    for index in range(0, 4):
-        cmd = "ln -sf ../../../../build/zibal/{0}.v_toplevel_system_onChipRam_ram_symbol{1}.bin " \
-                  "{0}.v_toplevel_system_onChipRam_ram_symbol{1}.bin".format(args.soc, index)
-        logging.debug(cmd)
-        subprocess.run(cmd.split(' '), env=env, cwd=xilinx_cwd, stdout=subprocess.DEVNULL,
-                       check=True)
-
-    xilinx_cwd = os.path.join(cwd, "eda/Xilinx/syn")
-    for index in range(0, 4):
-        cmd = "ln -sf ../../../../build/zibal/{0}.v_toplevel_system_onChipRam_ram_symbol{1}.bin " \
-                  "{0}.v_toplevel_system_onChipRam_ram_symbol{1}.bin".format(args.soc, index)
-        logging.debug(cmd)
-        subprocess.run(cmd.split(' '), env=env, cwd=xilinx_cwd, stdout=subprocess.DEVNULL,
-                       check=True)
-
 
 def sim(args, env, cwd):
     """Command to simulate a SOC on a virtual board."""
