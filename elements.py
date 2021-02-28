@@ -6,6 +6,7 @@ import os
 import logging
 import time
 import shutil
+import glob
 import yaml
 
 
@@ -186,6 +187,11 @@ def sim(args, env, cwd):
         env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/{}".format(sim_type))
 
         xilinx_cwd = os.path.join(cwd, "build/vivado/{}".format(sim_type))
+        binaries = glob.glob("build/zibal/{}.v_*bin".format(common.get('SOC', '')))
+        for binary in binaries:
+            subprocess.run("ln -sf {} .".format(os.path.join("../../..", binary)).split(' '),
+                           env=env, cwd=xilinx_cwd, stdout=subprocess.DEVNULL, check=True)
+
         command = "vivado -mode batch -source ../../../zibal/eda/Xilinx/vivado/{}/sim.tcl " \
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou".format(sim_type)
         logging.debug(command)
