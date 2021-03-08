@@ -64,6 +64,15 @@ def parse_args():
     parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'cadence'],
                             help="Choose between differen toolchains.")
 
+    parser_build = subparsers.add_parser('build', help='Run the complete flow to generate a '
+                                                       'bitstream file.')
+    parser_build.set_defaults(func=build)
+    parser_build.add_argument('board', help="Name of the board")
+    parser_build.add_argument('application', help="Name of the application")
+    parser_build.add_argument('-f', action='store_true', help="Force build")
+    parser_build.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
+                            help="Choose between differen toolchains.")
+
     parser_flash = subparsers.add_parser('flash', help='Flashes parts of the SDK')
     parser_flash.set_defaults(func=flash)
     parser_flash.add_argument('board', help="Name of the board")
@@ -244,6 +253,18 @@ def syn(args, env, cwd):
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
+
+def build(args, env, cwd):
+    """Command to compile, generate and synthesize a board."""
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
+    if not 'common' in board:
+        raise SystemExit("No common definitions in board {}".format(args.board))
+    common = board.get('common')
+    args.soc = common.get('SOC', '')
+
+    compile_(args, env, cwd)
+    generate(args, env, cwd)
+    syn(args, env, cwd)
 
 def flash(args, env, cwd):
     """Command to flash the design to a fpga or spi nor."""
