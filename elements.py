@@ -249,7 +249,7 @@ def syn(args, env, cwd):
         env['PDK'] = board['cadence'].get('pdk', '')
 
         cadence_cwd = os.path.join(cwd, "zibal/eda/cadence")
-        command = "genus -f tcl/frontend.tcl -log ./output/logs/"
+        command = "genus -f tcl/frontend.tcl -log ./../../../build/cadence/genus/logs/"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
