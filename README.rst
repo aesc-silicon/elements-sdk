@@ -129,19 +129,21 @@ Generate (Zibal)
 ****************
 
 The ``generate`` command can build various different SOC designs. It only takes the name of the
-SOC as parameter.
+board as parameter.
 
-Hint: FPGA based SOC designs will add the compiled Zephyr output into the memory.
+.. tip::
 
-.. code-block:: text
-
-    ./elements.py generate <soc>
-
-Example to build the Hydrogen-1 SOC:
+  FPGA based SOC designs will add the compiled Zephyr output into the memory.
 
 .. code-block:: text
 
-    ./elements.py generate Hydrogen1
+    ./elements.py generate <board>
+
+Example to build the Hydrogen-1 SOC which is included DH-006:
+
+.. code-block:: text
+
+    ./elements.py generate DH-006
 
 Simulation
 **********
@@ -149,12 +151,11 @@ Simulation
 Since a board is always built on a specific SOC design, simulations can be done on board-level.
 The ``simulate`` command takes as parameter the name of the board. The toolchain can be passed with
 the optional parameter ``--toolchain``. The Xilinx toolchain is selected by default. A further
-flag ``-synthesized`` can be used to simulate a synthesized design. This flag is currently only
-available for the Xilinx toolchain.
+option can select the source type to simulate for example a synthesized design.
 
 .. code-block:: text
 
-    ./elements.py simulate <board> [--toolchain <xilinx/oss>] [-synthesized]
+    ./elements.py simulate <board> [--toolchain <xilinx/oss>] [--source <generated/synthesized/placed>]
 
 Example to simulate DH-006:
 
@@ -176,6 +177,22 @@ Example to simulate DH-006:
 .. code-block:: text
 
     ./elements.py synthesize DH-006
+
+Build
+*****
+
+Sometimes only the bitsream is required and to not run all steps, the build command can compile,
+generate and synthesize a design.
+
+.. code-block:: text
+
+    ./elements.py build <board>
+
+Example to build DH-006:
+
+.. code-block:: text
+
+    ./elements.py build DH-006
 
 Flash
 *****
@@ -220,7 +237,9 @@ will have included all required packages for the SDK.
     sudo docker build -t elements-sdk:1.0 .
     sudo docker run elements-sdk:1.0 ./elements.py compile DH-006 zephyr-samples/demo/leds
 
-Hint: Only ``compile`` and ``generate`` are currently supported.
+.. tip::
+
+  Only ``compile`` and ``generate`` are currently supported.
 
 .. inclusion-end-marker-do-not-remove
 
