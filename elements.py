@@ -17,7 +17,7 @@ def open_yaml(path):
     """Opens a YAML file and returns the content as dictionary."""
     try:
         with open(path, 'r') as stream:
-            return list(yaml.load_all(stream, Loader=yaml.FullLoader))
+            return yaml.load(stream, Loader=yaml.FullLoader)
     except yaml.YAMLError as exc:
         raise SystemExit from exc
     except FileNotFoundError as exc:
@@ -48,20 +48,27 @@ def parse_args():
 
     parser_generate = subparsers.add_parser('generate', help='Generates the MCU')
     parser_generate.set_defaults(func=generate)
-    parser_generate.add_argument('soc', help="Name of the SOC")
+    parser_generate.add_argument('board', help="Name of the board")
 
     parser_sim = subparsers.add_parser('simulate', help='Simulates the design')
     parser_sim.set_defaults(func=sim)
     parser_sim.add_argument('board', help="Name of the board")
     parser_sim.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
-                            help="Choose between differen toolchains.")
-    parser_sim.add_argument('-synthesized', action='store_true',
-                            help="Simulate an already syntheized design")
+                            help="Choose between different toolchains.")
+    parser_sim.add_argument('--source', default="generated",
+                            choices=['generated', 'synthesized', 'placed'],
+                            help="Choose between different design sources.")
 
     parser_syn = subparsers.add_parser('synthesize', help='Synthesizes the design')
     parser_syn.set_defaults(func=syn)
     parser_syn.add_argument('board', help="Name of the board")
-    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'cadence'],
+    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
+                            help="Choose between differen toolchains.")
+
+    parser_map = subparsers.add_parser('map', help='Map the design')
+    parser_map.set_defaults(func=map_)
+    parser_map.add_argument('board', help="Name of the board")
+    parser_map.add_argument('--toolchain', default="cadence", choices=['cadence'],
                             help="Choose between differen toolchains.")
 
     parser_build = subparsers.add_parser('build', help='Run the complete flow to generate a '
@@ -81,6 +88,7 @@ def parse_args():
 
     parser_debug = subparsers.add_parser('debug', help='Debugs the firmware with GDB.')
     parser_debug.set_defaults(func=debug)
+    parser_debug.add_argument('board', help="Name of the board")
 
     parser_test = subparsers.add_parser('test', help='Tests the SDK')
     parser_test.set_defaults(func=test)
@@ -122,27 +130,31 @@ def clean(args, env, cwd):  # pylint: disable=unused-argument
     else:
         print("Nothing to do!")
 
+
 def compile_(args, env, cwd):
     """Command to compile a Zephyr binary for a board and application."""
     force = "always" if args.f else "auto"
     board = args.board.replace('-', '').lower()
-    command = "west build -p {} -b {} -d ./build/zephyr/ {}".format(force, board,
-                                                                    args.application)
+    output = "./build/{}/zephyr/".format(args.board)
+    command = "west build -p {} -b {} -d {} {}".format(force, board, output, args.application)
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
 
 def generate(args, env, cwd):
     """Command to generate a Microcontroller design for a SOC."""
-    subprocess.run("mkdir -p build/zibal/".split(' '), env=env, cwd=cwd,
-                   stdout=subprocess.DEVNULL, check=True)
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    boot_source = board.get('boot_source', "")
+    soc = board.get('SOC', {'name': None}).get('name')
 
-    if not os.path.exists("build/zephyr/zephyr/zephyr.bin"):
+    path = "build/{}/zephyr/zephyr/zephyr.bin".format(args.board)
+    if boot_source == "memory" and not os.path.exists(path):
         raise SystemExit("No Zephyr binary found. "
                          "Run \"./elements.py compile <board> <app>\" before.")
 
+    env['BOARD'] = args.board
     cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}'.format(args.soc)]
+    command = ['sbt', 'runMain zibal.soc.{}'.format(soc)]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=cwd, check=True)
 
@@ -150,25 +162,25 @@ def generate(args, env, cwd):
 def sim(args, env, cwd):
     """Command to simulate a SOC on a virtual board."""
     name = args.board.replace('-', '')
-    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
-    if not 'common' in board:
-        raise SystemExit("No common definitions in board {}".format(args.board))
-    common = board.get('common')
-
-    soc = common.get('SOC', None)
-    if not os.path.exists("build/zibal/{}.v".format(soc)):
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    soc = board.get('SOC', {'name': None}).get('name')
+    if not os.path.exists("build/{}/zibal/{}.v".format(args.board, soc)):
         raise SystemExit("No SOC design found. Run \"./elements.py generate {}\" before.".format(
-                         soc))
+                         args.board))
+
 
     if args.toolchain == 'oss':
+        if args.source == "placed" or args.source == "placed":
+            raise SystemExit("Source type is not supported for the OSS toolchain.")
+
         oss_cwd = os.path.join(cwd, "zibal/eda/OSS")
-        build_cwd = os.path.join(cwd, "build/zibal")
-        top_rep = common.get('top', '').replace('-', '')
-        command = "iverilog -Wall -g2009 {0}.v ../testbenches/{1}.sv ../../../build/zibal/{2}.v " \
-                  " -I../testbenches -o ../../../build/zibal/{3}.out".format(common.get('top', ''),
-                                                                  common.get('testbench', ''),
-                                                                  common.get('SOC', ''),
-                                                                  top_rep)
+        build_cwd = os.path.join(cwd, "build/{}/zibal".format(args.board))
+        top_rep = board.get('top', '').replace('-', '')
+        command = "iverilog -Wall -g2009 {0}.v ../testbenches/{1}.sv ../../../{2}/{3}.v " \
+                  " -I../testbenches -o ../../../{2}/{4}.out".format(board.get('top', ''),
+                                                                     board.get('testbench', ''),
+                                                                     build_cwd, soc,
+                                                                     top_rep)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=oss_cwd, check=True)
         command = "vvp -l{0}.log {0}.out".format(top_rep)
@@ -178,30 +190,31 @@ def sim(args, env, cwd):
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True)
     if args.toolchain == 'xilinx':
+        if args.source == "placed":
+            raise SystemExit("Source type is not supported for the Xilinx toolchain.")
+
         if not 'xilinx' in board:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
 
-        sim_type = "syn" if args.synthesized else "sim"
-        subprocess.run("mkdir -p build/vivado/{}/logs".format(sim_type).split(' '), env=env,
-                       cwd=cwd, stdout=subprocess.DEVNULL, check=True)
+        sim_type = "syn" if args.source == "synthesized" else "sim"
 
         env['BOARD'] = args.board
         env['BOARD_NAME'] = name
-        env['SOC'] = common.get('SOC', '')
-        env['TOP'] = common.get('top', '')
-        env['TOP_NAME'] = common.get('top', '').replace('-', '')
-        env['TESTBENCH'] = common.get('testbench', '')
-        env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
+        env['SOC'] = soc
+        env['TOP'] = board.get('top', '')
+        env['TOP_NAME'] = board.get('top', '').replace('-', '')
+        env['TESTBENCH'] = board.get('testbench', '')
+        env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
         env['PART'] = board['xilinx'].get('part', '')
         env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/{}".format(sim_type))
 
-        xilinx_cwd = os.path.join(cwd, "build/vivado/{}".format(sim_type))
-        binaries = glob.glob("build/zibal/{}.v_*bin".format(common.get('SOC', '')))
+        xilinx_cwd = os.path.join(cwd, "build/{}/vivado/{}".format(args.board, sim_type))
+        binaries = glob.glob("build/{}/zibal/{}.v_*bin".format(args.board, soc))
         for binary in binaries:
-            subprocess.run("ln -sf {} .".format(os.path.join("../../..", binary)).split(' '),
+            subprocess.run("ln -sf {} .".format(os.path.join("../../../..", binary)).split(' '),
                            env=env, cwd=xilinx_cwd, stdout=subprocess.DEVNULL, check=True)
 
-        command = "vivado -mode batch -source ../../../zibal/eda/Xilinx/vivado/{}/sim.tcl " \
+        command = "vivado -mode batch -source ../../../../zibal/eda/Xilinx/vivado/{}/sim.tcl " \
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou".format(sim_type)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
@@ -210,20 +223,17 @@ def sim(args, env, cwd):
 def syn(args, env, cwd):
     """Command to synthesize a SOC for a board."""
     name = args.board.replace('-', '')
-    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
-    if not 'common' in board:
-        raise SystemExit("No common definitions in board {}".format(args.board))
-    common = board.get('common')
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    soc = board.get('SOC', {'name': None}).get('name')
     env['BOARD'] = args.board
     env['BOARD_NAME'] = name
-    env['SOC'] = common.get('SOC', '')
-    env['TOP'] = common.get('top', '')
-    env['TOP_NAME'] = common.get('top', '').replace('-', '')
-    env['TESTBENCH'] = common.get('testbench', '')
-    env['TESTBENCH_NAME'] = common.get('testbench', '').replace('-', '')
+    env['SOC'] = soc
+    env['TOP'] = board.get('top', '')
+    env['TOP_NAME'] = board.get('top', '').replace('-', '')
+    env['TESTBENCH'] = board.get('testbench', '')
+    env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
 
-    soc = common.get('SOC', None)
-    if not os.path.exists("build/zibal/{}.v".format(soc)):
+    if not os.path.exists("build/{}/zibal/{}.v".format(args.board, soc)):
         raise SystemExit("No SOC design found. Run \"./elements.py generate {}\" before.".format(
                          soc))
 
@@ -233,59 +243,59 @@ def syn(args, env, cwd):
         env['PART'] = board['xilinx'].get('part', '')
         env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/syn")
 
-        subprocess.run("mkdir -p build/vivado/syn/logs".split(' '), env=env,
+        subprocess.run("mkdir -p build/{}/vivado/syn/logs".format(args.board).split(' '), env=env,
                        cwd=cwd, stdout=subprocess.DEVNULL, check=True)
 
-        xilinx_cwd = os.path.join(cwd, "build/vivado/syn")
-        command = "vivado -mode batch -source ../../../zibal/eda/Xilinx/vivado/syn/syn.tcl " \
+        xilinx_cwd = os.path.join(cwd, "build/{}/vivado/syn".format(args.board))
+        command = "vivado -mode batch -source ../../../../zibal/eda/Xilinx/vivado/syn/syn.tcl " \
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
 
+
+def map_(args, env, cwd):
+    """Command to map a SOC for a board."""
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
     if args.toolchain == 'cadence':
         if not 'cadence' in board:
             raise SystemExit("No cadence definitions in board {}".format(args.board))
         env['PROCESS'] = board['cadence'].get('process', '')
         env['PDK'] = board['cadence'].get('pdk', '')
 
-        cadence_cwd = os.path.join(cwd, "zibal/eda/cadence")
-        command = "genus -f tcl/frontend.tcl -log ./../../../build/cadence/genus/logs/"
+        cadence_cwd = os.path.join(cwd, "build/{}/cadence/map")
+        command = "genus -f ./../../../../zibal/eda/Cadence/tcl/frontend.tcl -log ."
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
 
 def build(args, env, cwd):
     """Command to compile, generate and synthesize a board."""
-    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
-    if not 'common' in board:
-        raise SystemExit("No common definitions in board {}".format(args.board))
-    common = board.get('common')
-    args.soc = common.get('SOC', '')
-
     compile_(args, env, cwd)
     generate(args, env, cwd)
     syn(args, env, cwd)
 
+
 def flash(args, env, cwd):
     """Command to flash the design to a fpga or spi nor."""
     openocd_cwd = os.path.join(cwd, "openocd")
-    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))[0]
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
     if args.destination == 'memory':
         debug(args, env, cwd, type_="flash")
     else:
-        if not args.destination in board.get('destinations', {}):
+        if not args.destination in board.get('debug_bridge', {}):
             raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
                                                                               args.board))
 
-        name = args.board.replace('-', '')
-        if not os.path.exists("build/zibal/{}_top.bit".format(name)):
+        name = "{}_top".format(args.board.replace('-', ''))
+        if not os.path.exists("build/{}/vivado/syn/{}.bit".format(args.board, name)):
             raise SystemExit("No bitstream found. "
                              "Run \"./elements.py synthesize {}\" before.".format(args.board))
 
 
-        destination = board['destinations'][args.destination]
-        transport = board['destinations']["transport"]
-        command = ['src/openocd', '-c', 'set BOARD {}'.format(name),
+        destination = board['debug_bridge'][args.destination]
+        transport = board['debug_bridge']["transport"]
+        command = ['src/openocd', '-c', 'set BOARD {}'.format(args.board),
+                   '-c', 'set TOP {}'.format(name),
                    '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
                    '-c', 'set TRANSPORT {}'.format(transport),
                    '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
@@ -293,14 +303,15 @@ def flash(args, env, cwd):
         subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
 
 
-def debug(_, env, cwd, type_="debug"):
+def debug(args, env, cwd, type_="debug"):
     """Command to debug the firmware with GDB"""
-    if not os.path.exists("build/zephyr/zephyr/zephyr.elf"):
+    if not os.path.exists("build/{}/zephyr/zephyr/zephyr.elf".format(args.board)):
         raise SystemExit("No Zephyr elf found. "
                          "Run \"./elements.py compile <board> <app>\" before.")
 
     openocd_cwd = os.path.join(cwd, "openocd")
-    command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML ../build/zibal/VexRiscv.yaml',
+    yaml_path = "../build/{}/zibal/VexRiscv.yaml".format(args.board)
+    command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML {}'.format(yaml_path),
                '-f', 'tcl/interface/jlink.cfg',
                '-f', '../zibal/gdb/hydrogen.cfg']
     logging.debug(command)
@@ -310,7 +321,7 @@ def debug(_, env, cwd, type_="debug"):
     toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
     command = ['{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
                '-x', 'zibal/gdb/{}.cmd'.format(type_),
-               'build/zephyr/zephyr/zephyr.elf']
+               'build/{}/zephyr/zephyr/zephyr.elf'.format(args.board)]
     logging.debug(command)
     if type_ == "flash":
         gdb_process = subprocess.Popen(command, env=env, cwd=cwd)
@@ -364,12 +375,32 @@ def environment():
     return env
 
 
+def prepare(args):
+    """Prepares the build directory."""
+    path = "build/{}".format(args.board)
+    if not os.path.exists(path):
+        subprocess.run("mkdir -p {}".format(path).split(' '), stdout=subprocess.DEVNULL, check=True)
+    if not os.path.exists(os.path.join(path, "zibal")):
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "zibal")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+    if not os.path.exists(os.path.join(path, "vivado")):
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "vivado/sim/logs")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "vivado/syn/logs")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+    if not os.path.exists(os.path.join(path, "cadence")):
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "cadence/map")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+
+
 def main():
     """Main function."""
     args = parse_args()
     if args.v:
         logging.basicConfig(format=_FORMAT, level=logging.DEBUG)
     env = environment()
+    if args.board:
+        prepare(args)
     cwd = os.path.dirname(os.path.realpath(__file__))
     if hasattr(args, 'func'):
         args.func(args, env, cwd)
