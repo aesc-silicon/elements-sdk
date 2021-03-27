@@ -399,7 +399,7 @@ def main():
     if args.v:
         logging.basicConfig(format=_FORMAT, level=logging.DEBUG)
     env = environment()
-    if args.board:
+    if hasattr(args, 'board'):
         prepare(args)
     cwd = os.path.dirname(os.path.realpath(__file__))
     if hasattr(args, 'func'):
