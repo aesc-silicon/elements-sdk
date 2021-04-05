@@ -63,13 +63,23 @@ def parse_args():
     parser_syn.set_defaults(func=syn)
     parser_syn.add_argument('board', help="Name of the board")
     parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
-                            help="Choose between differen toolchains.")
+                            help="Choose between different toolchains.")
 
     parser_map = subparsers.add_parser('map', help='Map the design')
     parser_map.set_defaults(func=map_)
     parser_map.add_argument('board', help="Name of the board")
     parser_map.add_argument('--toolchain', default="cadence", choices=['cadence'],
-                            help="Choose between differen toolchains.")
+                            help="Choose between different toolchains.")
+    parser_map.add_argument('--effort', default="high", choices=['low', 'medium', 'high'],
+                            help="Choose between different mapping effort modes.")
+
+    parser_place = subparsers.add_parser('place', help='Place and route the design')
+    parser_place.set_defaults(func=place)
+    parser_place.add_argument('board', help="Name of the board")
+    parser_place.add_argument('--toolchain', default="cadence", choices=['cadence'],
+                            help="Choose between different toolchains.")
+    parser_place.add_argument('--effort', default="high", choices=['low', 'medium', 'high'],
+                            help="Choose between different placeping effort modes.")
 
     parser_build = subparsers.add_parser('build', help='Run the complete flow to generate a '
                                                        'bitstream file.')
@@ -78,7 +88,7 @@ def parse_args():
     parser_build.add_argument('application', help="Name of the application")
     parser_build.add_argument('-f', action='store_true', help="Force build")
     parser_build.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
-                            help="Choose between differen toolchains.")
+                            help="Choose between different toolchains.")
 
     parser_flash = subparsers.add_parser('flash', help='Flashes parts of the SDK')
     parser_flash.set_defaults(func=flash)
@@ -256,16 +266,65 @@ def syn(args, env, cwd):
 def map_(args, env, cwd):
     """Command to map a SOC for a board."""
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    name = args.board.replace('-', '')
+    soc = board.get('SOC', {'name': None}).get('name')
+    env['BOARD'] = args.board
+    env['BOARD_NAME'] = name
+    env['SOC'] = soc
+    env['TOP'] = board.get('top', '')
+    env['TOP_NAME'] = board.get('top', '').replace('-', '')
+    env['TESTBENCH'] = board.get('testbench', '')
+    env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
+    env['PROCESS'] = str(board['cadence'].get('process', ''))
+    env['PDK'] = board['cadence'].get('pdk', '')
+    env['EFFORT'] = args.effort
+
     if args.toolchain == 'cadence':
         if not 'cadence' in board:
             raise SystemExit("No cadence definitions in board {}".format(args.board))
-        env['PROCESS'] = board['cadence'].get('process', '')
-        env['PDK'] = board['cadence'].get('pdk', '')
 
-        cadence_cwd = os.path.join(cwd, "build/{}/cadence/map")
-        command = "genus -f ./../../../../zibal/eda/Cadence/tcl/frontend.tcl -log ."
+        cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
+        command = "genus -f tcl/map.tcl " \
+                  "-log ./../../../build/{}/cadence/map/logs/".format(args.board)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
+
+        command = "cp build/{0}/cadence/map/latest/{1}.v build/{0}/cadence/map".format(args.board,                                                                                         soc)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+
+
+def place(args, env, cwd):
+    """Command to place and route a SOC for a board."""
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    name = args.board.replace('-', '')
+    soc = board.get('SOC', {'name': None}).get('name')
+    env['BOARD'] = args.board
+    env['BOARD_NAME'] = name
+    env['SOC'] = soc
+    env['TOP'] = board.get('top', '')
+    env['TOP_NAME'] = board.get('top', '').replace('-', '')
+    env['TESTBENCH'] = board.get('testbench', '')
+    env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
+    env['PROCESS'] = str(board['cadence'].get('process', ''))
+    env['PDK'] = board['cadence'].get('pdk', '')
+    env['EFFORT'] = args.effort
+
+    if args.toolchain == 'cadence':
+        if not 'cadence' in board:
+            raise SystemExit("No cadence definitions in board {}".format(args.board))
+        top_module = board.get('top')
+
+        cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
+        command = "innovus -files tcl/place.tcl " \
+                  "-log ./../../../build/{}/cadence/place/logs/".format(args.board)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
+
+        command = "cp build/{0}/cadence/place/latest/{1}_final.v " \
+                  "build/{0}/cadence/place/{1}.v".format(args.board, top_module)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
 
 def build(args, env, cwd):
@@ -372,6 +431,8 @@ def environment():
     env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(zephyr_sdk_version))
     env['PATH'] += os.pathsep + vivado_path
     env['VIVADO_PATH'] = vivado_path
+    env['PDK_BASE'] = get_variable(env, localenv, 'PDK_BASE')
+    env['IHP_TECH'] = os.path.join(get_variable(env, localenv, 'PDK_BASE'), 'tech')
     return env
 
 
