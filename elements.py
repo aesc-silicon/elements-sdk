@@ -53,7 +53,7 @@ def parse_args():
     parser_sim = subparsers.add_parser('simulate', help='Simulates the design')
     parser_sim.set_defaults(func=sim)
     parser_sim.add_argument('board', help="Name of the board")
-    parser_sim.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
+    parser_sim.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss', 'cadence'],
                             help="Choose between different toolchains.")
     parser_sim.add_argument('--source', default="generated",
                             choices=['generated', 'synthesized', 'placed'],
@@ -180,17 +180,16 @@ def sim(args, env, cwd):
 
 
     if args.toolchain == 'oss':
-        if args.source == "placed" or args.source == "placed":
+        if args.source == "synthesized" or args.source == "placed":
             raise SystemExit("Source type is not supported for the OSS toolchain.")
 
         oss_cwd = os.path.join(cwd, "zibal/eda/OSS")
         build_cwd = os.path.join(cwd, "build/{}/zibal".format(args.board))
         top_rep = board.get('top', '').replace('-', '')
-        command = "iverilog -Wall -g2009 {0}.v ../testbenches/{1}.sv ../../../{2}/{3}.v " \
-                  " -I../testbenches -o ../../../{2}/{4}.out".format(board.get('top', ''),
-                                                                     board.get('testbench', ''),
-                                                                     build_cwd, soc,
-                                                                     top_rep)
+        command = "iverilog -Wall -g2009 -DVCD=\"{2}/{0}.vcd\" -I../testbenches " \
+                  " {0}.v ../testbenches/{1}.sv {2}/{3}.v " \
+                  " -o {2}/{4}.out".format(board.get('top', ''), board.get('testbench', ''),
+                                           build_cwd, soc, top_rep, args.board)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=oss_cwd, check=True)
         command = "vvp -l{0}.log {0}.out".format(top_rep)
@@ -228,6 +227,25 @@ def sim(args, env, cwd):
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou".format(sim_type)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
+
+    if args.toolchain == 'cadence':
+        if args.source == "generated" or args.source == "synthesized":
+            raise SystemExit("Source type is not supported for the Cadence toolchain.")
+
+        env['BOARD'] = args.board
+        env['BOARD_NAME'] = name
+        env['SOC'] = soc
+        env['TOP'] = board.get('top', '')
+        env['TOP_NAME'] = board.get('top', '').replace('-', '')
+        env['TESTBENCH'] = board.get('testbench', '')
+        env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
+        env['PDK'] = board['cadence'].get('pdk', '')
+        env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Cadence/tcl/")
+        cadence_cwd = os.path.join(cwd, "build/{}/cadence/sim".format(args.board))
+
+        command = "../../../../zibal/eda/Cadence/tcl/sim.sh"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
 
 def syn(args, env, cwd):
@@ -451,6 +469,10 @@ def prepare(args):
                        stdout=subprocess.DEVNULL, check=True)
     if not os.path.exists(os.path.join(path, "cadence")):
         subprocess.run("mkdir -p {}".format(os.path.join(path, "cadence/map")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "cadence/place")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "cadence/sim")).split(' '),
                        stdout=subprocess.DEVNULL, check=True)
 
 
