@@ -174,6 +174,7 @@ def sim(args, env, cwd):
     name = args.board.replace('-', '')
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
     soc = board.get('SOC', {'name': None}).get('name')
+    top = board.get('SOC', {'top': None}).get('top')
     if not os.path.exists("build/{}/zibal/{}.v".format(args.board, soc)):
         raise SystemExit("No SOC design found. Run \"./elements.py generate {}\" before.".format(
                          args.board))
@@ -185,10 +186,10 @@ def sim(args, env, cwd):
 
         oss_cwd = os.path.join(cwd, "zibal/eda/OSS")
         build_cwd = os.path.join(cwd, "build/{}/zibal".format(args.board))
-        top_rep = board.get('top', '').replace('-', '')
+        top_rep = top.replace('-', '')
         command = "iverilog -Wall -g2009 -DVCD=\"{2}/{0}.vcd\" -I../testbenches " \
                   " {0}.v ../testbenches/{1}.sv {2}/{3}.v " \
-                  " -o {2}/{4}.out".format(board.get('top', ''), board.get('testbench', ''),
+                  " -o {2}/{4}.out".format(top, board.get('testbench', ''),
                                            build_cwd, soc, top_rep, args.board)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=oss_cwd, check=True)
@@ -210,8 +211,8 @@ def sim(args, env, cwd):
         env['BOARD'] = args.board
         env['BOARD_NAME'] = name
         env['SOC'] = soc
-        env['TOP'] = board.get('top', '')
-        env['TOP_NAME'] = board.get('top', '').replace('-', '')
+        env['TOP'] = top
+        env['TOP_NAME'] = top.replace('-', '')
         env['TESTBENCH'] = board.get('testbench', '')
         env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
         env['PART'] = board['xilinx'].get('part', '')
@@ -229,18 +230,19 @@ def sim(args, env, cwd):
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
 
     if args.toolchain == 'cadence':
-        if args.source == "generated" or args.source == "synthesized":
+        if args.source == "synthesized":
             raise SystemExit("Source type is not supported for the Cadence toolchain.")
 
         env['BOARD'] = args.board
         env['BOARD_NAME'] = name
         env['SOC'] = soc
-        env['TOP'] = board.get('top', '')
-        env['TOP_NAME'] = board.get('top', '').replace('-', '')
+        env['TOP'] = top
+        env['TOP_NAME'] = top.replace('-', '')
         env['TESTBENCH'] = board.get('testbench', '')
         env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
         env['PDK'] = board['cadence'].get('pdk', '')
         env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Cadence/tcl/")
+        env['SIM_TYPE'] = args.source
         cadence_cwd = os.path.join(cwd, "build/{}/cadence/sim".format(args.board))
 
         command = "../../../../zibal/eda/Cadence/tcl/sim.sh"
@@ -253,11 +255,12 @@ def syn(args, env, cwd):
     name = args.board.replace('-', '')
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
     soc = board.get('SOC', {'name': None}).get('name')
+    top = board.get('SOC', {'top': None}).get('top')
     env['BOARD'] = args.board
     env['BOARD_NAME'] = name
     env['SOC'] = soc
-    env['TOP'] = board.get('top', '')
-    env['TOP_NAME'] = board.get('top', '').replace('-', '')
+    env['TOP'] = top
+    env['TOP_NAME'] = top.replace('-', '')
     env['TESTBENCH'] = board.get('testbench', '')
     env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
 
@@ -286,11 +289,12 @@ def map_(args, env, cwd):
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
     name = args.board.replace('-', '')
     soc = board.get('SOC', {'name': None}).get('name')
+    top = board.get('SOC', {'top': None}).get('top')
     env['BOARD'] = args.board
     env['BOARD_NAME'] = name
     env['SOC'] = soc
-    env['TOP'] = board.get('top', '')
-    env['TOP_NAME'] = board.get('top', '').replace('-', '')
+    env['TOP'] = top
+    env['TOP_NAME'] = top.replace('-', '')
     env['TESTBENCH'] = board.get('testbench', '')
     env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
     env['PROCESS'] = str(board['cadence'].get('process', ''))
@@ -317,11 +321,12 @@ def place(args, env, cwd):
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
     name = args.board.replace('-', '')
     soc = board.get('SOC', {'name': None}).get('name')
+    top = board.get('SOC', {'top': None}).get('top')
     env['BOARD'] = args.board
     env['BOARD_NAME'] = name
     env['SOC'] = soc
-    env['TOP'] = board.get('top', '')
-    env['TOP_NAME'] = board.get('top', '').replace('-', '')
+    env['TOP'] = top
+    env['TOP_NAME'] = top.replace('-', '')
     env['TESTBENCH'] = board.get('testbench', '')
     env['TESTBENCH_NAME'] = board.get('testbench', '').replace('-', '')
     env['PROCESS'] = str(board['cadence'].get('process', ''))
@@ -331,7 +336,6 @@ def place(args, env, cwd):
     if args.toolchain == 'cadence':
         if not 'cadence' in board:
             raise SystemExit("No cadence definitions in board {}".format(args.board))
-        top_module = board.get('top')
 
         cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
         command = "innovus -files tcl/place.tcl " \
@@ -340,7 +344,7 @@ def place(args, env, cwd):
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
         command = "cp build/{0}/cadence/place/latest/{1}_final.v " \
-                  "build/{0}/cadence/place/{1}.v".format(args.board, top_module)
+                  "build/{0}/cadence/place/{1}.v".format(args.board, top)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
@@ -356,6 +360,7 @@ def flash(args, env, cwd):
     """Command to flash the design to a fpga or spi nor."""
     openocd_cwd = os.path.join(cwd, "openocd")
     board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    top = board.get('SOC', {'top': None}).get('top')
     if args.destination == 'memory':
         debug(args, env, cwd, type_="flash")
     else:
@@ -363,8 +368,8 @@ def flash(args, env, cwd):
             raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
                                                                               args.board))
 
-        name = "{}_top".format(args.board.replace('-', ''))
-        if not os.path.exists("build/{}/vivado/syn/{}.bit".format(args.board, name)):
+        top_rep = top.replace('-', '')
+        if not os.path.exists("build/{}/vivado/syn/{}.bit".format(args.board, top_rep)):
             raise SystemExit("No bitstream found. "
                              "Run \"./elements.py synthesize {}\" before.".format(args.board))
 
@@ -372,7 +377,7 @@ def flash(args, env, cwd):
         destination = board['debug_bridge'][args.destination]
         transport = board['debug_bridge']["transport"]
         command = ['src/openocd', '-c', 'set BOARD {}'.format(args.board),
-                   '-c', 'set TOP {}'.format(name),
+                   '-c', 'set TOP {}'.format(top_rep),
                    '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
                    '-c', 'set TRANSPORT {}'.format(transport),
                    '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
