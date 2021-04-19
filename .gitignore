@@ -11,3 +11,5 @@ openocd
 .repo
 .west
 docsource/source/docsource
+conda_installer.sh
+symbiflow/

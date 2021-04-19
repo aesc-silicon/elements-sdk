@@ -62,7 +62,7 @@ def parse_args():
     parser_syn = subparsers.add_parser('synthesize', help='Synthesizes the design')
     parser_syn.set_defaults(func=syn)
     parser_syn.add_argument('board', help="Name of the board")
-    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx'],
+    parser_syn.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
                             help="Choose between different toolchains.")
 
     parser_map = subparsers.add_parser('map', help='Map the design')
@@ -282,7 +282,19 @@ def syn(args, env, cwd):
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
+    if args.toolchain == 'oss':
+        if not 'xilinx' in board:
+            raise SystemExit("No xilinx definitions in board {}".format(args.board))
+        env['PART'] = board['xilinx'].get('part', '').lower()
+        env['DEVICE'] = "{}_test".format(board['xilinx'].get('device', ''))
 
+        subprocess.run("mkdir -p build/{}/symbiflow/logs".format(args.board).split(' '), env=env,
+                       cwd=cwd, stdout=subprocess.DEVNULL, check=True)
+
+        symbiflow_cwd = os.path.join(cwd, "zibal/eda/Xilinx/symbiflow")
+        command = "./syn.sh"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=symbiflow_cwd, check=True)
 
 def map_(args, env, cwd):
     """Command to map a SOC for a board."""
@@ -369,17 +381,21 @@ def flash(args, env, cwd):
                                                                               args.board))
 
         top_rep = top.replace('-', '')
-        if not os.path.exists("build/{}/vivado/syn/{}.bit".format(args.board, top_rep)):
+
+        vivado_bit = os.path.exists("build/{}/vivado/syn/{}.bit".format(args.board, top_rep))
+        symbiflow_bit = os.path.exists("build/{}/symbiflow/{}.bit".format(args.board, top_rep))
+        if not (vivado_bit or symbiflow_bit):
             raise SystemExit("No bitstream found. "
                              "Run \"./elements.py synthesize {}\" before.".format(args.board))
 
-
+        bitstream_origin = "symbiflow" if symbiflow_bit else "vivado"
         destination = board['debug_bridge'][args.destination]
         transport = board['debug_bridge']["transport"]
         command = ['src/openocd', '-c', 'set BOARD {}'.format(args.board),
                    '-c', 'set TOP {}'.format(top_rep),
                    '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
                    '-c', 'set TRANSPORT {}'.format(transport),
+                   '-c', 'set BITSTREAM_ORIGIN {}'.format(bitstream_origin),
                    '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
         logging.debug(command)
         subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
@@ -452,7 +468,10 @@ def environment():
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
     env['ZEPHYR_SDK_VERSION'] = zephyr_sdk_version
     env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(zephyr_sdk_version))
+    env['FPGA_FAM'] = "xc7"
+    env['INSTALL_DIR'] = os.path.join(base, 'symbiflow')
     env['PATH'] += os.pathsep + vivado_path
+    env['PATH'] += os.pathsep + os.path.join(base, 'symbiflow/xc7/install/bin')
     env['VIVADO_PATH'] = vivado_path
     env['PDK_BASE'] = get_variable(env, localenv, 'PDK_BASE')
     env['IHP_TECH'] = os.path.join(get_variable(env, localenv, 'PDK_BASE'), 'tech')
