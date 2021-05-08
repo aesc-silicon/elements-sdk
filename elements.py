@@ -376,7 +376,7 @@ def flash(args, env, cwd):
     if args.destination == 'memory':
         debug(args, env, cwd, type_="flash")
     else:
-        if not args.destination in board.get('debug_bridge', {}):
+        if not args.destination in board.get('flash_bridge', {}):
             raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
                                                                               args.board))
 
@@ -389,8 +389,8 @@ def flash(args, env, cwd):
                              "Run \"./elements.py synthesize {}\" before.".format(args.board))
 
         bitstream_origin = "symbiflow" if symbiflow_bit else "vivado"
-        destination = board['debug_bridge'][args.destination]
-        transport = board['debug_bridge']["transport"]
+        destination = board['flash_bridge'][args.destination]
+        transport = board['flash_bridge']["transport"]
         command = ['src/openocd', '-c', 'set BOARD {}'.format(args.board),
                    '-c', 'set TOP {}'.format(top_rep),
                    '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
