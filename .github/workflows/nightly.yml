@@ -7,12 +7,12 @@ on:
 jobs:
   prepare:
     runs-on: self-hosted
+    env:
+      repository_name: elements-sdk
     steps:
     - name: clone repo
       run: |
         git clone git@github.com:phytec-labs/${{ env.repository_name }}.git ${{ env.repository_name }}
-      env:
-        repository_name: elements-sdk
 
     - name: set-up environment
       run: |
@@ -29,8 +29,6 @@ jobs:
         chmod +x zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
         ./zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y -nocmake
         cd ../
-      env:
-        repository_name: elements-sdk
 
     - name: build OpenOCD
       run: |
@@ -41,59 +39,104 @@ jobs:
         make || make -j8
         cd ../
         cd ../
-      env:
-        repository_name: elements-sdk
 
-  compile:
+  compile_demo:
     runs-on: self-hosted
     needs: [prepare]
+    env:
+      repository_name: elements-sdk
     strategy:
       matrix:
         board:
         - "DH-006"
+        - "DH-008"
         - "TH-283"
         - "TH-294"
         - "Nexys4-DDR"
+       demo:
+       - "leds"
     steps:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements.py compile ${{ matrix.board }} zephyr-samples/demo/leds
-      env:
-        repository_name: elements-sdk
+        ./elements.py compile ${{ matrix.board }} zephyr-samples/demo/${{ matrix.demo }}
+
+  compile_startup:
+    runs-on: self-hosted
+    needs: [prepare]
+    env:
+      repository_name: elements-sdk
+    strategy:
+      matrix:
+        board:
+        - "TH-283"
+        startup:
+        - "frequency"
+        - "gpio"
+        - "i2c"
+        - "mtimer"
+        - "spi"
+        - "uart"
+    steps:
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements.py compile ${{ matrix.board }} zephyr-samples/startup/${{ matrix.startup }}
+
+  compile_arcade:
+    runs-on: self-hosted
+    needs: [prepare]
+    env:
+      repository_name: elements-sdk
+    strategy:
+      matrix:
+        board:
+        - "DH-008"
+        arcade:
+        - "snake"
+    steps:
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements.py compile ${{ matrix.board }} zephyr-samples/arcade/${{ matrix.arcade }}
 
   generate:
     runs-on: self-hosted
-    needs: [compile]
+    needs: [compile_demo, compile_startup, compile_arcade]
+    env:
+      repository_name: elements-sdk
     strategy:
       matrix:
         soc:
         - "Hydrogen1"
         - "Hydrogen2"
         - "Hydrogen3"
+        - "Hydrogen4"
         - "HydrogenTest"
+        - "Carbon1"
     steps:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
         ./elements.py generate ${{ matrix.soc }}
-      env:
-        repository_name: elements-sdk
 
   test:
     runs-on: self-hosted
     needs: [generate]
+    env:
+      repository_name: elements-sdk
     steps:
     - name: zibal
       run: |
         cd ${{ env.repository_name }}
         ./elements.py test -zibal
-      env:
-        repository_name: elements-sdk
 
   deploy:
     runs-on: self-hosted
     needs: [test]
+    env:
+      repository_name: elements-sdk
+      branch: stable
     strategy:
       matrix:
         repository:
@@ -107,17 +150,14 @@ jobs:
         git remote add origin git@github.com:phytec-labs/elements-${{ matrix.repository }}.git
         git push origin HEAD:${{ env.branch }} -f
         cd ../../
-      env:
-        repository_name: elements-sdk
-        branch: stable
 
   cleanup:
     runs-on: self-hosted
     needs: [deploy]
+    env:
+      repository_name: elements-sdk
     if: always()
     steps:
     - name: post cleanup
       run: |
         rm -rf ${{ env.repository_name}}
-      env:
-        repository_name: elements-sdk
