@@ -53,8 +53,8 @@ jobs:
         - "TH-283"
         - "TH-294"
         - "Nexys4-DDR"
-       demo:
-       - "leds"
+        demo:
+        - "leds"
     steps:
     - name: compile
       run: |
