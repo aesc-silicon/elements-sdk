@@ -76,10 +76,15 @@ def parse_args():
     parser_place = subparsers.add_parser('place', help='Place and route the design')
     parser_place.set_defaults(func=place)
     parser_place.add_argument('board', help="Name of the board")
+    parser_place.add_argument('--stage', default="save", choices=['init', 'floorplan', 'place',
+                                                                  'cts', 'route', 'signoff',
+                                                                  'verify', 'save'],
+                              help="Define a stage the place and route should stop")
+
     parser_place.add_argument('--toolchain', default="cadence", choices=['cadence'],
-                            help="Choose between different toolchains.")
+                              help="Choose between different toolchains.")
     parser_place.add_argument('--effort', default="high", choices=['low', 'medium', 'high'],
-                            help="Choose between different placeping effort modes.")
+                              help="Choose between different placeping effort modes.")
 
     parser_build = subparsers.add_parser('build', help='Run the complete flow to generate a '
                                                        'bitstream file.')
@@ -88,7 +93,7 @@ def parse_args():
     parser_build.add_argument('application', help="Name of the application")
     parser_build.add_argument('-f', action='store_true', help="Force build")
     parser_build.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
-                            help="Choose between different toolchains.")
+                              help="Choose between different toolchains.")
 
     parser_flash = subparsers.add_parser('flash', help='Flashes parts of the SDK')
     parser_flash.set_defaults(func=flash)
@@ -344,6 +349,7 @@ def place(args, env, cwd):
     env['PROCESS'] = str(board['cadence'].get('process', ''))
     env['PDK'] = board['cadence'].get('pdk', '')
     env['EFFORT'] = args.effort
+    env['STAGE'] = args.stage
 
     if args.toolchain == 'cadence':
         if not 'cadence' in board:
