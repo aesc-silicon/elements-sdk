@@ -214,7 +214,7 @@ def sim(args, env, cwd):
         command = "iverilog -Wall -g2009 -DVCD=\"{2}/{0}.vcd\" -I../testbenches " \
                   " {0}.v ../testbenches/{1}.sv {2}/{3}.v " \
                   " -o {2}/{4}.out".format(top, board.get('testbench', ''),
-                                           build_cwd, soc, top_rep, args.board)
+                                           build_cwd, soc, top_rep)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=oss_cwd, check=True)
         command = "vvp -l{0}.log {0}.out".format(top_rep)
@@ -357,7 +357,8 @@ def map_(args, env, cwd):
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
-        command = "cp build/{0}/cadence/map/latest/{1}.v build/{0}/cadence/map".format(args.board,                                                                                         soc)
+        command = "cp build/{0}/cadence/map/latest/{1}.v build/{0}/cadence/map".format(args.board,
+                                                                                       soc)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
