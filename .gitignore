@@ -6,6 +6,7 @@ venv
 zephyr
 zephyr-*
 zibal
+zibal-fpl
 vexriscv
 openocd
 .repo

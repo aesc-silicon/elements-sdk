@@ -43,7 +43,8 @@ def parse_args():
     parser_compile = subparsers.add_parser('compile', help='Compiles the firmware')
     parser_compile.set_defaults(func=compile_)
     parser_compile.add_argument('board', help="Name of the board")
-    parser_compile.add_argument('application', help="Name of the application")
+    parser_compile.add_argument('application', nargs='?', default="",
+                                help="Name of the application")
     parser_compile.add_argument('-f', action='store_true', help="Force build")
 
     parser_generate = subparsers.add_parser('generate', help='Generates the MCU')
@@ -148,12 +149,30 @@ def clean(args, env, cwd):  # pylint: disable=unused-argument
 
 def compile_(args, env, cwd):
     """Command to compile a Zephyr binary for a board and application."""
-    force = "always" if args.f else "auto"
-    board = args.board.replace('-', '').lower()
-    output = "./build/{}/zephyr/".format(args.board)
-    command = "west build -p {} -b {} -d {} {}".format(force, board, output, args.application)
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+    board = open_yaml("zibal/eda/boards/{}.yaml".format(args.board))
+    if board.get('boot_source', "") == "memory":
+        force = "always" if args.f else "auto"
+        board_name = args.board.replace('-', '').lower()
+        output = "./build/{}/zephyr/".format(args.board)
+        command = "west build -p {} -b {} -d {} {}".format(force, board_name, output,
+                                                           args.application)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+    if board.get('boot_source', "") == "spi":
+        env['BOARD'] = args.board
+        command = "make"
+        soc = board.get('SOC', {'name': None}).get('name').lower()
+        platform = ''.join(i for i in soc if not i.isdigit())
+        fpl_cwd = os.path.join(cwd, "zibal-fpl")
+        platform_cwd = os.path.join(fpl_cwd, platform)
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=platform_cwd, check=True)
+
+        build_cwd = os.path.join(cwd, "build/{}/fpl".format(args.board))
+        with open("{}/kernel.rom".format(build_cwd), 'w') as rom_file:
+            command = "python {}/scripts/gen_rom.py".format(fpl_cwd)
+            logging.debug(command)
+            subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True, stdout=rom_file)
 
 
 def generate(args, env, cwd):
@@ -229,6 +248,11 @@ def sim(args, env, cwd):
             subprocess.run("ln -sf {} .".format(os.path.join("../../../..", binary)).split(' '),
                            env=env, cwd=xilinx_cwd, stdout=subprocess.DEVNULL, check=True)
 
+        binaries = glob.glob("build/{}/fpl/*.rom".format(args.board))
+        for binary in binaries:
+            subprocess.run("ln -sf {} .".format(os.path.join("../../../..", binary)).split(' '),
+                           env=env, cwd=xilinx_cwd, stdout=subprocess.DEVNULL, check=True)
+
         command = "vivado -mode batch -source ../../../../zibal/eda/Xilinx/vivado/{}/sim.tcl " \
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou".format(sim_type)
         logging.debug(command)
@@ -249,6 +273,11 @@ def sim(args, env, cwd):
         env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Cadence/tcl/")
         env['SIM_TYPE'] = args.source
         cadence_cwd = os.path.join(cwd, "build/{}/cadence/sim".format(args.board))
+
+        binaries = glob.glob("build/{}/fpl/*.rom".format(args.board))
+        for binary in binaries:
+            subprocess.run("ln -sf {} .".format(os.path.join("../../../..", binary)).split(' '),
+                           env=env, cwd=cadence_cwd, stdout=subprocess.DEVNULL, check=True)
 
         command = "../../../../zibal/eda/Cadence/tcl/sim.sh"
         logging.debug(command)
@@ -491,6 +520,9 @@ def prepare(args):
         subprocess.run("mkdir -p {}".format(path).split(' '), stdout=subprocess.DEVNULL, check=True)
     if not os.path.exists(os.path.join(path, "zibal")):
         subprocess.run("mkdir -p {}".format(os.path.join(path, "zibal")).split(' '),
+                       stdout=subprocess.DEVNULL, check=True)
+    if not os.path.exists(os.path.join(path, "fpl")):
+        subprocess.run("mkdir -p {}".format(os.path.join(path, "fpl")).split(' '),
                        stdout=subprocess.DEVNULL, check=True)
     if not os.path.exists(os.path.join(path, "vivado")):
         subprocess.run("mkdir -p {}".format(os.path.join(path, "vivado/sim/logs")).split(' '),
