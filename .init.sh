@@ -19,6 +19,11 @@ chmod +x zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-x86_64-linux-setup.run
 ./zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-x86_64-linux-setup.run -- -d $PWD/zephyr-sdk-${ZEPHYR_SDK_VERSION} -y -nocmake
 rm zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-x86_64-linux-setup.run
 
+wget https://github.com/stnolting/riscv-gcc-prebuilt/releases/download/rv32i-1.0.0/riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
+mkdir riscv32-unknown-elf
+tar -xvf riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz -C riscv32-unknown-elf/
+rm riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
+
 mkdir -p symbiflow/xc7/install
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O conda_installer.sh
 bash conda_installer.sh -u -b -p ${PWD}/symbiflow/xc7/conda;

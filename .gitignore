@@ -13,3 +13,4 @@ openocd
 docsource/source/docsource
 conda_installer.sh
 symbiflow/
+riscv32-unknown-elf
