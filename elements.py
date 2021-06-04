@@ -8,6 +8,7 @@ import time
 import shutil
 import glob
 import yaml
+import datetime
 
 
 _FORMAT = "%(asctime)s - %(message)s"
@@ -336,6 +337,7 @@ def map_(args, env, cwd):
     name = args.board.replace('-', '')
     soc = board.get('SOC', {'name': None}).get('name')
     top = board.get('SOC', {'top': None}).get('top')
+    now = datetime.datetime.today().strftime("%Y-%m-%d_%H-%M-%S")
     env['BOARD'] = args.board
     env['BOARD_NAME'] = name
     env['SOC'] = soc
@@ -346,14 +348,18 @@ def map_(args, env, cwd):
     env['PROCESS'] = str(board['cadence'].get('process', ''))
     env['PDK'] = board['cadence'].get('pdk', '')
     env['EFFORT'] = args.effort
+    env['DATETIME'] = now
 
     if args.toolchain == 'cadence':
         if not 'cadence' in board:
             raise SystemExit("No cadence definitions in board {}".format(args.board))
 
+        logs_path = os.path.join(cwd, "build/{}/cadence/map".format(args.board), now, "logs")
+        subprocess.run("mkdir -p {}".format(logs_path).split(' '), stdout=subprocess.DEVNULL,
+                       check=True)
+
         cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
-        command = "genus -f tcl/map.tcl " \
-                  "-log ./../../../build/{}/cadence/map/logs/".format(args.board)
+        command = "genus -f tcl/map.tcl -log {}".format(logs_path)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
@@ -369,6 +375,7 @@ def place(args, env, cwd):
     name = args.board.replace('-', '')
     soc = board.get('SOC', {'name': None}).get('name')
     top = board.get('SOC', {'top': None}).get('top')
+    now = datetime.datetime.today().strftime("%Y-%m-%d_%H-%M-%S")
     env['BOARD'] = args.board
     env['BOARD_NAME'] = name
     env['SOC'] = soc
@@ -380,14 +387,18 @@ def place(args, env, cwd):
     env['PDK'] = board['cadence'].get('pdk', '')
     env['EFFORT'] = args.effort
     env['STAGE'] = args.stage
+    env['DATETIME'] = now
 
     if args.toolchain == 'cadence':
         if not 'cadence' in board:
             raise SystemExit("No cadence definitions in board {}".format(args.board))
 
+        logs_path = os.path.join(cwd, "build/{}/cadence/place".format(args.board), now, "logs")
+        subprocess.run("mkdir -p {}".format(logs_path).split(' '), stdout=subprocess.DEVNULL,
+                       check=True)
+
         cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
-        command = "innovus -files tcl/place.tcl " \
-                  "-log ./../../../build/{}/cadence/place/logs/".format(args.board)
+        command = "innovus -files tcl/place.tcl -log {}".format(logs_path)
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cadence_cwd, check=True)
 
