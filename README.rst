@@ -1,9 +1,9 @@
 Elements SDK
 ============
 
-The Elements Software Development Kit (SDK) is a bundle with various projects included to
-build a complete Open Source Microcontroller Unit (MCU) and firmware. Moveover, it provides a
-tool to easily generate all parts and helps to debug.
+The Elements Software Development Kit (SDK) is a bundle of various projects to build a complete
+Open Source Microcontroller Unit (MCU) and the needed Operating System for them. Moveover, it
+provides a tool to easily generate all parts and helps to debug.
 
 The complete documentation is uploaded to `https://phytec-labs.github.io/elements-sdk/`_ or can be
 build manually as described in `Documentation`_.
@@ -18,6 +18,7 @@ Prerequisites
 * Linux host system (Ubuntu 20.04 recommended)
 * Python 3 (python3.8-dev)
 * Vivado for Xilinx platforms (optional)
+* Cadence for digital silicons (optional)
 
 Installation
 ############
@@ -47,15 +48,13 @@ Vivado
 
 The Vivado toolchain is not part of this SDK and needs to be installed separately for Xilinx
 platforms from `Xilinx's homepage`_. Download the Linux Self Extracting Web Installer for Version
-2019.2 and install it. Ignore the warnings about the Not Supported Linux OS and do not install the
-latest version. You can use the Vivado HL WebPACK license for free if you do not sell the bitsream
-and disable everything except the Artix-7 Platform to save disk storage. Elements excepts to find
-the Vivado toolchain under ``/opt/xilinx``.
+2020.2 and install it. Select Vivado as product and Vivado HL WebPACK as Edition. You can use this
+edition's license for free, if you do not sell the bitsream, and disable everything except the Artix-7 Platform to save disk storage. Elements excepts to find the Vivado toolchain under ``/opt/xilinx``.
 
 .. code-block:: text
 
-    chmod +x ~/Downloads/Xilinx_Unified_2019.2_1106_2127_Lin64.bin
-    ~/Downloads/Xilinx_Unified_2019.2_1106_2127_Lin64.bin
+    chmod +x ~/Downloads/Xilinx_Unified_2020.2_1118_1232_Lin64.bin
+    ~/Downloads/Xilinx_Unified_2020.2_1118_1232_Lin64.bin
 
 .. _Xilinx's homepage: https://www.xilinx.com/support/download.html
 
@@ -67,7 +66,7 @@ This section shortly describes some definitions for clarification in the further
 Application
 ***********
 
-An application is the user-level software. It's build in the firmware and will be started by
+An application is the user-level software. It's build-in to the firmware and will be started by
 Zephyr. Custom applications for boards will be added as application during the Zephyr compile
 process.
 
@@ -133,7 +132,7 @@ board as parameter.
 
 .. tip::
 
-  FPGA based SOC designs will add the compiled Zephyr output into the memory.
+  FPGA based SOC designs will add the compiled Zephyr binary into the memory.
 
 .. code-block:: text
 
@@ -257,6 +256,6 @@ folder.
 License
 #######
 
-Copyright (c) 2020 PHYTEC Messtechnik GmbH. Released under the `MIT license`_.
+Copyright (c) 2021 PHYTEC Messtechnik GmbH. Released under the `MIT license`_.
 
 .. _MIT license: COPYING.MIT
