@@ -516,6 +516,9 @@ def environment():
 
 def prepare(args):
     """Prepares the build directory."""
+    if not os.path.exists("zibal/eda/boards/{}.yaml".format(args.board)):
+        raise SystemExit("Board {} does not exist!".format(args.board))
+
     path = "build/{}".format(args.board)
     if not os.path.exists(path):
         subprocess.run("mkdir -p {}".format(path).split(' '), stdout=subprocess.DEVNULL, check=True)
