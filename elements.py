@@ -9,6 +9,7 @@ import shutil
 import glob
 import yaml
 import datetime
+import configparser
 
 
 _FORMAT = "%(asctime)s - %(message)s"
@@ -502,14 +503,13 @@ def environment():
     env = os.environ.copy()
     base = os.path.dirname(os.path.abspath(__file__))
     localenv = {}
-    if os.path.exists("env.txt"):
-        with open("env.txt", 'r') as stream:
-            for line in stream.readlines():
-                tmp = line.split('=')
-                localenv[tmp[0]] = tmp[1].replace('"', '').replace('\n', '')
+    if os.path.exists("env.ini"):
+        config = configparser.ConfigParser()
+        config.read("env.ini")
+        localenv.update(config['DEFAULT'].items())
 
-    zephyr_sdk_version = get_variable(env, localenv, 'ZEPHYR_SDK_VERSION')
-    vivado_path = get_variable(env, localenv, 'VIVADO_PATH')
+    zephyr_sdk_version = get_variable(env, localenv, 'zephyr_sdk_version')
+    vivado_path = get_variable(env, localenv, 'vivado_path')
 
     env['ELEMENTS_BASE'] = base
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
@@ -520,8 +520,8 @@ def environment():
     env['PATH'] += os.pathsep + vivado_path
     env['PATH'] += os.pathsep + os.path.join(base, 'symbiflow/xc7/install/bin')
     env['VIVADO_PATH'] = vivado_path
-    env['PDK_BASE'] = get_variable(env, localenv, 'PDK_BASE')
-    env['IHP_TECH'] = os.path.join(get_variable(env, localenv, 'PDK_BASE'), 'tech')
+    env['PDK_BASE'] = get_variable(env, localenv, 'pdk_base')
+    env['IHP_TECH'] = os.path.join(get_variable(env, localenv, 'pdk_base'), 'tech')
     return env
 
 
