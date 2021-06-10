@@ -108,12 +108,12 @@ jobs:
     strategy:
       matrix:
         soc:
-        - "Hydrogen1"
-        - "Hydrogen2"
-        - "Hydrogen3"
-        - "Hydrogen4"
-        - "HydrogenTest"
-        - "Carbon1"
+        - "DH-006"
+        - "TH-294"
+        - "Nexys4-DDR"
+        - "DH-008"
+        - "TH-283"
+        - "DH-012"
     steps:
     - name: compile
       run: |
