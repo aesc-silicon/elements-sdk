@@ -24,6 +24,7 @@ jobs:
         pip3 install west
         pip3 install -r zephyr/scripts/requirements.txt
         west init -l zephyr
+        west update
         # Copy instead of download the toolchain to save bandwidth
         cp /home/inspection/ci/tools/zephyr-sdk/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run .
         chmod +x zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
