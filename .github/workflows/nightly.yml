@@ -2,7 +2,7 @@ name: SDK nightly
 
 on:
   schedule:
-  - cron: "0 4 * * *"
+  - cron: "15 4 * * *"
 
 jobs:
   prepare:
