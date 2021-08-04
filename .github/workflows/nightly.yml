@@ -17,28 +17,7 @@ jobs:
     - name: set-up environment
       run: |
         cd ${{ env.repository_name }}
-        python3 /bin/repo init -u git@github.com:phytec-labs/elements-manifest.git -m next.xml
-        python3 /bin/repo sync
-        virtualenv -p python3 venv
-        . venv/bin/activate
-        pip3 install west
-        pip3 install -r zephyr/scripts/requirements.txt
-        west init -l zephyr
-        west update
-        # Copy instead of download the toolchain to save bandwidth
-        cp /home/inspection/ci/tools/zephyr-sdk/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run .
-        chmod +x zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
-        ./zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y -nocmake
-        cd ../
-
-    - name: build OpenOCD
-      run: |
-        cd ${{ env.repository_name }}
-        cd openocd
-        ./bootstrap
-        ./configure
-        make || make -j8
-        cd ../
+        python3 elements.py init
         cd ../
 
   compile_demo:
