@@ -121,16 +121,28 @@ def init(args, env, cwd):
         command = "rm -rf .repo"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+
     if os.path.exists(".repo"):
         raise SystemExit("Repo exists! Either the SDK is already initialized or force init.")
 
-    command = "repo init -u https://github.com/phytec-labs/elements-manifest.git"
+    if not os.path.exists("./repo"):
+        command = "curl https://storage.googleapis.com/git-repo-downloads/repo-1"
+        logging.debug(command)
+        proc = subprocess.run(command.split(' '), cwd=cwd, check=True, stdout=subprocess.PIPE)
+        with open("./repo", "w") as text_file:
+            text_file.write(proc.stdout.decode())
+
+        command = "chmod a+x ./repo"
+        logging.debug(command)
+        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+
+    command = "python3 ./repo init -u https://github.com/phytec-labs/elements-manifest.git"
     if args.manifest:
         command = command + " -m {}".format(args.manifest)
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
-    command = "repo sync"
+    command = "python3 ./repo sync"
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
