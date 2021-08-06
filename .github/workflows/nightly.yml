@@ -19,6 +19,7 @@ jobs:
         cd ${{ env.repository_name }}
         pwd
         ls -la
+        virtualenv -p python3 venv
         python3 elements.py init
         pwd
         ls -la
