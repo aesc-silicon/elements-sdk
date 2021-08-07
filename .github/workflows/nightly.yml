@@ -17,12 +17,8 @@ jobs:
     - name: set-up environment
       run: |
         cd ${{ env.repository_name }}
-        pwd
-        ls -la
         virtualenv -p python3 venv
         python3 elements.py init
-        pwd
-        ls -la
         cd ../
 
   compile_demo:
@@ -44,8 +40,6 @@ jobs:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        pwd
-        ls -la
         ./elements.py compile ${{ matrix.board }} zephyr-samples/demo/${{ matrix.demo }}
 
   compile_startup:
