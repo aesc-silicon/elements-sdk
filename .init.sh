@@ -14,10 +14,10 @@ pip3 install -r zephyr/scripts/requirements.txt
 
 west init -l zephyr
 
-wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-toolchain-x86_64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
-chmod +x zephyr-toolchain-x86_64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
-./zephyr-toolchain-x86_64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run -- -d $PWD/zephyr-sdk-${ZEPHYR_SDK_VERSION} -y -nocmake
-rm zephyr-toolchain-x86_64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
+wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
+chmod +x zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
+./zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run -- -d $PWD/zephyr-sdk-${ZEPHYR_SDK_VERSION} -y -nocmake
+rm zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
 
 wget https://github.com/stnolting/riscv-gcc-prebuilt/releases/download/rv32i-1.0.0/riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
 mkdir riscv32-unknown-elf
