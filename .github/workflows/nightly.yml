@@ -18,103 +18,134 @@ jobs:
       run: |
         cd ${{ env.repository_name }}
         virtualenv -p python3 venv
-        python3 elements.py init --manifest next.xml
+        python3 elements-fpga.py init --manifest next.xml
         cd ../
 
-  compile_demo:
+  test_boot:
     runs-on: self-hosted
     needs: [prepare]
     env:
       repository_name: elements-sdk
     strategy:
       matrix:
-        board:
-        - "DH-006"
-        - "DH-008"
-        - "TH-283"
-        - "TH-294"
-        - "Nexys4-DDR"
+        kit:
+        - "Hydrogen1 Nexys4-DDR"
+        - "HydrogenTest Nexys4-DDR"
+    steps:
+    - name: prepare
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py prepare ${{ matrix.kit }}
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/startup/boot
+    - name: generate
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py generate ${{ matrix.kit }}
+    - name: test
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py test ${{ matrix.kit }} software boot
+    - name: synthesize
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py synthesize ${{ matrix.kit }} --toolchain oss
+
+  test_hydrogen1_nexys4-ddr_startup:
+    runs-on: self-hosted
+    needs: [test_boot]
+    env:
+      repository_name: elements-sdk
+    strategy:
+      matrix:
+        kit:
+        - "Hydrogen1 Nexys4-DDR"
+        startup:
+        - "mtimer"
+    steps:
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/startup/${{ matrix.startup }}
+    - name: generate
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py generate ${{ matrix.kit }}
+    - name: test
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py test ${{ matrix.kit }} software ${{ matrix.startup }}
+
+  test_hydrogenTest_nexys4-ddr_startup:
+    runs-on: self-hosted
+    needs: [test_boot]
+    env:
+      repository_name: elements-sdk
+    strategy:
+      matrix:
+        kit:
+        - "HydrogenTest Nexys4-DDR"
+        startup:
+        - "mtimer"
+        - "gpio"
+        - "uart"
+        - "frequency"
+    steps:
+    - name: compile
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/startup/${{ matrix.startup }}
+    - name: generate
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py generate ${{ matrix.kit }}
+    - name: test
+      run: |
+        cd ${{ env.repository_name }}
+        ./elements-fpga.py test ${{ matrix.kit }} software ${{ matrix.startup }}
+
+  compile_demo:
+    runs-on: self-hosted
+    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
+    env:
+      repository_name: elements-sdk
+    strategy:
+      matrix:
+        kit:
+        - "Hydrogen1 Nexys4-DDR"
+        - "HydrogenTest Nexys4-DDR"
         demo:
         - "leds"
     steps:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements.py compile ${{ matrix.board }} zephyr-samples/demo/${{ matrix.demo }}
-
-  compile_startup:
-    runs-on: self-hosted
-    needs: [prepare]
-    env:
-      repository_name: elements-sdk
-    strategy:
-      matrix:
-        board:
-        - "TH-283"
-        startup:
-        - "frequency"
-        - "gpio"
-        - "i2c"
-        - "mtimer"
-        - "spi"
-        - "uart"
-    steps:
-    - name: compile
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements.py compile ${{ matrix.board }} zephyr-samples/startup/${{ matrix.startup }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/demo/${{ matrix.demo }}
 
   compile_arcade:
     runs-on: self-hosted
-    needs: [prepare]
+    needs: [test_hydrogen1_nexys4-ddr_startup]
+    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
     env:
       repository_name: elements-sdk
     strategy:
       matrix:
-        board:
-        - "DH-008"
+        kit:
+        - "Hydrogen1 Nexys4-DDR"
+        - "HydrogenTest Nexys4-DDR"
         arcade:
         - "snake"
     steps:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements.py compile ${{ matrix.board }} zephyr-samples/arcade/${{ matrix.arcade }}
-
-  generate:
-    runs-on: self-hosted
-    needs: [compile_demo, compile_startup, compile_arcade]
-    env:
-      repository_name: elements-sdk
-    strategy:
-      matrix:
-        soc:
-        - "DH-006"
-        - "TH-294"
-        - "Nexys4-DDR"
-        - "DH-008"
-        - "TH-283"
-        - "DH-012"
-    steps:
-    - name: compile
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements.py generate ${{ matrix.soc }}
-
-  test:
-    runs-on: self-hosted
-    needs: [generate]
-    env:
-      repository_name: elements-sdk
-    steps:
-    - name: zibal
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements.py test -zibal
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/arcade/${{ matrix.arcade }}
 
   deploy:
     runs-on: self-hosted
-    needs: [test]
+    needs: [compile_demo, compile_arcade]
     env:
       repository_name: elements-sdk
       branch: stable
