@@ -16,3 +16,4 @@ conda_installer.sh
 symbiflow/
 riscv32-unknown-elf
 repo
+*tar.gz
