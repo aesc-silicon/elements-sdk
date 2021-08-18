@@ -11,6 +11,7 @@ python3 -m pip install west
 python3 -m pip install pyelftools
 . venv/bin/activate
 pip3 install -r zephyr/scripts/requirements.txt
+pip3 install -r requirements.txt
 
 west init -l zephyr
 
@@ -27,12 +28,13 @@ rm riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
 mkdir -p symbiflow/xc7/install
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O conda_installer.sh
 bash conda_installer.sh -u -b -p ${PWD}/symbiflow/xc7/conda;
-source "${PWD}/symbiflow/xc7/conda/etc/profile.d/conda.sh";
-conda env create -f environment.yml
 
-wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/201/20210325-000253/symbiflow-arch-defs-install-1c7a3d1e.tar.xz | tar -xJC ${PWD}/symbiflow/xc7/install
-wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/201/20210325-000253/symbiflow-arch-defs-xc7a50t_test-1c7a3d1e.tar.xz | tar -xJC ${PWD}/symbiflow/xc7/install
-wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/201/20210325-000253/symbiflow-arch-defs-xc7a100t_test-1c7a3d1e.tar.xz | tar -xJC ${PWD}/symbiflow/xc7/install
+source "${PWD}/symbiflow/xc7/conda/etc/profile.d/conda.sh";
+conda env create -f ${PWD}/environment.yml
+
+wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/361/20210816-133520/symbiflow-arch-defs-install-5bd496ab.tar.xz | tar -xJC ${PWD}/symbiflow/xc7/install
+wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/361/20210816-133520/symbiflow-arch-defs-xc7a50t_test-5bd496ab.tar.xz | tar -xJC ${PWD}/symbiflow/xc7/install
+wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/361/20210816-133520/symbiflow-arch-defs-xc7a100t_test-5bd496ab.tar.xz | tar -xJC ${PWD}/symbiflow/xc7/install
 
 cd openocd
 ./bootstrap
