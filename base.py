@@ -142,7 +142,6 @@ def compile_(args, env, cwd):
                                                                           args.application,
                                                                           include)
         logging.debug(command)
-        print(env['PATH'])
         subprocess.run(shlex.split(command), env=env, cwd=cwd, check=True)
 
 
