@@ -39,7 +39,7 @@ jobs:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/startup/boot
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/boot
     - name: generate
       run: |
         cd ${{ env.repository_name }}
@@ -68,7 +68,7 @@ jobs:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/startup/${{ matrix.startup }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
     - name: generate
       run: |
         cd ${{ env.repository_name }}
@@ -96,7 +96,7 @@ jobs:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/startup/${{ matrix.startup }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
     - name: generate
       run: |
         cd ${{ env.repository_name }}
@@ -122,7 +122,7 @@ jobs:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/demo/${{ matrix.demo }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/demo/${{ matrix.demo }}
 
   compile_arcade:
     runs-on: self-hosted
@@ -140,7 +140,7 @@ jobs:
     - name: compile
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr-samples/arcade/${{ matrix.arcade }}
+        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/arcade/${{ matrix.arcade }}
 
   deploy:
     runs-on: self-hosted
