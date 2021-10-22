@@ -17,3 +17,5 @@ symbiflow/
 riscv32-unknown-elf
 repo
 *tar.gz
+__pycache__/
+cmake
