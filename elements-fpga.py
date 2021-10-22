@@ -44,7 +44,8 @@ def parse_args():
     parser_compile.set_defaults(func=compile_)
     parser_compile.add_argument('soc', help="Name of a SOC")
     parser_compile.add_argument('board', help="Name of a board")
-    parser_compile.add_argument('type', choices=['zephyr', 'bootrom'], help="Type of firmware")
+    parser_compile.add_argument('type', choices=['zephyr', 'bootrom', 'menuconfig'],
+                                help="Type of firmware")
     parser_compile.add_argument('application', nargs='?', default="",
                                 help="Name of the application")
     parser_compile.add_argument('-f', action='store_true', help="Force build")

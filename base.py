@@ -144,6 +144,13 @@ def compile_(args, env, cwd):
         logging.debug(command)
         subprocess.run(shlex.split(command), env=env, cwd=cwd, check=True)
 
+    if args.type == "menuconfig":
+        zephyr_cwd = os.path.join(cwd, f"build/{soc}/{board}/zephyr")
+
+        command = "ninja menuconfig"
+        logging.debug(command)
+        subprocess.run(shlex.split(command), env=env, cwd=zephyr_cwd, check=True)
+
 
 def generate(args, env, cwd):
     """Command to prepare a SOC board combination by generating all required files."""
