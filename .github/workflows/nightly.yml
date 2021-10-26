@@ -47,7 +47,7 @@ jobs:
     - name: test
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py test ${{ matrix.kit }} software boot
+        ./elements-fpga.py test ${{ matrix.kit }} boot
     - name: synthesize
       run: |
         cd ${{ env.repository_name }}
@@ -76,7 +76,7 @@ jobs:
     - name: test
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py test ${{ matrix.kit }} software ${{ matrix.startup }}
+        ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   test_hydrogenTest_nexys4-ddr_startup:
     runs-on: self-hosted
@@ -104,7 +104,7 @@ jobs:
     - name: test
       run: |
         cd ${{ env.repository_name }}
-        ./elements-fpga.py test ${{ matrix.kit }} software ${{ matrix.startup }}
+        ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   compile_demo:
     runs-on: self-hosted
