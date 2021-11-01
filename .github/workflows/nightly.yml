@@ -30,7 +30,7 @@ jobs:
       matrix:
         kit:
         - "Hydrogen1 Nexys4-DDR"
-        - "HydrogenTest Nexys4-DDR"
+#        - "HydrogenTest Nexys4-DDR"
     steps:
     - name: prepare
       run: |
@@ -78,44 +78,45 @@ jobs:
         cd ${{ env.repository_name }}
         ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
-  test_hydrogenTest_nexys4-ddr_startup:
-    runs-on: self-hosted
-    needs: [test_boot]
-    env:
-      repository_name: elements-sdk
-    strategy:
-      matrix:
-        kit:
-        - "HydrogenTest Nexys4-DDR"
-        startup:
-        - "mtimer"
-        - "gpio"
-        - "uart"
-        - "frequency"
-    steps:
-    - name: compile
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
-    - name: generate
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements-fpga.py generate ${{ matrix.kit }}
-    - name: test
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
+#  test_hydrogenTest_nexys4-ddr_startup:
+#    runs-on: self-hosted
+#    needs: [test_boot]
+#    env:
+#      repository_name: elements-sdk
+#    strategy:
+#      matrix:
+#        kit:
+#        - "HydrogenTest Nexys4-DDR"
+#        startup:
+#        - "mtimer"
+#        - "gpio"
+#        - "uart"
+#        - "frequency"
+#    steps:
+#    - name: compile
+#      run: |
+#        cd ${{ env.repository_name }}
+#        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
+#    - name: generate
+#      run: |
+#        cd ${{ env.repository_name }}
+#        ./elements-fpga.py generate ${{ matrix.kit }}
+#    - name: test
+#      run: |
+#        cd ${{ env.repository_name }}
+#        ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   compile_demo:
     runs-on: self-hosted
-    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
+#    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
+    needs: [test_hydrogen1_nexys4-ddr_startup]
     env:
       repository_name: elements-sdk
     strategy:
       matrix:
         kit:
         - "Hydrogen1 Nexys4-DDR"
-        - "HydrogenTest Nexys4-DDR"
+#        - "HydrogenTest Nexys4-DDR"
         demo:
         - "leds"
     steps:
@@ -126,14 +127,15 @@ jobs:
 
   compile_arcade:
     runs-on: self-hosted
-    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
+#    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
+    needs: [test_hydrogen1_nexys4-ddr_startup]
     env:
       repository_name: elements-sdk
     strategy:
       matrix:
         kit:
         - "Hydrogen1 Nexys4-DDR"
-        - "HydrogenTest Nexys4-DDR"
+#        - "HydrogenTest Nexys4-DDR"
         arcade:
         - "snake"
     steps:
