@@ -125,28 +125,29 @@ jobs:
         cd ${{ env.repository_name }}
         ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/demo/${{ matrix.demo }}
 
-  compile_arcade:
-    runs-on: self-hosted
-#    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
-    needs: [test_hydrogen1_nexys4-ddr_startup]
-    env:
-      repository_name: elements-sdk
-    strategy:
-      matrix:
-        kit:
-        - "Hydrogen1 Nexys4-DDR"
-#        - "HydrogenTest Nexys4-DDR"
-        arcade:
-        - "snake"
-    steps:
-    - name: compile
-      run: |
-        cd ${{ env.repository_name }}
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/arcade/${{ matrix.arcade }}
+#  compile_arcade:
+#    runs-on: self-hosted
+##    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
+#    needs: [test_hydrogen1_nexys4-ddr_startup]
+#    env:
+#      repository_name: elements-sdk
+#    strategy:
+#      matrix:
+#        kit:
+#        - "Hydrogen1 Nexys4-DDR"
+##        - "HydrogenTest Nexys4-DDR"
+#        arcade:
+#        - "snake"
+#    steps:
+#    - name: compile
+#      run: |
+#        cd ${{ env.repository_name }}
+#        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/arcade/${{ matrix.arcade }}
 
   deploy:
     runs-on: self-hosted
-    needs: [compile_demo, compile_arcade]
+#    needs: [compile_demo, compile_arcade]
+    needs: [compile_demo]
     env:
       repository_name: elements-sdk
       branch: stable
