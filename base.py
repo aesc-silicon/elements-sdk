@@ -102,7 +102,7 @@ def prepare(args, env, cwd):
     env['BOARD'] = board
 
     cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}'.format(soc)]
+    command = ['sbt', 'runMain zibal.soc.{}.{}Top prepare'.format(soc.lower(), board)]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=cwd, check=True)
 
@@ -160,7 +160,7 @@ def generate(args, env, cwd):
     env['BOARD'] = board
 
     cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}.{}Top '.format(soc.lower(), board)]
+    command = ['sbt', 'runMain zibal.soc.{}.{}Top generate'.format(soc.lower(), board)]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=cwd, check=True)
 
