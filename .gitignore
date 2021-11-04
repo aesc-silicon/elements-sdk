@@ -19,3 +19,5 @@ repo
 *tar.gz
 __pycache__/
 cmake
+project/
+target/
