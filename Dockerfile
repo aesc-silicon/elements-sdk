@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     automake \
     pkg-config \
     libyaml-dev \
-    cmake \
     python3 \
     python3.8-dev \
     python3-pip \
@@ -18,33 +17,18 @@ RUN apt-get update && apt-get install -y \
     gdb \
     curl
 
-RUN curl https://storage.googleapis.com/git-repo-downloads/repo > /bin/repo
-RUN chmod a+rx /bin/repo
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
+RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list
+RUN curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/scalasbt-release.gpg --import
+RUN chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
+RUN apt-get update && apt-get install -y sbt
 
 # initialize SDK
 RUN git clone https://github.com/phytec-labs/elements-sdk.git
 WORKDIR elements-sdk/
 
-RUN python3 /bin/repo init -u https://github.com/phytec-labs/elements-manifest.git
-RUN python3 /bin/repo sync
-
 RUN virtualenv -p python3 venv
 
-RUN pip3 install west
-RUN venv/bin/pip install -r zephyr/scripts/requirements.txt
+RUN pip3 install pyyaml packaging
 
-RUN venv/bin/west init -l zephyr
-
-# download toolchain
-RUN wget https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v0.12.0/zephyr-toolchain-riscv64-0.12.0-x86_64-linux-setup.run
-RUN chmod +x zephyr-toolchain-riscv64-0.12.0-setup.run
-RUN ./zephyr-toolchain-riscv64-0.12.0-setup.run -- -d $PWD/zephyr-sdk-0.12.0 -y -nocmake
-
-# install openocd
-WORKDIR openocd
-RUN ./bootstrap
-RUN ./configure
-RUN make -j8
-RUN make install
-
-WORKDIR ../
+RUN python3 elements-fpga.py init

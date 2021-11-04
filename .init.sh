@@ -42,7 +42,7 @@ cd openocd
 make -j8
 cd ../
 
-git clone git@github.com:Kitware/CMake.git cmake
+git clone https://github.com/Kitware/CMake.git cmake
 cd cmake
 git checkout v3.20.0
 ./bootstrap && make -j 4

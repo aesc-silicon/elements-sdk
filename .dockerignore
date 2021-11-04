@@ -1,0 +1,8 @@
+build/
+cmake/
+project/
+riscv32*
+symbiflow/
+venv/
+zephyr*
+.git/

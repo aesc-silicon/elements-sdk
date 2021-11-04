@@ -308,7 +308,7 @@ will have included all required packages for the SDK.
 
     sudo docker build -t elements-sdk:1.0 .
     sudo docker run elements-sdk:1.0 \
-    ./elements-fpga.py compile Hydrogen1 Nexys4-DDR zephyr-samples/demo/leds
+        ./elements-fpga.py compile Hydrogen1 Nexys4-DDR zephyr zephyr-samples/demo/leds
 
 .. tip::
 
