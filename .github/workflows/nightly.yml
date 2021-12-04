@@ -1,6 +1,9 @@
 name: SDK nightly
 
 on:
+  push:
+    paths:
+      - '.github/workflows/nightly.yaml'
   schedule:
   - cron: "15 4 * * *"
 

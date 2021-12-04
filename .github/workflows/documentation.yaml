@@ -1,10 +1,12 @@
 name: SDK documentation
 
 on:
+  push:
+    paths:
+      - '.github/workflows/documentation.yaml'
+      - 'docsource/*'
   schedule:
   - cron: "0 3 * * *"
-  push:
-    branches: [ main ]
 
 jobs:
   deploy:
