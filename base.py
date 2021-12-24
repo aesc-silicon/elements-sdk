@@ -14,7 +14,7 @@ from packaging import version
 
 
 _FORMAT = "%(asctime)s - %(message)s"
-
+_RELEASE = "v22.1"
 
 def open_yaml(path):
     """Opens a YAML file and returns the content as dictionary."""
@@ -51,9 +51,8 @@ def init(args, env, cwd):
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
-    command = "python3 ./repo init -u https://github.com/phytec-labs/elements-manifest.git"
-    if args.manifest:
-        command = command + " -m {}".format(args.manifest)
+    command = "python3 ./repo init -u https://github.com/phytec-labs/elements-manifest.git" \
+              " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 

@@ -1,11 +1,13 @@
 Elements SDK
 ============
 
-The Elements Software Development Kit (SDK) is a bundle of various projects to build a complete
-Open Source Microcontroller Unit (MCU) and the needed Operating System (OS) for them. A System On
-Chip (SOC) is defined in one file and the target board in another one. Together both files will
-generate all required files for the OS and the used toolchain for a fast result and low maintaince.
-Moveover, it provides a tool to easily generate all parts and helps to debug.
+The Elements Software Development Kit (SDK) is a bundle of various projects to develop, build and
+debug all layers of an Open Source Microcontroller Unit (MCU). This means it includes System on
+Chip (SOC) designs and the corresponding Operation Sytem (OS). Moreover, different tools and both
+commerical and open source toolchains are added.
+
+The most important part is a Python Command-line tool to easily generate custom MCUs and to support
+debugging or deploying it.
 
 The complete documentation is uploaded to `https://phytec-labs.github.io/elements-sdk/`_ or can be
 build manually as described in `Documentation`_.
@@ -18,8 +20,9 @@ Features
 ########
 
 * Open-Source FPGA flow
-* Portfolio of configurable peripherals with Zephyr support
+* Portfolio of configurable peripherals with OS support
 * Predefined SOC platforms
+* Integrated Operation Systems like Zephyr
 * Toolchain files are generated automatically
 * Nightly checks
 
@@ -43,10 +46,11 @@ Installation
         sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
         sudo apt install libtinfo5 libncurses5
 
-- Download the repository::
+- Download the repository and checkout the latest release::
 
         git clone https://github.com/phytec-labs/elements-sdk.git
         cd elements-sdk/
+        git checkout v22.1
 
 - Create a virtualenv::
 
