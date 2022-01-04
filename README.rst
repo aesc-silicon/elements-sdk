@@ -298,7 +298,7 @@ expected by checking against predefined test cases.
 
 Example to test the mtimer startup application for the Hydrogen1 SOC and the Nexys4-DDR board:
 
-.. code-block:: test
+.. code-block:: text
 
     ./elements-fpga.py test Hydrogen1 Nexys4-DDR mtimer
 
