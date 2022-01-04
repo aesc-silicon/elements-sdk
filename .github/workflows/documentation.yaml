@@ -10,39 +10,26 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    env:
+      branch: gh-pages
     steps:
-    - name: clone repo
-      run: |
-        git clone git@github-elements:phytec-labs/${{ env.repository_name }}.git ${{ env.repository_name }}
-      env:
-        repository_name: elements-sdk
+    - name: Clone Repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PAT }}
 
     - name: set-up environment
       run: |
-        cd ${{ env.repository_name }}
         mkdir -p docsource/source/docsource/images
         cp docsource/images/*.png docsource/source/docsource/images/
         make clean html -C docsource
         cp -r docsource/build/html/. docs
-        cd ../
-      env:
-        repository_name: elements-sdk
 
     - name: push docu to gh-pages
       run: |
-        cd ${{ env.repository_name }}
         git add docs/
+        git config --global user.email "no-mail@phytec.de"
+        git config --global user.name "Elements SDK"
         git commit -m "Current docu"
         git push origin HEAD:${{ env.branch }} -f
-        cd ../
-      env:
-        repository_name: elements-sdk
-        branch: gh-pages
-
-    - name: post cleanup
-      if: always()
-      run: |
-        rm -rf ${{ env.repository_name}}
-      env:
-        repository_name: elements-sdk
