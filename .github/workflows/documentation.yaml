@@ -19,14 +19,19 @@ jobs:
       with:
         token: ${{ secrets.PAT }}
 
-    - name: set-up environment
+    - name: Set-up Environment
+      run: |
+        pip3 install sphinx
+        pip3 install sphinx_rtd_theme
+
+    - name: Build Documenation
       run: |
         mkdir -p docsource/source/docsource/images
         cp docsource/images/*.png docsource/source/docsource/images/
         make clean html -C docsource
         cp -r docsource/build/html/. docs
 
-    - name: push docu to gh-pages
+    - name: Push Documenation to gh-pages
       run: |
         git add docs/
         git config --global user.email "no-mail@phytec.de"
