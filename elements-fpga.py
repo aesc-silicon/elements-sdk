@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import os
 import logging
+import glob
 
 from base import prepare_build, environment, open_board, get_soc_name, get_board_name
 from base import init, clean, socs, boards, prepare, compile_, generate, flash, debug
@@ -118,6 +119,10 @@ def simulate(args, env, cwd):
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 
+    binary_files = glob.glob("zibal/{}Top.v*bin".format(board))
+    for binary_file in binary_files:
+        os.remove(binary_file)
+
     command = "gtkwave boot.vcd"
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True,
@@ -187,6 +192,10 @@ def test(args, env, cwd):
                                                                              args.case)]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
+
+    binary_files = glob.glob("zibal/{}Top.v*bin".format(board))
+    for binary_file in binary_files:
+        os.remove(binary_file)
 
 
 def main():
