@@ -159,6 +159,7 @@ jobs:
         - "openocd"
         - "vexriscv"
         - "zephyr"
+        - "embench-iot"
     steps:
     - name: push back to branch
       run: |

@@ -9,6 +9,7 @@ import glob
 
 from base import prepare_build, environment, open_board, get_soc_name, get_board_name
 from base import init, clean, socs, boards, prepare, compile_, generate, flash, debug
+from base import benchmark
 
 
 _FORMAT = "%(asctime)s - %(message)s"
@@ -96,6 +97,11 @@ def parse_args():
     parser_test.add_argument('soc', help="Name of a SOC")
     parser_test.add_argument('board', help="Name of a board")
     parser_test.add_argument('case', help="Name of the test case")
+
+    parser_benchmark = subparsers.add_parser('benchmark', help="Benchmark tests for a kit")
+    parser_benchmark.set_defaults(func=benchmark)
+    parser_benchmark.add_argument('soc', help="Name of a SOC")
+    parser_benchmark.add_argument('board', help="Name of a board")
 
     return parser.parse_args()
 

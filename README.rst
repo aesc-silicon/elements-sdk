@@ -289,7 +289,7 @@ Example to flash the firmware into the memory and start at the start address:
 Test
 ----
 
-Applications can be simulated on a kit to verify the hard- and software of a peripherals works as
+Applications can be simulated on a kit to verify the hard- and software of peripherals works as
 expected by checking against predefined test cases.
 
 .. code-block:: text
@@ -301,6 +301,22 @@ Example to test the mtimer startup application for the Hydrogen1 SOC and the Nex
 .. code-block:: text
 
     ./elements-fpga.py test Hydrogen1 Nexys4-DDR mtimer
+
+Benchmark
+---------
+
+This command provides speed and size information about a kit. These data are useful to compare
+different kind of kits among each other.
+
+.. code-block:: text
+
+    ./elements-fpga.py benchmark <soc> <board>
+
+Example to generate speed and size information for the Hydrogen1 SOC and the Nexys4-DDR board:
+
+.. code-block:: text
+
+    ./elements-fpga.py benchmark Hydrogen1 Nexys4-DDR
 
 Docker
 ######

@@ -204,6 +204,7 @@ def debug(args, env, cwd, type_="debug"):
     """Command to debug the firmware with GDB"""
     soc = get_soc_name(args.soc)
     board = get_board_name(args.board)
+    platform = ''.join(i.lower() for i in soc if not i.isdigit())
     if not os.path.exists(f"build/{soc}/{board}/zephyr/zephyr/zephyr.elf"):
         raise SystemExit("No Zephyr elf found. Run \"./elements-fpga.py compile " \
                          f"{args.soc} {args.board} <app>\" before.")
@@ -212,7 +213,7 @@ def debug(args, env, cwd, type_="debug"):
     yaml_path = f"../build/{soc}/{board}/zibal/VexRiscv.yaml"
     command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML {}'.format(yaml_path),
                '-f', 'tcl/interface/jlink.cfg',
-               '-f', '../zibal/gdb/hydrogen.cfg']
+               '-f', '../zibal/gdb/{}.cfg'.format(platform)]
     logging.debug(command)
     openocd_process = subprocess.Popen(command, env=env, cwd=openocd_cwd,
                                        stdout=subprocess.DEVNULL)
@@ -229,6 +230,43 @@ def debug(args, env, cwd, type_="debug"):
     else:
         subprocess.run(command, env=env, cwd=cwd, check=True)
     openocd_process.terminate()
+
+
+def benchmark(args, env, cwd):
+    """Command to run Embench benchmark tests"""
+    soc = get_soc_name(args.soc)
+    board = get_board_name(args.board)
+    platform = ''.join(i.lower() for i in soc if not i.isdigit())
+    toolchain = os.path.join(env['ELEMENTS_BASE'], 'riscv32-unknown-elf/bin/riscv32-unknown-elf-')
+    gcc = toolchain + 'gcc'
+    gdb = toolchain + 'gdb'
+    python = "../venv/bin/python3"
+
+    embench_cwd = os.path.join(cwd, "embench-iot")
+    command = "{} build_all.py --arch riscv32 --board {} --clean --cc {}".format(python, platform,
+                                                                                 gcc)
+    logging.debug(command)
+    subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+
+    openocd_cwd = os.path.join(cwd, "openocd")
+    yaml_path = f"../build/{soc}/{board}/zibal/VexRiscv.yaml"
+    command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML {}'.format(yaml_path),
+               '-f', 'tcl/interface/jlink.cfg',
+               '-f', '../zibal/gdb/{}.cfg'.format(platform)]
+    logging.debug(command)
+    openocd_process = subprocess.Popen(command, env=env, cwd=openocd_cwd,
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    command = "{} benchmark_speed.py --gdb-command {} --target-module run_vexriscv_gdb" \
+              " --timeout 60 --cpu-mhz 100".format(python, gdb)
+    logging.debug(command)
+    subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+
+    openocd_process.terminate()
+
+    command = "{} benchmark_size.py".format(python)
+    logging.debug(command)
+    subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
 
 
 def get_variable(env, localenv, key):
