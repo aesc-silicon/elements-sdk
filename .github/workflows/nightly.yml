@@ -3,32 +3,27 @@ name: SDK nightly
 on:
   push:
     paths:
-      - '.github/workflows/nightly.yaml'
+      - '.github/workflows/nightly.yml'
   schedule:
   - cron: "15 4 * * *"
 
 jobs:
   prepare:
-    runs-on: self-hosted
-    env:
-      repository_name: elements-sdk
+    runs-on: ubuntu-latest
     steps:
-    - name: clone repo
-      run: |
-        git clone git@github-elements:phytec-labs/${{ env.repository_name }}.git ${{ env.repository_name }}
+    - name: Clone Repository
+      uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.PAT }}
 
     - name: set-up environment
       run: |
-        cd ${{ env.repository_name }}
         virtualenv -p python3 venv
         python3 elements-fpga.py init --manifest next.xml
-        cd ../
 
   test_boot:
     runs-on: self-hosted
     needs: [prepare]
-    env:
-      repository_name: elements-sdk
     strategy:
       matrix:
         kit:
@@ -37,30 +32,23 @@ jobs:
     steps:
     - name: prepare
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py prepare ${{ matrix.kit }}
     - name: compile
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/boot
     - name: generate
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py generate ${{ matrix.kit }}
     - name: test
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py test ${{ matrix.kit }} boot
     - name: synthesize
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py synthesize ${{ matrix.kit }} --toolchain oss
 
   test_hydrogen1_nexys4-ddr_startup:
     runs-on: self-hosted
     needs: [test_boot]
-    env:
-      repository_name: elements-sdk
     strategy:
       matrix:
         kit:
@@ -70,22 +58,17 @@ jobs:
     steps:
     - name: compile
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
     - name: generate
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py generate ${{ matrix.kit }}
     - name: test
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   test_hydrogenTest_nexys4-ddr_startup:
     runs-on: self-hosted
     needs: [test_boot]
-    env:
-      repository_name: elements-sdk
     strategy:
       matrix:
         kit:
@@ -98,22 +81,17 @@ jobs:
     steps:
     - name: compile
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
     - name: generate
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py generate ${{ matrix.kit }}
     - name: test
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   compile_demo:
     runs-on: self-hosted
     needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
-    env:
-      repository_name: elements-sdk
     strategy:
       matrix:
         kit:
@@ -124,15 +102,12 @@ jobs:
     steps:
     - name: compile
       run: |
-        cd ${{ env.repository_name }}
         ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/demo/${{ matrix.demo }}
 
 #  compile_arcade:
 #    runs-on: self-hosted
 ##    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
 #    needs: [test_hydrogen1_nexys4-ddr_startup]
-#    env:
-#      repository_name: elements-sdk
 #    strategy:
 #      matrix:
 #        kit:
@@ -143,7 +118,6 @@ jobs:
 #    steps:
 #    - name: compile
 #      run: |
-#        cd ${{ env.repository_name }}
 #        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/arcade/${{ matrix.arcade }}
 
   deploy:
@@ -151,7 +125,6 @@ jobs:
 #    needs: [compile_demo, compile_arcade]
     needs: [compile_demo]
     env:
-      repository_name: elements-sdk
       branch: stable
     strategy:
       matrix:
@@ -163,18 +136,7 @@ jobs:
     steps:
     - name: push back to branch
       run: |
-        cd ${{ env.repository_name }}/${{ matrix.repository }}
+        cd ${{ matrix.repository }}
         git remote add origin git@github-elements:phytec-labs/elements-${{ matrix.repository }}.git
         git push origin HEAD:${{ env.branch }} -f
-        cd ../../
-
-  cleanup:
-    runs-on: self-hosted
-    needs: [deploy]
-    env:
-      repository_name: elements-sdk
-    if: always()
-    steps:
-    - name: post cleanup
-      run: |
-        rm -rf ${{ env.repository_name}}
+        cd ../

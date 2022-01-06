@@ -3,7 +3,7 @@ name: SDK documentation
 on:
   push:
     paths:
-      - '.github/workflows/documentation.yaml'
+      - '.github/workflows/documentation.yml'
       - 'docsource/*'
   schedule:
   - cron: "0 3 * * *"

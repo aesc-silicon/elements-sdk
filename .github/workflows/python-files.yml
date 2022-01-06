@@ -3,6 +3,7 @@ name: Validate Python Files
 on:
   push:
     paths:
+      - '.github/workflows/python-files.yml'
       - '*.py'
   pull_request:
     paths:
