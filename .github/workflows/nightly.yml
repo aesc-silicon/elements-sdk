@@ -9,7 +9,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     steps:
     - name: Clone Repository
       uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
         python3 elements-fpga.py init --manifest next.xml
 
   test_boot:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     needs: [prepare]
     strategy:
       matrix:
@@ -55,7 +55,7 @@ jobs:
         ./elements-fpga.py synthesize ${{ matrix.kit }} --toolchain oss
 
   test_hydrogen1_nexys4-ddr_startup:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     needs: [test_boot]
     strategy:
       matrix:
@@ -75,7 +75,7 @@ jobs:
         ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   test_hydrogenTest_nexys4-ddr_startup:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     needs: [test_boot]
     strategy:
       matrix:
@@ -98,7 +98,7 @@ jobs:
         ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
 
   compile_demo:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
     needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
     strategy:
       matrix:
@@ -113,7 +113,7 @@ jobs:
         ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/demo/${{ matrix.demo }}
 
 #  compile_arcade:
-#    runs-on: ubuntu-20.04
+#    runs-on: self-hosted
 ##    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
 #    needs: [test_hydrogen1_nexys4-ddr_startup]
 #    strategy:
@@ -129,7 +129,7 @@ jobs:
 #        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/arcade/${{ matrix.arcade }}
 
   deploy:
-    runs-on: ubuntu-20.04
+    runs-on: self-hosted
 #    needs: [compile_demo, compile_arcade]
     needs: [compile_demo]
     env:
