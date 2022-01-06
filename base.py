@@ -1,6 +1,5 @@
 #!venv/bin/python3
 """Tool to handle all projects in the elements SDK."""
-import argparse
 import subprocess
 import os
 import logging
@@ -75,7 +74,7 @@ def clean(args, env, cwd):  # pylint: disable=unused-argument
         print("Nothing to do!")
 
 
-def socs(args, env, cwd):
+def socs(args, env, cwd):  # pylint: disable=unused-argument
     """Lists all available SOCs by existing SOC files."""
     all_socs = glob.glob("zibal/eda/socs/*yaml")
     all_socs = list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
@@ -83,7 +82,7 @@ def socs(args, env, cwd):
         print(f"{soc}")
 
 
-def boards(args, env, cwd):
+def boards(args, env, cwd):  # pylint: disable=unused-argument
     """Lists all available boards for a SOC."""
     soc_file = f"zibal/eda/socs/{args.soc}.yaml"
     if not os.path.exists(soc_file):
@@ -106,7 +105,7 @@ def prepare(args, env, cwd):
     subprocess.run(command, env=env, cwd=cwd, check=True)
 
 
-def compile_(args, env, cwd):
+def compile_(args, env, cwd):  # pylint: disable=too-many-locals
     """Command to compile a Zephyr binary or bootrom."""
     soc = get_soc_name(args.soc)
     board = get_board_name(args.board)
@@ -215,21 +214,21 @@ def debug(args, env, cwd, type_="debug"):
                '-f', 'tcl/interface/jlink.cfg',
                '-f', '../zibal/gdb/{}.cfg'.format(platform)]
     logging.debug(command)
-    openocd_process = subprocess.Popen(command, env=env, cwd=openocd_cwd,
-                                       stdout=subprocess.DEVNULL)
+    with subprocess.Popen(command, env=env, cwd=openocd_cwd, stdout=subprocess.DEVNULL) as \
+        openocd_process:
 
-    toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
-    command = ['{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
-               '-x', 'zibal/gdb/{}.cmd'.format(type_),
-               'build/{}/{}/zephyr/zephyr/zephyr.elf'.format(soc, board)]
-    logging.debug(command)
-    if type_ == "flash":
-        gdb_process = subprocess.Popen(command, env=env, cwd=cwd)
-        time.sleep(15)
-        gdb_process.terminate()
-    else:
-        subprocess.run(command, env=env, cwd=cwd, check=True)
-    openocd_process.terminate()
+        toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
+        command = ['{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
+                   '-x', 'zibal/gdb/{}.cmd'.format(type_),
+                   'build/{}/{}/zephyr/zephyr/zephyr.elf'.format(soc, board)]
+        logging.debug(command)
+        if type_ == "flash":
+            with subprocess.Popen(command, env=env, cwd=cwd) as gdb_process:
+                time.sleep(15)
+                gdb_process.terminate()
+        else:
+            subprocess.run(command, env=env, cwd=cwd, check=True)
+        openocd_process.terminate()
 
 
 def benchmark(args, env, cwd):
@@ -254,19 +253,19 @@ def benchmark(args, env, cwd):
                '-f', 'tcl/interface/jlink.cfg',
                '-f', '../zibal/gdb/{}.cfg'.format(platform)]
     logging.debug(command)
-    openocd_process = subprocess.Popen(command, env=env, cwd=openocd_cwd,
-                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    with subprocess.Popen(command, env=env, cwd=openocd_cwd, stdout=subprocess.DEVNULL,
+                          stderr=subprocess.DEVNULL) as openocd_process:
 
-    command = "{} benchmark_speed.py --gdb-command {} --target-module run_vexriscv_gdb" \
-              " --timeout 60 --cpu-mhz 100".format(python, gdb)
-    logging.debug(command)
-    subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+        command = "{} benchmark_speed.py --gdb-command {} --target-module run_vexriscv_gdb" \
+                  " --timeout 60 --cpu-mhz 100".format(python, gdb)
+        logging.debug(command)
+        subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
 
-    openocd_process.terminate()
+        openocd_process.terminate()
 
-    command = "{} benchmark_size.py".format(python)
-    logging.debug(command)
-    subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+        command = "{} benchmark_size.py".format(python)
+        logging.debug(command)
+        subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
 
 
 def get_variable(env, localenv, key):

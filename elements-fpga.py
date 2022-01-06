@@ -1,5 +1,6 @@
 #!venv/bin/python3
 """Tool to handle all FPGA projects in the elements SDK."""
+# pylint: disable=invalid-name
 
 import argparse
 import subprocess
@@ -15,7 +16,7 @@ from base import benchmark
 _FORMAT = "%(asctime)s - %(message)s"
 
 
-def parse_args():
+def parse_args():  # pylint: disable=too-many-locals, too-many-statements
     """Parses all arguments."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', action='store_true', help="Enables debug output")

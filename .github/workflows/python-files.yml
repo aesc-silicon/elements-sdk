@@ -1,0 +1,25 @@
+name: Validate Python Files
+
+on:
+  push:
+    paths:
+      - '*.py'
+  pull_request:
+    paths:
+      - '*.py'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [37, 38, 39]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        pip3 install pylint
+    - name: Lint Python Files
+      run: |
+        pylint base.py elements-fpga.py
