@@ -43,8 +43,18 @@ cd openocd
 make -j8
 cd ../
 
+if ! test -f "openocd/src/openocd"; then
+	echo "openocd does not exist."
+	exit 2
+fi
+
 git clone https://github.com/Kitware/CMake.git cmake
 cd cmake
 git checkout v3.20.0
 ./bootstrap && make -j 4
 cd ../
+
+if ! test -f "cmake/bin/cmake"; then
+	echo "cmake does not exist."
+	exit 2
+fi
