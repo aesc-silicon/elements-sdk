@@ -18,7 +18,7 @@ _RELEASE = "v22.1"
 def open_yaml(path):
     """Opens a YAML file and returns the content as dictionary."""
     try:
-        with open(path, 'r') as stream:
+        with open(path, 'r', encoding='UTF-8') as stream:
             if version.parse(yaml.__version__) > version.parse("5.1.0"):
                 return yaml.load(stream, Loader=yaml.FullLoader)
             return yaml.load(stream)
@@ -43,7 +43,7 @@ def init(args, env, cwd):
         command = "curl https://storage.googleapis.com/git-repo-downloads/repo-1"
         logging.debug(command)
         proc = subprocess.run(command.split(' '), cwd=cwd, check=True, stdout=subprocess.PIPE)
-        with open("./repo", "w") as text_file:
+        with open("./repo", "w", encoding='UTF-8') as text_file:
             text_file.write(proc.stdout.decode())
 
         command = "chmod a+x ./repo"
@@ -121,7 +121,7 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
         subprocess.run(command.split(' '), env=env, cwd=platform_cwd, check=True)
 
         build_cwd = os.path.join(cwd, f"build/{soc}/{board}/fpl")
-        with open("{}/kernel.rom".format(build_cwd), 'w') as rom_file:
+        with open("{}/kernel.rom".format(build_cwd), 'w', encoding='UTF-8') as rom_file:
             command = "python {}/scripts/gen_rom.py".format(fpl_cwd)
             logging.debug(command)
             subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True, stdout=rom_file)
