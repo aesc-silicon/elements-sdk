@@ -146,3 +146,12 @@ jobs:
         git remote add origin git@github-elements:phytec-labs/elements-${{ matrix.repository }}.git
         git push origin HEAD:${{ env.branch }} -f
         cd ../
+
+  cleanup:
+    runs-on: self-hosted
+    needs: [deploy]
+    if: always()
+    steps:
+    - name: post cleanup
+      run: |
+        ls -A1 | xargs rm -rf
