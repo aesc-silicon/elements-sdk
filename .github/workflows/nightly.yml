@@ -38,8 +38,6 @@ jobs:
     steps:
     - name: prepare
       run: |
-        ls -l
-        echo $PWD
         ./elements-fpga.py prepare ${{ matrix.kit }}
     - name: compile
       run: |
