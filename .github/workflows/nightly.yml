@@ -2,6 +2,8 @@ name: SDK nightly
 
 on:
   push:
+    branches:
+      - 'main'
     paths:
       - '.github/workflows/nightly.yml'
   schedule:
