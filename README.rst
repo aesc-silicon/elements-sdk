@@ -58,7 +58,7 @@ Installation
 
 - Initialise the SDK::
 
-        python3 elements-fpga.py init
+        python3 elements.py init
 
 Vivado
 ******
@@ -107,6 +107,52 @@ Kit
 A kit is a combination of a SOC and board. Since a SOC can be used in multiple boards, this unique
 combination is very important.
 
+Comman Tasks
+############
+
+For common tasks a dedicated tool exists called ``elements.py``. This can be used to initialize or
+clean the project or to get information about available SOCs or boards.
+
+Init
+----
+
+The ``init`` command downloads all repositories or toolchains and compiles required binaries. By
+default the current release manifest will be used. Another manifest can be passed as argument with
+the ``--manifest`` parameter. To re-initialize the project, the parameter ``-f`` can force to
+initialize.
+
+.. code-block:: text
+
+    ./elements.py init [--manifest next.xml] [-f]
+
+
+Clean
+-----
+
+The ``clean`` command removes everything from the build directory.
+
+.. code-block:: text
+
+    ./elements.py clean
+
+SOCs
+----
+
+The ``socs`` command lists all available SOCs.
+
+.. code-block:: text
+
+    ./elements.py socs
+
+Boards
+------
+
+The ``boards`` command lists all available boards for a SOC.
+
+.. code-block:: text
+
+    ./elements.py boards <soc>
+
 FPGA Flow
 #########
 
@@ -133,24 +179,6 @@ the flow. However, the help text can also support with the built-in commands.
 
     ./elements-fpga.py -h
 
-SOCs
-----
-
-The ``socs`` command lists all available SOCs.
-
-.. code-block:: text
-
-    ./elements-fpga.py socs
-
-Boards
-------
-
-The ``boards`` command lists all available boards for a SOC.
-
-.. code-block:: text
-
-    ./elements-fpga.py boards <soc>
-
 Prepare
 -------
 
@@ -158,13 +186,13 @@ The ``prepare`` command creates data for a kit which are required by the followi
 
 .. code-block:: text
 
-    ./elements-fpga.py compile <soc> <board>
+    ./elements-fpga.py <soc> <board> prepare
 
 Example to prepare a kit with a Hydrogen1 SOC for the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py prepare Hydrogen1 Nexys4-DDR
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR prepare
 
 
 Compile (Zephyr)
@@ -176,13 +204,13 @@ entirely new.
 
 .. code-block:: text
 
-    ./elements-fpga.py compile <soc> <board> zephyr <application> [-f]
+    ./elements-fpga.py <soc> <board> compile zephyr <application> [-f]
 
 Example to compile the LED demo for a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py compile Hydrogen1 Nexys4-DDR zephyr-samples/demo/leds
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR compile zephyr-samples/demo/leds
 
 Generate (Zibal)
 ----------------
@@ -196,13 +224,13 @@ the toolchains.
 
 .. code-block:: text
 
-    ./elements-fpga.py generate <soc> <board>
+    ./elements-fpga.py <soc> <board> generate
 
 Example to build the Hydrogen1 SOC for a kit with the Nexys4-DDR board.
 
 .. code-block:: text
 
-    ./elements-fpga.py generate Hydrogen1 Nexys4-DDR
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR generate
 
 Simulate
 --------
@@ -213,14 +241,14 @@ option can select the source type to simulate for example a synthesized design.
 
 .. code-block:: text
 
-    ./elements-fpga.py simulate <soc> <board> [--toolchain <oss/cadence>]
-                           [--source <generated/synthesized/placed>]
+    ./elements-fpga.py <soc> <board> simulate [--toolchain <oss/cadence>]
+                                     [--source <generated/synthesized/placed>]
 
 Example to simulate a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py simulate Hydrogen1 Nexys4-DDR
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR simulate
 
 Synthesize
 ----------
@@ -229,13 +257,13 @@ The ``synthesize`` is similiar to the simulate. It can synthesize a SOC design f
 
 .. code-block:: text
 
-    ./elements-fpga.py synthesize <soc> <board> [--toolchain <xilinx/oss>]
+    ./elements-fpga.py <soc> <board> synthesize [--toolchain <xilinx/oss>]
 
 Example to synthesize a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py synthesize Hydrogen1 Nexys4-DDR --toolchain oss
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR synthesize --toolchain oss
 
 Build
 -----
@@ -246,13 +274,13 @@ requests one.
 
 .. code-block:: text
 
-    ./elements-fpga.py build <soc> <board> [<application>]
+    ./elements-fpga.py <soc> <board> build [<application>]
 
 Example to build a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py build Hydrogen1 Nexys4-DDR zephyr-samples/startup/mtimer/ --toolchain oss
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR build zephyr-samples/startup/mtimer/ --toolchain oss
 
 Flash
 -----
@@ -262,13 +290,13 @@ it can also flash a firmware into the memory of the MCU. The FPGA destination is
 
 .. code-block:: text
 
-    ./elements-fpga.py flash <soc> <board> [--destination <fpga/spi/memory>]
+    ./elements-fpga.py <soc> <board> flash [--destination <fpga/spi/memory>]
 
 Example to flash the FPGA on a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py flash Hydrogen1 Nexys4-DDR
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR flash
 
 Debug
 -----
@@ -278,13 +306,13 @@ The debug command supports debugging the firmware. It flashes a new firmware and
 
 .. code-block:: text
 
-    ./elements-fpga.py debug <soc> <board>
+    ./elements-fpga.py <soc> <board> debug
 
 Example to flash the firmware into the memory and start at the start address:
 
 .. code-block:: text
 
-    ./elements-fpga.py debug Hydrogen1 Nexys4-DDR
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR debug
 
 Test
 ----
@@ -294,13 +322,13 @@ expected by checking against predefined test cases.
 
 .. code-block:: text
 
-    ./elements-fpga.py test <soc> <board> <testcase>
+    ./elements-fpga.py <soc> <board> <testcase> test
 
 Example to test the mtimer startup application for the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py test Hydrogen1 Nexys4-DDR mtimer
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR mtimer test
 
 Benchmark
 ---------
@@ -310,13 +338,17 @@ different kind of kits among each other.
 
 .. code-block:: text
 
-    ./elements-fpga.py benchmark <soc> <board>
+    ./elements-fpga.py <soc> <board> benchmark
 
 Example to generate speed and size information for the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py benchmark Hydrogen1 Nexys4-DDR
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR benchmark
+
+.. note::
+
+  This command is only available in release v22.2 or later.
 
 Docker
 ######
@@ -328,7 +360,7 @@ will have included all required packages for the SDK.
 
     sudo docker build -t elements-sdk:1.0 .
     sudo docker run elements-sdk:1.0 \
-        ./elements-fpga.py compile Hydrogen1 Nexys4-DDR zephyr zephyr-samples/demo/leds
+        ./elements-fpga.py Hydrogen1 Nexys4-DDR compile zephyr zephyr-samples/demo/leds
 
 .. tip::
 

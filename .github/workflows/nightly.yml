@@ -27,7 +27,7 @@ jobs:
     - name: set-up environment
       run: |
         virtualenv -p python3 venv
-        python3 elements-fpga.py init --manifest next.xml
+        python3 elements.py init --manifest next.xml
 
   test_boot:
     runs-on: self-hosted
@@ -40,19 +40,19 @@ jobs:
     steps:
     - name: prepare
       run: |
-        ./elements-fpga.py prepare ${{ matrix.kit }}
+        ./elements-fpga.py ${{ matrix.kit }} prepare
     - name: compile
       run: |
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/boot
+        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/startup/boot
     - name: generate
       run: |
-        ./elements-fpga.py generate ${{ matrix.kit }}
+        ./elements-fpga.py ${{ matrix.kit }} generate
     - name: test
       run: |
-        ./elements-fpga.py test ${{ matrix.kit }} boot
+        ./elements-fpga.py ${{ matrix.kit }} test boot
     - name: synthesize
       run: |
-        ./elements-fpga.py synthesize ${{ matrix.kit }} --toolchain oss
+        ./elements-fpga.py ${{ matrix.kit }} synthesize --toolchain oss
 
   test_hydrogen1_nexys4-ddr_startup:
     runs-on: self-hosted
@@ -66,13 +66,13 @@ jobs:
     steps:
     - name: compile
       run: |
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
+        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/startup/${{ matrix.startup }}
     - name: generate
       run: |
-        ./elements-fpga.py generate ${{ matrix.kit }}
+        ./elements-fpga.py ${{ matrix.kit }} generate
     - name: test
       run: |
-        ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
+        ./elements-fpga.py ${{ matrix.kit }} test ${{ matrix.startup }}
 
   test_hydrogenTest_nexys4-ddr_startup:
     runs-on: self-hosted
@@ -89,13 +89,13 @@ jobs:
     steps:
     - name: compile
       run: |
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/startup/${{ matrix.startup }}
+        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/startup/${{ matrix.startup }}
     - name: generate
       run: |
-        ./elements-fpga.py generate ${{ matrix.kit }}
+        ./elements-fpga.py ${{ matrix.kit }} generate
     - name: test
       run: |
-        ./elements-fpga.py test ${{ matrix.kit }} ${{ matrix.startup }}
+        ./elements-fpga.py ${{ matrix.kit }} test ${{ matrix.startup }}
 
   compile_demo:
     runs-on: self-hosted
@@ -110,7 +110,7 @@ jobs:
     steps:
     - name: compile
       run: |
-        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/demo/${{ matrix.demo }}
+        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/demo/${{ matrix.demo }}
 
 #  compile_arcade:
 #    runs-on: self-hosted

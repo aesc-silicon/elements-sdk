@@ -2,109 +2,41 @@
 """Tool to handle all FPGA projects in the elements SDK."""
 # pylint: disable=invalid-name
 
-import argparse
 import subprocess
 import os
 import logging
 import glob
 
-from base import prepare_build, environment, open_board, get_soc_name, get_board_name
-from base import init, clean, socs, boards, prepare, compile_, generate, flash, debug
-from base import benchmark
+from base import prepare_build, environment, open_board, get_soc_name, get_board_name, parse_args
+from base import prepare, compile_, generate
 
 
 _FORMAT = "%(asctime)s - %(message)s"
 
 
-def parse_args():  # pylint: disable=too-many-locals, too-many-statements
-    """Parses all arguments."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-v', action='store_true', help="Enables debug output")
-
-    subparsers = parser.add_subparsers(help="Elements commands")
-
-    parser_init = subparsers.add_parser('init', help="Initialise the SDK")
-    parser_init.set_defaults(func=init)
-    parser_init.add_argument('--manifest', help="Repo manifest")
-    parser_init.add_argument('-f', action='store_true', help="Force init")
-
-    parser_clean = subparsers.add_parser('clean', help="Cleans all builds")
-    parser_clean.set_defaults(func=clean)
-
-    parser_socs = subparsers.add_parser('socs', help="Lists all available SOCs.")
-    parser_socs.set_defaults(func=socs)
-
-    parser_boards = subparsers.add_parser('boards', help="Lists all available boards for a SOC.")
-    parser_boards.set_defaults(func=boards)
-    parser_boards.add_argument('soc', help="Name of a SOC")
-
-    parser_prepare = subparsers.add_parser('prepare', help="Prepares all file for a kit")
-    parser_prepare.set_defaults(func=prepare)
-    parser_prepare.add_argument('soc', help="Name of a SOC")
-    parser_prepare.add_argument('board', help="Name of a board")
-
-    parser_compile = subparsers.add_parser('compile', help="Compiles a firmwares")
-    parser_compile.set_defaults(func=compile_)
-    parser_compile.add_argument('soc', help="Name of a SOC")
-    parser_compile.add_argument('board', help="Name of a board")
-    parser_compile.add_argument('type', choices=['zephyr', 'bootrom', 'menuconfig'],
-                                help="Type of firmware")
-    parser_compile.add_argument('application', nargs='?', default="",
-                                help="Name of the application")
-    parser_compile.add_argument('-f', action='store_true', help="Force build")
-
-    parser_generate = subparsers.add_parser('generate', help="Generates a SOC")
-    parser_generate.set_defaults(func=generate)
-    parser_generate.add_argument('soc', help="Name of a SOC")
-    parser_generate.add_argument('board', help="Name of a board")
-
+def parse_fpga_args(subparsers):
+    """Parses all FPGA related arguments."""
     parser_simulate = subparsers.add_parser('simulate', help="Simulates a design")
     parser_simulate.set_defaults(func=simulate)
-    parser_simulate.add_argument('soc', help="Name of a SOC")
-    parser_simulate.add_argument('board', help="Name of a board")
 
     parser_synthesize = subparsers.add_parser('synthesize', help="Synthesizes the design")
     parser_synthesize.set_defaults(func=synthesize)
-    parser_synthesize.add_argument('soc', help="Name of a SOC")
-    parser_synthesize.add_argument('board', help="Name of a board")
     parser_synthesize.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
                                    help="Choose between different toolchains.")
 
     parser_build = subparsers.add_parser('build', help="Run the complete flow to generate a "
                                                        "bitstream file.")
     parser_build.set_defaults(func=build)
-    parser_build.add_argument('soc', help="Name of a SOC")
-    parser_build.add_argument('board', help="Name of a board")
     parser_build.add_argument('application', nargs='?', default="",
                               help="Name of an application")
     parser_build.add_argument('-f', action='store_true', help="Force build")
     parser_build.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
                               help="Choose between different toolchains.")
 
-    parser_flash = subparsers.add_parser('flash', help="Flashes parts of the SDK")
-    parser_flash.set_defaults(func=flash)
-    parser_flash.add_argument('soc', help="Name of a SOC")
-    parser_flash.add_argument('board', help="Name of a board")
-    parser_flash.add_argument('--destination', default='fpga', choices=['fpga', 'spi', 'memory'],
-                              help="Destination of the bitstream or firmware")
-
-    parser_debug = subparsers.add_parser('debug', help="Debugs a firmware with GDB.")
-    parser_debug.set_defaults(func=debug)
-    parser_debug.add_argument('soc', help="Name of a SOC")
-    parser_debug.add_argument('board', help="Name of a board")
-
     parser_test = subparsers.add_parser('test', help="Tests the kit")
     parser_test.set_defaults(func=test)
-    parser_test.add_argument('soc', help="Name of a SOC")
-    parser_test.add_argument('board', help="Name of a board")
     parser_test.add_argument('case', help="Name of the test case")
 
-    parser_benchmark = subparsers.add_parser('benchmark', help="Benchmark tests for a kit")
-    parser_benchmark.set_defaults(func=benchmark)
-    parser_benchmark.add_argument('soc', help="Name of a SOC")
-    parser_benchmark.add_argument('board', help="Name of a board")
-
-    return parser.parse_args()
 
 
 def simulate(args, env, cwd):
@@ -207,7 +139,7 @@ def test(args, env, cwd):
 
 def main():
     """Main function."""
-    args = parse_args()
+    args = parse_args(parse_fpga_args)
     if args.v:
         logging.basicConfig(format=_FORMAT, level=logging.DEBUG)
     env = environment()
@@ -216,6 +148,5 @@ def main():
     cwd = os.path.dirname(os.path.realpath(__file__))
     if hasattr(args, 'func'):
         args.func(args, env, cwd)
-
 
 main()

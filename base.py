@@ -4,16 +4,105 @@ import subprocess
 import os
 import logging
 import time
-import shutil
 import glob
 import configparser
 import shlex
+import argparse
+import sys
 import yaml
 from packaging import version
 
 
 _FORMAT = "%(asctime)s - %(message)s"
 _RELEASE = "v22.1"
+
+
+class ElementsParser(argparse.ArgumentParser):
+    """Parser for the Elements SDK."""
+    def error(self, message):
+        sys.stderr.write("error: %s\n" % message)
+        if 'soc' in message:
+            sys.stderr.write("\nAvailable SOCs:\n")
+            for soc in get_socs():
+                sys.stderr.write("\t%s\n" % soc)
+            sys.exit(2)
+        soc = sys.argv[1] if len(sys.argv) > 0 else ""
+        if 'board' in message:
+            sys.stderr.write("\nAvailable boards for %s:\n" % soc)
+            for board in get_boards_for_soc(soc):
+                sys.stderr.write("\t%s\n" % board)
+            sys.exit(2)
+        if 'command' in message:
+            self.print_help(sys.stderr)
+            sys.exit(2)
+        sys.exit(2)
+
+
+def validate_soc_name(name):
+    """Helper to validate a SOC name is type of string and exist."""
+    if not isinstance(name, str):
+        raise argparse.ArgumentTypeError("SOC name is not a string.")
+    if name not in get_socs():
+        raise argparse.ArgumentTypeError(f"No SOC with the name {name} available.")
+    return name
+
+
+def validate_board_name(name):
+    """Helper to validate a board name is type of string and exist."""
+    if not isinstance(name, str):
+        raise argparse.ArgumentTypeError("Board name is not a string.")
+    if name not in get_boards():
+        raise argparse.ArgumentTypeError(f"No Board with the name {name} available.")
+    return name
+
+
+def parse_args(parse_tool_args):
+    """Parses all arguments."""
+    parser = ElementsParser()
+    parser.add_argument('-v', action='store_true', help="Enables debug output")
+    parser.add_argument('soc', type=validate_soc_name)
+    parser.add_argument('board', type=validate_board_name)
+
+    subparsers = parser.add_subparsers(help="Elements commands", dest='command')
+    subparsers.required = True
+
+#    parser_init = subparsers.add_parser('init', help="Initialise the SDK")
+#    parser_init.set_defaults(func=init)
+#    parser_init.add_argument('--manifest', help="Repo manifest")
+#    parser_init.add_argument('-f', action='store_true', help="Force init")
+
+#    parser_clean = subparsers.add_parser('clean', help="Cleans all builds")
+#    parser_clean.set_defaults(func=clean)
+
+    parser_prepare = subparsers.add_parser('prepare', help="Prepares all file for a kit")
+    parser_prepare.set_defaults(func=prepare)
+
+    parser_compile = subparsers.add_parser('compile', help="Compiles a firmwares")
+    parser_compile.set_defaults(func=compile_)
+    parser_compile.add_argument('type', choices=['zephyr', 'bootrom', 'menuconfig'],
+                                help="Type of firmware")
+    parser_compile.add_argument('application', nargs='?', default="",
+                                help="Name of the application")
+    parser_compile.add_argument('-f', action='store_true', help="Force build")
+
+    parser_generate = subparsers.add_parser('generate', help="Generates a SOC")
+    parser_generate.set_defaults(func=generate)
+
+    parser_flash = subparsers.add_parser('flash', help="Flashes parts of the SDK")
+    parser_flash.set_defaults(func=flash)
+    parser_flash.add_argument('--destination', default='fpga', choices=['fpga', 'spi', 'memory'],
+                              help="Destination of the bitstream or firmware")
+
+    parser_debug = subparsers.add_parser('debug', help="Debugs a firmware with GDB.")
+    parser_debug.set_defaults(func=debug)
+
+    parser_benchmark = subparsers.add_parser('benchmark', help="Benchmark tests for a kit")
+    parser_benchmark.set_defaults(func=benchmark)
+
+    parse_tool_args(subparsers)
+
+    return parser.parse_args()
+
 
 def open_yaml(path):
     """Opens a YAML file and returns the content as dictionary."""
@@ -29,67 +118,24 @@ def open_yaml(path):
     raise SystemExit("Unable to open {}".format(path))
 
 
-def init(args, env, cwd):
-    """Clones all repositories, installs and/or build all packages."""
-    if args.f:
-        command = "rm -rf .repo"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
-
-    if os.path.exists(".repo"):
-        raise SystemExit("Repo exists! Either the SDK is already initialized or force init.")
-
-    if not os.path.exists("./repo"):
-        command = "curl https://storage.googleapis.com/git-repo-downloads/repo-1"
-        logging.debug(command)
-        proc = subprocess.run(command.split(' '), cwd=cwd, check=True, stdout=subprocess.PIPE)
-        with open("./repo", "w", encoding='UTF-8') as text_file:
-            text_file.write(proc.stdout.decode())
-
-        command = "chmod a+x ./repo"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
-
-    command = "python3 ./repo init -u https://github.com/phytec-labs/elements-manifest.git" \
-              " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
-
-    command = "python3 ./repo sync"
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
-
-    command = "./.init.sh {}".format(env['ZEPHYR_SDK_VERSION'])
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
-
-    print("Initialization finished")
-
-
-def clean(args, env, cwd):  # pylint: disable=unused-argument
-    """Cleans all build by remove the build directory."""
-    if os.path.exists("build/"):
-        shutil.rmtree("build/")
-    else:
-        print("Nothing to do!")
-
-
-def socs(args, env, cwd):  # pylint: disable=unused-argument
-    """Lists all available SOCs by existing SOC files."""
+def get_socs():
+    """Returns a list of all available SOCs."""
     all_socs = glob.glob("zibal/eda/socs/*yaml")
-    all_socs = list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
-    for soc in all_socs:
-        print(f"{soc}")
+    return list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
 
 
-def boards(args, env, cwd):  # pylint: disable=unused-argument
-    """Lists all available boards for a SOC."""
-    soc_file = f"zibal/eda/socs/{args.soc}.yaml"
+def get_boards():
+    """Returns a list of all available boards."""
+    all_socs = glob.glob("zibal/eda/boards/*yaml")
+    return list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
+
+
+def get_boards_for_soc(soc):
+    """Returns a list of all available boards for a SOC."""
+    soc_file = f"zibal/eda/socs/{soc}.yaml"
     if not os.path.exists(soc_file):
-        raise SystemExit(f"SOC {args.soc} does not exist.")
-    all_boards = open_yaml(soc_file).get('boards', [])
-    for board in all_boards:
-        print(f"{board}")
+        raise SystemExit(f"SOC {soc} does not exist.")
+    return open_yaml(soc_file).get('boards', [])
 
 
 def prepare(args, env, cwd):
