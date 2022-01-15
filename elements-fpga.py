@@ -38,7 +38,6 @@ def parse_fpga_args(subparsers):
     parser_test.add_argument('case', help="Name of the test case")
 
 
-
 def simulate(args, env, cwd):
     """Command to simulate a SOC on a virtual board."""
     soc = get_soc_name(args.soc)
@@ -54,7 +53,7 @@ def simulate(args, env, cwd):
     build_cwd = os.path.join(cwd, f"build/{soc}/{board}/zibal/{board}Board/")
     zibal_cwd = os.path.join(cwd, "zibal")
     command = ['sbt', 'runMain zibal.soc.{}.{}Board {} boot'.format(soc.lower(), board,
-                                                                        "generated")]
+                                                                    "generated")]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 
@@ -128,7 +127,7 @@ def test(args, env, cwd):
 
     zibal_cwd = os.path.join(cwd, "zibal")
     command = ['sbt', 'runMain zibal.soc.{}.{}Board generated {}'.format(soc.lower(), board,
-                                                                             args.case)]
+                                                                         args.case)]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 

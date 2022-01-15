@@ -66,14 +66,6 @@ def parse_args(parse_tool_args):
     subparsers = parser.add_subparsers(help="Elements commands", dest='command')
     subparsers.required = True
 
-#    parser_init = subparsers.add_parser('init', help="Initialise the SDK")
-#    parser_init.set_defaults(func=init)
-#    parser_init.add_argument('--manifest', help="Repo manifest")
-#    parser_init.add_argument('-f', action='store_true', help="Force init")
-
-#    parser_clean = subparsers.add_parser('clean', help="Cleans all builds")
-#    parser_clean.set_defaults(func=clean)
-
     parser_prepare = subparsers.add_parser('prepare', help="Prepares all file for a kit")
     parser_prepare.set_defaults(func=prepare)
 
@@ -401,8 +393,9 @@ def prepare_build(args):
     path = f"build/{soc}/{board}"
     if not os.path.exists(path):
         os.makedirs(path)
-    pathes = ["zibal", "fpl", "vivado/sim/logs", "vivado/syn/logs", "cadence/map", "cadence/place",
-              "cadence/sim", "symbiflow/logs", f"zephyr-boards/boards/riscv/{soc}"]
+    pathes = ["zibal", "fpl", "vivado/sim/logs", "vivado/syn/logs", "cadence/synthesize",
+              "cadence/place", "cadence/sim", "symbiflow/logs",
+              f"zephyr-boards/boards/riscv/{soc}"]
     pathes = list(map(lambda x: os.path.join(path, x), pathes))
     for path in pathes:
         if not os.path.exists(path):
