@@ -1,0 +1,9 @@
+version: "2"
+services:
+  sdk:
+    build: .
+    volumes:
+      - build:/elements-sdk/build/
+    command: ["sleep", "infinity"]
+volumes:
+  build: {}
