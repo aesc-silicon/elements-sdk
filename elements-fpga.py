@@ -52,8 +52,8 @@ def simulate(args, env, cwd):
 
     build_cwd = os.path.join(cwd, f"build/{soc}/{board}/zibal/{board}Board/")
     zibal_cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}.{}Board {} boot'.format(soc.lower(), board,
-                                                                    "generated")]
+    command = ['sbt', 'runMain zibal.soc.{}.{}Board {} simulate'.format(soc.lower(), board,
+                                                                        "generated")]
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 
@@ -61,7 +61,7 @@ def simulate(args, env, cwd):
     for binary_file in binary_files:
         os.remove(binary_file)
 
-    command = "gtkwave boot.vcd"
+    command = "gtkwave simulate.vcd"
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True,
                    stdin=subprocess.PIPE)
