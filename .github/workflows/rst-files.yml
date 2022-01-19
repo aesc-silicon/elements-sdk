@@ -1,0 +1,23 @@
+name: Validate RST Files
+
+on:
+  push:
+    paths:
+      - '.github/workflows/rst-files.yml'
+      - '*.rst'
+  pull_request:
+    paths:
+      - '*.rst'
+      - 'docsource/source/*.rst'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: |
+        pip3 install rstcheck
+    - name: Lint Python Files
+      run: |
+        rstcheck README.rst docsource/source/*.rst
