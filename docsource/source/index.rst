@@ -9,8 +9,15 @@ Welcome to the documentation about the Elements Software Development Kit.
 
    basics
 
-This part of the documentation focuses on how to set up your system and a very basic explaination
-of the Elements Python-Tool.
+This part of the documentation focuses on how to set up your system.
+
+.. toctree::
+   :maxdepth: 2
+   :caption: SDK Usage
+
+   tools
+
+General tasks and both development flows are explained in this section.
 
 .. toctree::
    :maxdepth: 2
