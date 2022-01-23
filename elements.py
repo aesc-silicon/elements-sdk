@@ -61,7 +61,7 @@ def init(args, env, cwd):
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
-    command = "python3 ./repo init -u https://github.com/phytec-labs/elements-manifest.git" \
+    command = "python3 ./repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
               " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)

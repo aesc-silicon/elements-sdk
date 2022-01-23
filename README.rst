@@ -42,7 +42,7 @@ Installation
 
 - Download the repository and checkout the latest release::
 
-        git clone https://github.com/phytec-labs/elements-sdk.git
+        git clone https://github.com/aesc-silicon/elements-sdk.git
         cd elements-sdk/
         git checkout v22.1
 
@@ -145,9 +145,9 @@ PDKS
 Documentation
 #############
 
-The complete documentation is hosted on `https://phytec-labs.github.io/elements-sdk/`_.
+The complete documentation is hosted on `https://aesc-silicon.github.io/elements-sdk/`_.
 
-.. _https://phytec-labs.github.io/elements-sdk/: https://phytec-labs.github.io/elements-sdk/
+.. _https://aesc-silicon.github.io/elements-sdk/: https://aesc-silicon.github.io/elements-sdk/
 
 It describes the FPGA and ASIC flows and explains basic information and how to develop a simple
 Design.
@@ -166,6 +166,6 @@ folder.
 License
 #######
 
-Copyright (c) 2022 PHYTEC Messtechnik GmbH. Released under the `MIT license`_.
+Copyright (c) 2022 aesc silicon. Released under the `MIT license`_.
 
 .. _MIT license: COPYING.MIT

@@ -31,7 +31,7 @@ RUN mkdir ~/.ssh
 RUN ssh-keyscan github.com > ~/.ssh/known_hosts
 
 # initialize SDK
-RUN git clone https://github.com/phytec-labs/elements-sdk.git
+RUN git clone https://github.com/aesc-silicon/elements-sdk.git
 WORKDIR elements-sdk/
 
 RUN virtualenv -p python3 venv
