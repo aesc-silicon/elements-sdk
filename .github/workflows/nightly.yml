@@ -30,13 +30,6 @@ jobs:
         virtualenv -p python3 venv
         python3 elements.py init --manifest next.xml
 
-        #- name: Install SSH Keys
-        #  env:
-        #    SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-        #  run: |
-        #    ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        #    ssh-add - <<< "${{ secrets.CI_SSH_KEY }}"
-
     - name: Test Hydrogen1 Nexys4-DDR boot
       uses: ./.github/actions/nightly-fpga-build
       with:
