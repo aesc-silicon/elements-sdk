@@ -1,0 +1,28 @@
+name: 'Nightly FPGA Build'
+description: 'Runs the build FPGA flow with a open-source toolchain.'
+inputs:
+  kit:
+    description: 'Name of the kit like Hydrogen1 Nexys4-DDR'
+    required: true
+  testcase:
+    description: 'Name of the test case'
+    required: false
+    default: 'boot'
+runs:
+  using: 'composite'
+  steps:
+    - name: Prepare
+      run: |
+        ./elements-fpga.py ${{ inputs.kit }} prepare
+    - name: Compile
+      run: |
+        ./elements-fpga.py ${{ inputs.kit }} compile zephyr zephyr-samples/startup/${{ inputs.testcase }}
+    - name: Generate
+      run: |
+        ./elements-fpga.py ${{ inputs.kit }} generate
+    - name: Test
+      run: |
+        ./elements-fpga.py ${{ inputs.kit }} test ${{ inputs.testcase }}
+    - name: Synthesize
+      run: |
+        ./elements-fpga.py ${{ inputs.kit }} synthesize --toolchain oss

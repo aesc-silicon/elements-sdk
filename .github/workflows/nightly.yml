@@ -10,150 +10,101 @@ on:
   - cron: "15 4 * * *"
 
 jobs:
-  prepare:
-    runs-on: self-hosted
+  build:
+    runs-on: ubuntu-20.04
     steps:
     - name: Clone Repository
       uses: actions/checkout@v2
       with:
         token: ${{ secrets.PAT }}
 
-#    - name: Install Packages
-#      run: |
-#        sudo apt install ssh git libtool-bin autotools-dev automake pkg-config libyaml-dev
-#        sudo apt install python3 python3.8-dev python3-pip virtualenv gdb
-#        sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
+        #- name: Install Packages
+        #  run: |
+        #    sudo apt install ssh git curl libtool-bin autotools-dev automake pkg-config libyaml-dev
+        #    sudo apt install libssl-dev gdb ninja-build
+        #    sudo apt install python3 python3.8-dev python3-pip virtualenv openjdk-11-jre-headless
+        #    sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
 
-    - name: set-up environment
+    - name: Set-up Environment
       run: |
         virtualenv -p python3 venv
         python3 elements.py init --manifest next.xml
 
-  test_boot:
-    runs-on: self-hosted
-    needs: [prepare]
-    strategy:
-      matrix:
-        kit:
-        - "Hydrogen1 Nexys4-DDR"
-        - "HydrogenTest Nexys4-DDR"
-    steps:
-    - name: prepare
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} prepare
-    - name: compile
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/startup/boot
-    - name: generate
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} generate
-    - name: test
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} test boot
-    - name: synthesize
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} synthesize --toolchain oss
+        #- name: Install SSH Keys
+        #  env:
+        #    SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        #  run: |
+        #    ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+        #    ssh-add - <<< "${{ secrets.CI_SSH_KEY }}"
 
-  test_hydrogen1_nexys4-ddr_startup:
-    runs-on: self-hosted
-    needs: [test_boot]
-    strategy:
-      matrix:
-        kit:
-        - "Hydrogen1 Nexys4-DDR"
-        startup:
-        - "mtimer"
-    steps:
-    - name: compile
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/startup/${{ matrix.startup }}
-    - name: generate
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} generate
-    - name: test
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} test ${{ matrix.startup }}
+    - name: Test Hydrogen1 Nexys4-DDR boot
+      uses: actions/nightly-fpga-build
+      with:
+        kit: "Hydrogen1 Nexys4-DDR"
 
-  test_hydrogenTest_nexys4-ddr_startup:
-    runs-on: self-hosted
-    needs: [test_boot]
-    strategy:
-      matrix:
-        kit:
-        - "HydrogenTest Nexys4-DDR"
-        startup:
-        - "mtimer"
-        - "gpio"
-        - "uart"
-        - "frequency"
-    steps:
-    - name: compile
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/startup/${{ matrix.startup }}
-    - name: generate
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} generate
-    - name: test
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} test ${{ matrix.startup }}
+    - name: Test HydrogenTest Nexys4-DDR boot
+      uses: actions/nightly-fpga-build
+      with:
+        kit: "HydrogenTest Nexys4-DDR"
 
-  compile_demo:
-    runs-on: self-hosted
-    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
-    strategy:
-      matrix:
-        kit:
-        - "Hydrogen1 Nexys4-DDR"
-        - "HydrogenTest Nexys4-DDR"
-        demo:
-        - "leds"
-    steps:
-    - name: compile
-      run: |
-        ./elements-fpga.py ${{ matrix.kit }} compile zephyr zephyr-samples/demo/${{ matrix.demo }}
+    - name: Test Hydrogen1 Nexys4-DDR mtimer
+      uses: actions/nightly-fpga-test
+      with:
+        kit: "Hydrogen1 Nexys4-DDR"
+        testcase: "mtimer"
 
-#  compile_arcade:
-#    runs-on: self-hosted
-##    needs: [test_hydrogen1_nexys4-ddr_startup, test_hydrogenTest_nexys4-ddr_startup]
-#    needs: [test_hydrogen1_nexys4-ddr_startup]
-#    strategy:
-#      matrix:
-#        kit:
-#        - "Hydrogen1 Nexys4-DDR"
-##        - "HydrogenTest Nexys4-DDR"
-#        arcade:
-#        - "snake"
-#    steps:
-#    - name: compile
-#      run: |
-#        ./elements-fpga.py compile ${{ matrix.kit }} zephyr zephyr-samples/arcade/${{ matrix.arcade }}
+    - name: Test HydrogenTest Nexys4-DDR mtimer
+      uses: actions/nightly-fpga-test
+      with:
+        kit: "HydrogenTest Nexys4-DDR"
+        testcase: "mtimer"
 
-  deploy:
-    runs-on: self-hosted
-#    needs: [compile_demo, compile_arcade]
-    needs: [compile_demo]
-    env:
-      branch: stable
-    strategy:
-      matrix:
-        repository:
-        - "openocd"
-        - "vexriscv"
-        - "zephyr"
-        - "embench-iot"
-    steps:
-    - name: push back to branch
-      run: |
-        cd ${{ matrix.repository }}
-        git remote add origin git@github-elements:phytec-labs/elements-${{ matrix.repository }}.git
-        git push origin HEAD:${{ env.branch }} -f
-        cd ../
+    - name: Test HydrogenTest Nexys4-DDR gpio
+      uses: actions/nightly-fpga-test
+      with:
+        kit: "HydrogenTest Nexys4-DDR"
+        testcase: "gpio"
 
-  cleanup:
-    runs-on: self-hosted
-    needs: [deploy]
-    if: always()
-    steps:
-    - name: post cleanup
-      run: |
-        ls -A1 | xargs rm -rf
+    - name: Test HydrogenTest Nexys4-DDR uart
+      uses: actions/nightly-fpga-test
+      with:
+        kit: "HydrogenTest Nexys4-DDR"
+        testcase: "uart"
+
+    - name: Test HydrogenTest Nexys4-DDR frequency
+      uses: actions/nightly-fpga-test
+      with:
+        kit: "HydrogenTest Nexys4-DDR"
+        testcase: "frequency"
+
+    - name: Compile Demo Hydrogen1 Nexys4-DDR leds
+      uses: actions/nightly-fpga-compile
+      with:
+        kit: "Hydrogen1 Nexys4-DDR"
+        application: "leds"
+
+    - name: Compile Demo HydrogenTest Nexys4-DDR leds
+      uses: actions/nightly-fpga-compile
+      with:
+        kit: "HydrogenTest Nexys4-DDR"
+        application: "leds"
+
+    - name: Deploy openocd
+      uses: actions/nightly-deploy
+      with:
+        repository: "openocd"
+
+    - name: Deploy vexriscv
+      uses: actions/nightly-deploy
+      with:
+        repository: "vexriscv"
+
+    - name: Deploy zephyr
+      uses: actions/nightly-deploy
+      with:
+        repository: "zephyr"
+
+    - name: Deploy embench-iot
+      uses: actions/nightly-deploy
+      with:
+        repository: "embench-iot"

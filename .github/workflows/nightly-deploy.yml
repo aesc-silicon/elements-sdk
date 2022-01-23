@@ -1,0 +1,21 @@
+name: 'Nightly Deploy'
+description: 'Deploy repository after nightly run.'
+inputs:
+  repository:
+    description: 'Name of repository to deploy to'
+    required: true
+  branch:
+    description: 'Name of the repository branch to deploy to'
+    required: false
+    default: 'stable'
+runs:
+  using: 'composite'
+  steps:
+    - name: Deploy
+      env:
+        SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+        cd ${{ inputs.repository }}
+        git remote add origin git@github-elements:phytec-labs/elements-${{ inputs.repository }}.git
+        git push origin HEAD:${{ inputs.branch }} -f
+        cd ../
