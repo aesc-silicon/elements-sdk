@@ -38,73 +38,73 @@ jobs:
         #    ssh-add - <<< "${{ secrets.CI_SSH_KEY }}"
 
     - name: Test Hydrogen1 Nexys4-DDR boot
-      uses: actions/nightly-fpga-build
+      uses: ./.github/actions/nightly-fpga-build
       with:
         kit: "Hydrogen1 Nexys4-DDR"
 
     - name: Test HydrogenTest Nexys4-DDR boot
-      uses: actions/nightly-fpga-build
+      uses: ./.github/actions/nightly-fpga-build
       with:
         kit: "HydrogenTest Nexys4-DDR"
 
     - name: Test Hydrogen1 Nexys4-DDR mtimer
-      uses: actions/nightly-fpga-test
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "Hydrogen1 Nexys4-DDR"
         testcase: "mtimer"
 
     - name: Test HydrogenTest Nexys4-DDR mtimer
-      uses: actions/nightly-fpga-test
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "HydrogenTest Nexys4-DDR"
         testcase: "mtimer"
 
     - name: Test HydrogenTest Nexys4-DDR gpio
-      uses: actions/nightly-fpga-test
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "HydrogenTest Nexys4-DDR"
         testcase: "gpio"
 
     - name: Test HydrogenTest Nexys4-DDR uart
-      uses: actions/nightly-fpga-test
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "HydrogenTest Nexys4-DDR"
         testcase: "uart"
 
     - name: Test HydrogenTest Nexys4-DDR frequency
-      uses: actions/nightly-fpga-test
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "HydrogenTest Nexys4-DDR"
         testcase: "frequency"
 
     - name: Compile Demo Hydrogen1 Nexys4-DDR leds
-      uses: actions/nightly-fpga-compile
+      uses: ./.github/actions/nightly-fpga-compile
       with:
         kit: "Hydrogen1 Nexys4-DDR"
         application: "leds"
 
     - name: Compile Demo HydrogenTest Nexys4-DDR leds
-      uses: actions/nightly-fpga-compile
+      uses: ./.github/actions/nightly-fpga-compile
       with:
         kit: "HydrogenTest Nexys4-DDR"
         application: "leds"
 
     - name: Deploy openocd
-      uses: actions/nightly-deploy
+      uses: ./.github/actions/nightly-deploy
       with:
         repository: "openocd"
 
     - name: Deploy vexriscv
-      uses: actions/nightly-deploy
+      uses: ./.github/actions/nightly-deploy
       with:
         repository: "vexriscv"
 
     - name: Deploy zephyr
-      uses: actions/nightly-deploy
+      uses: ./.github/actions/nightly-deploy
       with:
         repository: "zephyr"
 
     - name: Deploy embench-iot
-      uses: actions/nightly-deploy
+      uses: ./.github/actions/nightly-deploy
       with:
         repository: "embench-iot"
