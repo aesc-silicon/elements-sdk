@@ -14,15 +14,20 @@ runs:
     - name: Prepare
       run: |
         ./elements-fpga.py ${{ inputs.kit }} prepare
+      shell: bash
     - name: Compile
       run: |
         ./elements-fpga.py ${{ inputs.kit }} compile zephyr zephyr-samples/startup/${{ inputs.testcase }}
+      shell: bash
     - name: Generate
       run: |
         ./elements-fpga.py ${{ inputs.kit }} generate
+      shell: bash
     - name: Test
       run: |
         ./elements-fpga.py ${{ inputs.kit }} test ${{ inputs.testcase }}
+      shell: bash
     - name: Synthesize
       run: |
         ./elements-fpga.py ${{ inputs.kit }} synthesize --toolchain oss
+      shell: bash

@@ -6,6 +6,10 @@ on:
       - 'main'
     paths:
       - '.github/workflows/nightly.yml'
+      - '.github/actions/nightly-deploy/action.yml'
+      - '.github/actions/nightly-fpga-build/action.yml'
+      - '.github/actions/nightly-fpga-compile/action.yml'
+      - '.github/actions/nightly-fpga-test/action.yml'
   schedule:
   - cron: "15 4 * * *"
 

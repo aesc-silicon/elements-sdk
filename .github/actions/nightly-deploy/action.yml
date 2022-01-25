@@ -19,3 +19,4 @@ runs:
         git remote add origin https://elements-user:${{ secrets.PAT }}@github.com/aesc-silicon/${{ inputs.repository_name }}.git
         git push origin HEAD:${{ inputs.branch }} -f
         cd ../
+      shell: bash

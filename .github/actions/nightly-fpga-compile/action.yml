@@ -13,6 +13,8 @@ runs:
     - name: Prepare
       run: |
         ./elements-fpga.py ${{ inputs.kit }} prepare
+      shell: bash
     - name: Compile
       run: |
         ./elements-fpga.py ${{ inputs.kit }} compile zephyr zephyr-samples/demo/${{ inputs.application }}
+      shell: bash
