@@ -37,7 +37,7 @@ Installation
         sudo apt install ssh git curl libtool-bin autotools-dev automake pkg-config libyaml-dev
         sudo apt install libssl-dev gdb ninja-build
         sudo apt install python3 python3.8-dev python3-pip virtualenv openjdk-11-jre-headless
-        sudo apt install iverilog gtkwave libcanberra-gtk-module libcanberra-gtk3-module
+        sudo apt install verilator gtkwave libcanberra-gtk-module libcanberra-gtk3-module
         sudo apt install libtinfo5 libncurses5
 
 - Download the repository and checkout the latest release::

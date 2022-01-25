@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     virtualenv \
     openjdk-11-jre-headless \
-    iverilog
+    verilator
 
 RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
 RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list
