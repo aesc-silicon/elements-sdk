@@ -222,7 +222,10 @@ def flash(args, env, cwd):
             raise SystemExit("No bitstream found. Run \"./elements-fpga.py synthesize " \
                              f"{args.soc} {args.board}\" before.")
 
-        bitstream_origin = "symbiflow" if symbiflow_bit else "vivado"
+        if args.destination == "spi":
+            bitstream_origin = "vivado"
+        else:
+            bitstream_origin = "symbiflow" if symbiflow_bit else "vivado"
         destination = board_data['flash_bridge'][args.destination]
         transport = board_data['flash_bridge']["transport"]
         command = ['src/openocd',
