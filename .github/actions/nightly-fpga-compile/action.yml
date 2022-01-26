@@ -18,3 +18,7 @@ runs:
       run: |
         ./elements-fpga.py ${{ inputs.kit }} compile zephyr zephyr-samples/demo/${{ inputs.application }}
       shell: bash
+    - name: Clean
+      run: |
+        ./elements.py clean ${{ inputs.kit }}
+      shell: bash

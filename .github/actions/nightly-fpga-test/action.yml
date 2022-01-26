@@ -26,3 +26,7 @@ runs:
       run: |
         ./elements-fpga.py ${{ inputs.kit }} test ${{ inputs.testcase }}
       shell: bash
+    - name: Clean
+      run: |
+        ./elements.py clean ${{ inputs.kit }}
+      shell: bash

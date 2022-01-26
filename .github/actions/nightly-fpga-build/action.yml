@@ -31,3 +31,7 @@ runs:
       run: |
         ./elements-fpga.py ${{ inputs.kit }} synthesize --toolchain oss
       shell: bash
+    - name: Clean
+      run: |
+        ./elements.py clean ${{ inputs.kit }}
+      shell: bash

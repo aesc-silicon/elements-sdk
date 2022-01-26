@@ -8,7 +8,7 @@ import os
 import logging
 import shutil
 
-from base import environment, get_socs, get_boards_for_soc, _RELEASE
+from base import environment, get_socs, get_boards_for_soc, get_soc_name, get_board_name, _RELEASE
 
 
 _FORMAT = "%(asctime)s - %(message)s"
@@ -29,6 +29,8 @@ def parse_args():
 
     parser_clean = subparsers.add_parser('clean', help="Cleans all builds")
     parser_clean.set_defaults(func=clean)
+    parser_clean.add_argument('soc', help="Name of a SOC", nargs="?")
+    parser_clean.add_argument('board', help="Name of a board", nargs="?")
 
     parser_socs = subparsers.add_parser('socs', help="Lists all available SOCs.")
     parser_socs.set_defaults(func=socs)
@@ -79,10 +81,16 @@ def init(args, env, cwd):
 
 def clean(args, env, cwd):  # pylint: disable=unused-argument
     """Cleans all build by remove the build directory."""
-    if os.path.exists("build/"):
-        shutil.rmtree("build/")
+    path = "build/"
+    if args.soc:
+        path = os.path.join(path, get_soc_name(args.soc))
+    if args.board:
+        path = os.path.join(path, get_board_name(args.board))
+    if os.path.exists(path):
+        logging.debug(f"Remove {path}")
+        shutil.rmtree(path)
     else:
-        print("Nothing to do!")
+        print(f"Path {path} does not exist!")
 
 
 def socs(args, env, cwd):  # pylint: disable=unused-argument

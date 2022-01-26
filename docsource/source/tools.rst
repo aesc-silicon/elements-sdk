@@ -20,11 +20,11 @@ initialize.
 Clean
 -----
 
-The ``clean`` command removes everything from the build directory.
+The ``clean`` command can remove all build artifacts for a kit, soc or the entire build.
 
 .. code-block:: text
 
-    ./elements.py clean
+    ./elements.py clean [<soc> [<board>]]
 
 SOCs
 ----
