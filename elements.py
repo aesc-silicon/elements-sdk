@@ -87,7 +87,7 @@ def clean(args, env, cwd):  # pylint: disable=unused-argument
     if args.board:
         path = os.path.join(path, get_board_name(args.board))
     if os.path.exists(path):
-        logging.debug(f"Remove {path}")
+        logging.debug("Remove path %s", path)
         shutil.rmtree(path)
     else:
         print(f"Path {path} does not exist!")
