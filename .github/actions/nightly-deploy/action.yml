@@ -19,7 +19,7 @@ runs:
         SSH_AUTH_SOCK: /tmp/ssh_agent.sock
       run: |
         cd ${{ inputs.repository }}
-        git remote add origin https://elements-user:${{ inputs.PAT }}@github.com/aesc-silicon/${{ inputs.repository_name }}.git
+        git remote add origin https://elements-user:${{ inputs.PAT }}@github.com/aesc-silicon/${{ inputs.repository }}.git
         git push origin HEAD:${{ inputs.branch }} -f
         cd ../
       shell: bash
