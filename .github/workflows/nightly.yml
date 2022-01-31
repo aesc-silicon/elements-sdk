@@ -34,57 +34,57 @@ jobs:
         virtualenv -p python3 venv
         python3 elements.py init --manifest next.xml
 
-    - name: Test Hydrogen1 Nexys4-DDR boot
-      uses: ./.github/actions/nightly-fpga-build
-      with:
-        kit: "Hydrogen1 Nexys4-DDR"
+#    - name: Test Hydrogen1 Nexys4-DDR boot
+#      uses: ./.github/actions/nightly-fpga-build
+#      with:
+#        kit: "Hydrogen1 Nexys4-DDR"
 
-    - name: Test HydrogenTest Nexys4-DDR boot
-      uses: ./.github/actions/nightly-fpga-build
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
+#    - name: Test HydrogenTest Nexys4-DDR boot
+#      uses: ./.github/actions/nightly-fpga-build
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
 
-    - name: Test Hydrogen1 Nexys4-DDR mtimer
-      uses: ./.github/actions/nightly-fpga-test
-      with:
-        kit: "Hydrogen1 Nexys4-DDR"
-        testcase: "mtimer"
+#    - name: Test Hydrogen1 Nexys4-DDR mtimer
+#      uses: ./.github/actions/nightly-fpga-test
+#      with:
+#        kit: "Hydrogen1 Nexys4-DDR"
+#        testcase: "mtimer"
 
-    - name: Test HydrogenTest Nexys4-DDR mtimer
-      uses: ./.github/actions/nightly-fpga-test
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
-        testcase: "mtimer"
+#    - name: Test HydrogenTest Nexys4-DDR mtimer
+#      uses: ./.github/actions/nightly-fpga-test
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
+#        testcase: "mtimer"
 
-    - name: Test HydrogenTest Nexys4-DDR gpio
-      uses: ./.github/actions/nightly-fpga-test
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
-        testcase: "gpio"
+#    - name: Test HydrogenTest Nexys4-DDR gpio
+#      uses: ./.github/actions/nightly-fpga-test
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
+#        testcase: "gpio"
 
-    - name: Test HydrogenTest Nexys4-DDR uart
-      uses: ./.github/actions/nightly-fpga-test
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
-        testcase: "uart"
+#    - name: Test HydrogenTest Nexys4-DDR uart
+#      uses: ./.github/actions/nightly-fpga-test
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
+#        testcase: "uart"
 
-    - name: Test HydrogenTest Nexys4-DDR frequency
-      uses: ./.github/actions/nightly-fpga-test
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
-        testcase: "frequency"
+#    - name: Test HydrogenTest Nexys4-DDR frequency
+#      uses: ./.github/actions/nightly-fpga-test
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
+#        testcase: "frequency"
 
-    - name: Compile Demo Hydrogen1 Nexys4-DDR leds
-      uses: ./.github/actions/nightly-fpga-compile
-      with:
-        kit: "Hydrogen1 Nexys4-DDR"
-        application: "leds"
+#    - name: Compile Demo Hydrogen1 Nexys4-DDR leds
+#      uses: ./.github/actions/nightly-fpga-compile
+#      with:
+#        kit: "Hydrogen1 Nexys4-DDR"
+#        application: "leds"
 
-    - name: Compile Demo HydrogenTest Nexys4-DDR leds
-      uses: ./.github/actions/nightly-fpga-compile
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
-        application: "leds"
+#    - name: Compile Demo HydrogenTest Nexys4-DDR leds
+#      uses: ./.github/actions/nightly-fpga-compile
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
+#        application: "leds"
 
     - name: Deploy openocd
       uses: ./.github/actions/nightly-deploy
