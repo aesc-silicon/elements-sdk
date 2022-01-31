@@ -90,18 +90,22 @@ jobs:
       uses: ./.github/actions/nightly-deploy
       with:
         repository: "openocd"
+        with: ${{ secrets.PAT }}
 
     - name: Deploy vexriscv
       uses: ./.github/actions/nightly-deploy
       with:
         repository: "vexriscv"
+        with: ${{ secrets.PAT }}
 
     - name: Deploy zephyr
       uses: ./.github/actions/nightly-deploy
       with:
         repository: "zephyr"
+        with: ${{ secrets.PAT }}
 
     - name: Deploy embench-iot
       uses: ./.github/actions/nightly-deploy
       with:
         repository: "embench-iot"
+        with: ${{ secrets.PAT }}
