@@ -21,7 +21,7 @@ def parse_fpga_args(subparsers):
 
     parser_synthesize = subparsers.add_parser('synthesize', help="Synthesizes the design")
     parser_synthesize.set_defaults(func=synthesize)
-    parser_synthesize.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
+    parser_synthesize.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'symbiflow'],
                                    help="Choose between different toolchains.")
 
     parser_build = subparsers.add_parser('build', help="Run the complete flow to generate a "
@@ -30,7 +30,7 @@ def parse_fpga_args(subparsers):
     parser_build.add_argument('application', nargs='?', default="",
                               help="Name of an application")
     parser_build.add_argument('-f', action='store_true', help="Force build")
-    parser_build.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'oss'],
+    parser_build.add_argument('--toolchain', default="xilinx", choices=['xilinx', 'symbiflow'],
                               help="Choose between different toolchains.")
 
     parser_test = subparsers.add_parser('test', help="Tests the kit")
@@ -57,6 +57,7 @@ def simulate(args, env, cwd):
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 
+    # Can be removed with SpinalDHL 1.6.2+
     binary_files = glob.glob("zibal/{}Top.v*bin".format(board))
     for binary_file in binary_files:
         os.remove(binary_file)
@@ -90,7 +91,7 @@ def synthesize(args, env, cwd):
                   " -log ./logs/vivado.log -journal ./logs/vivado.jou"
         logging.debug(command)
         subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
-    if args.toolchain == 'oss':
+    if args.toolchain == 'symbiflow':
         if not 'xilinx' in board_data:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
         env['PART'] = board_data['xilinx']['part']

@@ -99,11 +99,13 @@ Afterwards, all Python tools can be used identical to the CLI.
 .. code-block:: text
 
     sudo docker exec -it elements_sdk_1 \
-        ./elements-fpga.py Hydrogen1 Nexys4-DDR build zephyr-samples/demo/leds --toolchain oss
+        ./elements-fpga.py Hydrogen1 Nexys4-DDR build zephyr-samples/demo/leds \
+        --toolchain symbiflow
 
 .. tip::
 
-    Add ``--toolchain oss`` as parameter for the synthesize command to use the ope-source toolchain.
+    Add ``--toolchain symbiflow`` as parameter for the synthesize command to use the open-source
+    toolchain.
 
 Finally, stop the Docker.
 

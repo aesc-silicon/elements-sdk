@@ -129,8 +129,7 @@ option can select the source type to simulate for example a synthesized design.
 
 .. code-block:: text
 
-    ./elements-fpga.py <soc> <board> simulate [--toolchain <oss/cadence>]
-                                     [--source <generated/synthesized/placed>]
+    ./elements-fpga.py <soc> <board> simulate
 
 Example to simulate a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
@@ -145,13 +144,13 @@ The ``synthesize`` is similiar to the simulate. It can synthesize a SOC design f
 
 .. code-block:: text
 
-    ./elements-fpga.py <soc> <board> synthesize [--toolchain <xilinx/oss>]
+    ./elements-fpga.py <soc> <board> synthesize [--toolchain <xilinx/symbiflow>]
 
 Example to synthesize a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py Hydrogen1 Nexys4-DDR synthesize --toolchain oss
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR synthesize --toolchain symbiflow
 
 Build
 -----
@@ -168,7 +167,8 @@ Example to build a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py Hydrogen1 Nexys4-DDR build zephyr-samples/startup/mtimer/ --toolchain oss
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR build zephyr-samples/startup/mtimer/ \
+        --toolchain symbiflow
 
 Flash
 -----

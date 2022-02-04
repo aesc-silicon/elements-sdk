@@ -29,7 +29,7 @@ runs:
       shell: bash
     - name: Synthesize
       run: |
-        ./elements-fpga.py ${{ inputs.kit }} synthesize --toolchain oss
+        ./elements-fpga.py ${{ inputs.kit }} synthesize --toolchain symbiflow
       shell: bash
     - name: Clean
       run: |
