@@ -47,8 +47,8 @@ def simulate(args, env, cwd):
     top = f"{board}Top"
 
     if not os.path.exists(f"build/{soc}/{board}/zibal/{top}.v"):
-        raise SystemExit(f"No SOC design found. Run \"./elements-fpga.py generate {args.soc} "
-                         f"{args.board}\" before.")
+        raise SystemExit(f"No SOC design found. Run \"./elements-fpga.py {args.soc} "
+                         f"{args.board} generate\" before.")
 
     build_cwd = os.path.join(cwd, f"build/{soc}/{board}/zibal/{board}Board/")
     zibal_cwd = os.path.join(cwd, "zibal")
@@ -62,7 +62,7 @@ def simulate(args, env, cwd):
     for binary_file in binary_files:
         os.remove(binary_file)
 
-    command = "gtkwave simulate.vcd"
+    command = "gtkwave -o simulate.vcd"
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True,
                    stdin=subprocess.PIPE)
@@ -78,7 +78,7 @@ def synthesize(args, env, cwd):
 
     if not os.path.exists(f"build/{soc}/{board}/zibal/{board}Top.v"):
         raise SystemExit("No SOC design found!\n"
-                         f" Run \"./elements.py generate {args.soc} {args.board}\" before.")
+                         f" Run \"./elements-fpga.py {args.soc} {args.board} generate\" before.")
 
     if args.toolchain == 'xilinx':
         if 'xilinx' not in board_data:
