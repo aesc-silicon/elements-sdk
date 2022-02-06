@@ -57,11 +57,6 @@ def simulate(args, env, cwd):
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 
-    # Can be removed with SpinalDHL 1.6.2+
-    binary_files = glob.glob("zibal/{}Top.v*bin".format(board))
-    for binary_file in binary_files:
-        os.remove(binary_file)
-
     command = "gtkwave -o simulate.vcd"
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True,
