@@ -38,9 +38,7 @@ wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss
 wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/459/20211116-000105/symbiflow-arch-defs-xc7a100t_test-ef6fff3c.tar.xz | tar -xJC $INSTALL_DIR/xc7/install
 
 cd openocd
-./bootstrap
-./configure
-make -j8
+./bootstrap && ./configure && make -j `nproc`
 cd ../
 
 if ! test -f "openocd/src/openocd"; then
@@ -48,13 +46,22 @@ if ! test -f "openocd/src/openocd"; then
 	exit 2
 fi
 
-git clone https://github.com/Kitware/CMake.git cmake
+git clone https://github.com/Kitware/CMake.git cmake -b v3.20.0
 cd cmake
-git checkout v3.20.0
-./bootstrap && make -j 4
+./bootstrap && make -j `nproc`
 cd ../
 
 if ! test -f "cmake/bin/cmake"; then
 	echo "cmake does not exist."
+	exit 2
+fi
+
+git clone https://github.com/verilator/verilator verilator -b v4.218
+cd verilator
+autoconf && ./configure && make -j `nproc`
+cd ../
+
+if ! test -f "verilator/bin/verilator"; then
+	echo "verilator does not exist."
 	exit 2
 fi
