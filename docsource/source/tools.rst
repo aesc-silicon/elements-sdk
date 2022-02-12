@@ -4,6 +4,17 @@ General Tasks
 For common tasks a dedicated tool exists called ``elements.py``. This can be used to initialize or
 clean the project or to get information about available SOCs or boards.
 
+Checkout
+--------
+
+The ``checkout`` command checks out all repositories from either the default release manifest
+or a custom file given with the ``--manifest`` parameter.
+
+.. code-block:: text
+
+    ./elements.py init [--manifest next.xml] [-f]
+
+
 Init
 ----
 

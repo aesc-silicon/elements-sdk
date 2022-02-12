@@ -22,6 +22,11 @@ def parse_args():
     subparsers = parser.add_subparsers(help="Elements commands", dest='command')
     subparsers.required = True
 
+    parser_checkout = subparsers.add_parser('checkout', help="Checks out all repositories")
+    parser_checkout.set_defaults(func=checkout)
+    parser_checkout.add_argument('--manifest', help="Repo manifest")
+    parser_checkout.add_argument('-f', action='store_true', help="Force checkout")
+
     parser_init = subparsers.add_parser('init', help="Initialise the SDK")
     parser_init.set_defaults(func=init)
     parser_init.add_argument('--manifest', help="Repo manifest")
@@ -42,8 +47,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def init(args, env, cwd):
-    """Clones all repositories, installs and/or build all packages."""
+def checkout(args, env, cwd):
+    """Checks out all repositories."""
     if args.f:
         command = "rm -rf .repo"
         logging.debug(command)
@@ -72,6 +77,11 @@ def init(args, env, cwd):
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
 
+    print("Checkout done")
+
+
+def init(args, env, cwd):
+    """Clones all repositories, installs and/or build all packages."""
     command = "./.init.sh {}".format(env['ZEPHYR_SDK_VERSION'])
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
