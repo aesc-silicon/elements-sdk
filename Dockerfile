@@ -14,12 +14,20 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     gdb \
     ninja-build \
+    flex \
+    bison \
     python3 \
     python3.8-dev \
     python3-pip \
     virtualenv \
-    openjdk-11-jre-headless \
-    verilator
+    openjdk-11-jdk-headless \
+    verilator \
+    gtkwave \
+    libcanberra-gtk-module \
+    libcanberra-gtk3-module \
+    libtinfo5 \
+    libncurses5
+
 
 RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | tee /etc/apt/sources.list.d/sbt.list
 RUN echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | tee /etc/apt/sources.list.d/sbt_old.list

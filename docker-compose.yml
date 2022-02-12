@@ -2,8 +2,28 @@ version: "2"
 services:
   sdk:
     build: .
+    environment:
+      - DISPLAY=${DISPLAY}
     volumes:
       - build:/elements-sdk/build/
+# Uncomment to use Xilinx toolchain
+#      - <path to vivado installation dir>/Vivado/:/opt/xilinx/Vivado/
+# Uncomment if different environment variables are used
+#      - ./env.ini:/elements-sdk/env.ini
+# Uncomment to forward local changes
+#      - ./base.py:/elements-sdk/base.py
+#      - ./elements.py:/elements-sdk/elements.py
+#      - ./elements-fpga.py:/elements-sdk/elements-fpga.py
+#      - ./elements-asic.py:/elements-sdk/elements-asic.py
+#      - ./embench-iot/:/elements-sdk/embench-iot/
+#      - ./openocd/:/elements-sdk/openocd/
+#      - ./vexriscv/:/elements-sdk/vexriscv/
+#      - ./zephyr/:/elements-sdk/zephyr/
+#      - ./zephyr-samples/:/elements-sdk/zephyr-samples/
+#      - ./zibal/:/elements-sdk/zibal/
+#      - ./zibal-fpl/:/elements-sdk/zibal-fpl/
+# Mount tmp directory for X11 support
+      - /tmp/.X11-unix:/tmp/.X11-unix
     command: ["sleep", "infinity"]
 volumes:
   build: {}

@@ -35,8 +35,8 @@ Installation
 - Install required packages::
 
         sudo apt install ssh git curl libtool-bin autotools-dev automake pkg-config libyaml-dev
-        sudo apt install libssl-dev gdb ninja-build
-        sudo apt install python3 python3.8-dev python3-pip virtualenv openjdk-11-jre-headless
+        sudo apt install libssl-dev gdb ninja-build flex bison
+        sudo apt install python3 python3.8-dev python3-pip virtualenv openjdk-11-jdk-headless
         sudo apt install verilator gtkwave libcanberra-gtk-module libcanberra-gtk3-module
         sudo apt install libtinfo5 libncurses5
 
@@ -49,6 +49,10 @@ Installation
 - Create a virtualenv::
 
         virtualenv -p python3 venv
+
+- Install required packages for elements::
+
+        . venv/bin/activate && pip install pyyaml packaging
 
 - Initialise the SDK::
 
@@ -112,6 +116,23 @@ Finally, stop the Docker.
 .. code-block:: text
 
     docker-compose stop
+
+Development
+***********
+
+The docker image can also be used to develop. Therefore, the repos on the host system should be
+forwarded to the container to make all changes public. Open the ``docker-compose.yml`` file and
+uncomment the lines in ``volumnes`` which should be made public.
+
+GUI Support
+***********
+
+Some GUI applications require access to the host system's X server. Run the following command in
+the host shell to grant them.
+
+.. code-block:: text
+
+    xhost local:root
 
 Support
 #######
