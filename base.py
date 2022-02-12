@@ -372,7 +372,7 @@ def environment():
     env['PATH'] += os.pathsep + os.path.join(base, 'symbiflow/xc7/install/bin')
     env['PATH'] = os.path.join(base, 'cmake/bin') + os.pathsep + env['PATH']
     env['PATH'] = os.path.join(base, 'verilator/bin') + os.pathsep + env['PATH']
-    env['VERILATOR_ROOT'] = os.path.join(base, 'verilator/bin')
+    env['VERILATOR_ROOT'] = os.path.join(base, 'verilator')
     env['VIVADO_PATH'] = vivado_path
     env['PDK_BASE'] = get_variable(env, localenv, 'pdk_base')
     env['IHP_TECH'] = os.path.join(get_variable(env, localenv, 'pdk_base'), 'tech')
