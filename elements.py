@@ -82,6 +82,8 @@ def checkout(args, env, cwd):
 
 def init(args, env, cwd):
     """Clones all repositories, installs and/or build all packages."""
+    checkout(args, env, cwd)
+
     command = "./.init.sh {}".format(env['ZEPHYR_SDK_VERSION'])
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
