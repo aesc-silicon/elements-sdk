@@ -272,7 +272,7 @@ def debug(args, env, cwd, type_="debug"):
         openocd_process.terminate()
 
 
-def benchmark(args, env, cwd):
+def benchmark(args, env, cwd): # pylint: disable=too-many-locals
     """Command to run Embench benchmark tests"""
     soc = get_soc_name(args.soc)
     board = get_board_name(args.board)
@@ -281,6 +281,17 @@ def benchmark(args, env, cwd):
     gcc = toolchain + 'gcc'
     gdb = toolchain + 'gdb'
     python = "../venv/bin/python3"
+
+
+    yaml_file = "build/{0}/{1}/zibal/{1}Top.yaml".format(soc, board)
+    if not os.path.exists(yaml_file):
+        raise SystemExit(f"{board}Top.yaml does not exist. Run prepare command first!")
+
+    soc_data = open_yaml(yaml_file)
+    cpu_frequency = soc_data.get('frequencies', {}).get('cpu', 0)
+    if cpu_frequency == 0:
+        raise SystemExit(f"No cpu frequency found in {board}Top.yaml")
+    cpu_frequency = int(cpu_frequency / 1000000)
 
     embench_cwd = os.path.join(cwd, "embench-iot")
     command = "{} build_all.py --arch riscv32 --board {} --clean --cc {}".format(python, platform,
@@ -297,8 +308,9 @@ def benchmark(args, env, cwd):
     with subprocess.Popen(command, env=env, cwd=openocd_cwd, stdout=subprocess.DEVNULL,
                           stderr=subprocess.DEVNULL) as openocd_process:
 
+        print(f"CPU performance is {cpu_frequency} MHz")
         command = "{} benchmark_speed.py --gdb-command {} --target-module run_vexriscv_gdb" \
-                  " --timeout 60 --cpu-mhz 100".format(python, gdb)
+                  " --timeout 60 --cpu-mhz {}".format(python, gdb, cpu_frequency)
         logging.debug(command)
         subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
 
