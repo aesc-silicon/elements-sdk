@@ -35,14 +35,16 @@ jobs:
         python3 elements.py init --manifest next.xml
 
     - name: Test Hydrogen1 Nexys4-DDR boot
-      uses: ./.github/actions/nightly-fpga-build
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "Hydrogen1 Nexys4-DDR"
+        testcase: "boot"
 
     - name: Test HydrogenTest Nexys4-DDR boot
-      uses: ./.github/actions/nightly-fpga-build
+      uses: ./.github/actions/nightly-fpga-test
       with:
         kit: "HydrogenTest Nexys4-DDR"
+        testcase: "boot"
 
     - name: Test Hydrogen1 Nexys4-DDR mtimer
       uses: ./.github/actions/nightly-fpga-test
