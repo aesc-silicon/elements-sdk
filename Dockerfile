@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
     ninja-build \
     flex \
     bison \
-    libfl \
+    libfl-dev \
     python3 \
     python3.8-dev \
     python3-pip \
