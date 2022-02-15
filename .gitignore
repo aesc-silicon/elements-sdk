@@ -12,7 +12,6 @@ openocd
 .repo
 .west
 docsource/source/docsource
-conda_installer.sh
 symbiflow/
 riscv32-unknown-elf
 repo
@@ -23,3 +22,5 @@ project/
 target/
 embench-iot/
 verilator/
+*sh
+*log
