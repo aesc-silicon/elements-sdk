@@ -58,11 +58,12 @@ jobs:
         kit: "HydrogenTest Nexys4-DDR"
         testcase: "mtimer"
 
-    - name: Test HydrogenTest Nexys4-DDR gpio
-      uses: ./.github/actions/nightly-fpga-test
-      with:
-        kit: "HydrogenTest Nexys4-DDR"
-        testcase: "gpio"
+# Verilator does not simulate IOBUFs correct. Only first works.
+#    - name: Test HydrogenTest Nexys4-DDR gpio
+#      uses: ./.github/actions/nightly-fpga-test
+#      with:
+#        kit: "HydrogenTest Nexys4-DDR"
+#        testcase: "gpio"
 
     - name: Test HydrogenTest Nexys4-DDR uart
       uses: ./.github/actions/nightly-fpga-test
