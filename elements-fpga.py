@@ -14,7 +14,7 @@ from base import prepare, compile_, generate
 _FORMAT = "%(asctime)s - %(message)s"
 
 
-def parse_fpga_args(subparsers):
+def parse_fpga_args(subparsers, _):
     """Parses all FPGA related arguments."""
     parser_simulate = subparsers.add_parser('simulate', help="Simulates a design")
     parser_simulate.set_defaults(func=simulate)

@@ -1,5 +1,5 @@
 #!venv/bin/python3
-"""Tool to handle all ASIC projects in the elements SDK."""
+"""Tool to handle all ASIC partitions in the elements SDK."""
 # pylint: disable=invalid-name
 
 import subprocess
@@ -14,7 +14,16 @@ from base import prepare, compile_, generate
 _FORMAT = "%(asctime)s - %(message)s"
 
 
-def parse_asic_args(subparsers, _):
+def validate_partition_name(name):
+    """Helper to validate a board name is type of string and exist."""
+    if not isinstance(name, str):
+        raise argparse.ArgumentTypeError("Board name is not a string.")
+    if name not in get_boards():
+        raise argparse.ArgumentTypeError(f"No Board with the name {name} available.")
+    return name
+
+
+def parse_asic_args(subparsers):
     """Parses all ASIC related arguments."""
     parser_simulate = subparsers.add_parser('simulate', help="Simulates a design")
     parser_simulate.set_defaults(func=simulate)
@@ -61,7 +70,7 @@ def simulate(args, env, cwd):
     logging.debug(command)
     subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
 
-    command = "gtkwave -o simulate.vcd"
+    command = "gtkwave simulate.vcd"
     logging.debug(command)
     subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True,
                    stdin=subprocess.PIPE)
