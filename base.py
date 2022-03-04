@@ -377,7 +377,8 @@ def environment():
     env['ELEMENTS_BASE'] = base
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
     env['ZEPHYR_SDK_VERSION'] = zephyr_sdk_version
-    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, 'zephyr-sdk-{}'.format(zephyr_sdk_version))
+    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, f'zephyr-sdk-{zephyr_sdk_version}')
+    env['Zephyr_DIR'] = os.path.join(base, 'zephyr')
     env['FPGA_FAM'] = "xc7"
     env['INSTALL_DIR'] = os.path.join(base, 'symbiflow')
     env['PATH'] += os.pathsep + vivado_path
