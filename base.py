@@ -152,11 +152,10 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
 
     if args.type == "bootrom":
         command = "make"
-        platform = ''.join(i.lower() for i in soc if not i.isdigit())
-        fpl_cwd = os.path.join(cwd, "zibal-fpl")
-        platform_cwd = os.path.join(fpl_cwd, platform)
+        fpl_cwd = os.path.join(cwd, "zibal/software/bootrom/")
+        soc_cwd = os.path.join(fpl_cwd, soc.lower())
         logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=platform_cwd, check=True)
+        subprocess.run(command.split(' '), env=env, cwd=soc_cwd, check=True)
 
         build_cwd = os.path.join(cwd, f"build/{soc}/{board}/fpl")
         with open("{}/kernel.rom".format(build_cwd), 'w', encoding='UTF-8') as rom_file:
