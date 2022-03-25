@@ -374,6 +374,7 @@ def environment():
     vivado_path = get_variable(env, localenv, 'vivado_path')
 
     env['ELEMENTS_BASE'] = base
+    env['NAFARR_BASE'] = os.path.join(base, 'nafarr')
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
     env['ZEPHYR_SDK_VERSION'] = zephyr_sdk_version
     env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, f'zephyr-sdk-{zephyr_sdk_version}')
