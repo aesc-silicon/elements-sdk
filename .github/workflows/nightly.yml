@@ -38,7 +38,7 @@ jobs:
     - name: Debugging
       run: |
         ls -lh
-        repo info
+        ./repo info
         echo $PWD
 
         ls -l nafarr/
