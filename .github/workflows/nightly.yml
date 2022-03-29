@@ -35,6 +35,20 @@ jobs:
         virtualenv -p python3 venv
         python3 elements.py init --manifest next.xml
 
+    - name: Debugging
+      run: |
+        ls -lh
+        repo info
+        echo $PWD
+
+        ls -l nafarr/
+        ls -l nafarr/hardware/
+        ls -l nafarr/hardware/scala/
+        ls -l nafarr/hardware/scala/nafarr/
+        ls -l nafarr/hardware/scala/nafarr/blackboxes/
+        ls -l nafarr/hardware/scala/nafarr/blackboxes/xilinx/
+        ls -l nafarr/hardware/scala/nafarr/blackboxes/xilinx/a7/
+
     - name: Test Hydrogen1 Nexys4-DDR boot
       uses: ./.github/actions/nightly-fpga-test
       with:
