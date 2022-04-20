@@ -3,12 +3,12 @@
 # pylint: disable=invalid-name
 
 import argparse
-import subprocess
 import os
 import logging
 import shutil
 
 from base import environment, get_socs, get_boards_for_soc, get_soc_name, get_board_name, _RELEASE
+from base import command
 
 
 _FORMAT = "%(asctime)s - %(message)s"
@@ -50,32 +50,27 @@ def parse_args():
 def checkout(args, env, cwd):
     """Checks out all repositories."""
     if args.f:
-        command = "rm -rf .repo"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+        command("rm -rf .repo", env, cwd)
 
     if os.path.exists(".repo"):
         raise SystemExit("Repo exists! Either the SDK is already initialized or force init.")
 
     if not os.path.exists("./repo"):
-        command = "curl https://storage.googleapis.com/git-repo-downloads/repo-1"
-        logging.debug(command)
-        proc = subprocess.run(command.split(' '), cwd=cwd, check=True, stdout=subprocess.PIPE)
-        with open("./repo", "w", encoding='UTF-8') as text_file:
-            text_file.write(proc.stdout.decode())
 
-        command = "chmod a+x ./repo"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+        def repo_handler(process):
+            with open("./repo", "w", encoding='UTF-8') as text_file:
+                text_file.write(process.stdout.decode())
 
-    command = "python3 ./repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
-              " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+        command("curl https://storage.googleapis.com/git-repo-downloads/repo-1", env, cwd,
+                handler=repo_handler)
 
-    command = "python3 ./repo sync"
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+        command("chmod a+x ./repo", env, cwd)
+
+    cmd = "python3 ./repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
+          " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
+    command(cmd, env, cwd)
+
+    command("python3 ./repo sync", env, cwd)
 
     print("Checkout done")
 
@@ -84,9 +79,7 @@ def init(args, env, cwd):
     """Clones all repositories, installs and/or build all packages."""
     checkout(args, env, cwd)
 
-    command = "./.init.sh {}".format(env['ZEPHYR_SDK_VERSION'])
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=cwd, check=True)
+    command("./.init.sh {}".format(env['ZEPHYR_SDK_VERSION']), env, cwd)
 
     print("Initialization finished")
 

@@ -91,7 +91,7 @@ def parse_args(parse_tool_args):
     parser_benchmark = subparsers.add_parser('benchmark', help="Benchmark tests for a kit")
     parser_benchmark.set_defaults(func=benchmark)
 
-    parse_tool_args(subparsers)
+    parse_tool_args(subparsers, parser)
 
     return parser.parse_args()
 
@@ -102,12 +102,12 @@ def open_yaml(path):
         with open(path, 'r', encoding='UTF-8') as stream:
             if version.parse(yaml.__version__) > version.parse("5.1.0"):
                 return yaml.load(stream, Loader=yaml.FullLoader)
-            return yaml.load(stream)
+            return yaml.load(stream) # pylint: disable=no-value-for-parameter
     except yaml.YAMLError as exc:
         raise SystemExit from exc
     except FileNotFoundError as exc:
         raise SystemExit from exc
-    raise SystemExit("Unable to open {}".format(path))
+    raise SystemExit(f"Unable to open {path}")
 
 
 def get_socs():
@@ -130,6 +130,21 @@ def get_boards_for_soc(soc):
     return open_yaml(soc_file).get('boards', [])
 
 
+# pylint: disable=too-many-arguments
+def command(cmd, env, cwd, stdout=None, stderr=None, handler=None):
+    """Wrapper to call subprocess calls."""
+    logging.debug(cmd)
+    if handler:
+        with subprocess.Popen(shlex.split(cmd), env=env, cwd=cwd, stdout=stdout,
+                              stderr=stderr) as process:
+            if handler:
+                handler(process)
+            process.terminate()
+    else:
+        subprocess.run(shlex.split(cmd), env=env, cwd=cwd, check=True, stdout=stdout,
+                       stderr=stderr)
+
+
 def prepare(args, env, cwd):
     """Command to prepare a SOC board combination by generating all required files."""
     soc = get_soc_name(args.soc)
@@ -137,10 +152,8 @@ def prepare(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}.{}Top prepare'.format(soc.lower(), board)]
-    logging.debug(command)
-    subprocess.run(command, env=env, cwd=cwd, check=True)
+    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Top prepare\"", env,
+            os.path.join(cwd, "zibal"))
 
 
 def compile_(args, env, cwd):  # pylint: disable=too-many-locals
@@ -151,17 +164,12 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
     env['BOARD'] = board
 
     if args.type == "bootrom":
-        command = "make"
         fpl_cwd = os.path.join(cwd, "zibal/software/bootrom/")
-        soc_cwd = os.path.join(fpl_cwd, soc.lower())
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=soc_cwd, check=True)
+        command("make", env, os.path.join(fpl_cwd, soc.lower))
 
         build_cwd = os.path.join(cwd, f"build/{soc}/{board}/fpl")
-        with open("{}/kernel.rom".format(build_cwd), 'w', encoding='UTF-8') as rom_file:
-            command = "python {}/scripts/gen_rom.py".format(fpl_cwd)
-            logging.debug(command)
-            subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True, stdout=rom_file)
+        with open(f"{build_cwd}/kernel.rom", 'w', encoding='UTF-8') as rom_file:
+            command(f"python {fpl_cwd}/scripts/gen_rom.py", env, build_cwd, rom_file)
 
     if args.type == "zephyr":
         if not args.application:
@@ -173,18 +181,11 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
         project_path = os.path.join(cwd, f"build/{soc}/{board}/zephyr-boards/")
         include = f"-DDTC_INCLUDE_FLAG_FOR_DTS=\"-isystem;{include_path}/\" " \
                   f"-DBOARD_ROOT={project_path}"
-        command = "venv/bin/west build -p {} -b {} -d {} {} -- {}".format(force, kit, output,
-                                                                          args.application,
-                                                                          include)
-        logging.debug(command)
-        subprocess.run(shlex.split(command), env=env, cwd=cwd, check=True)
+        command(f"venv/bin/west build -p {force} -b {kit} -d {output} {args.application} -- " \
+                f"{include}", env, cwd)
 
     if args.type == "menuconfig":
-        zephyr_cwd = os.path.join(cwd, f"build/{soc}/{board}/zephyr")
-
-        command = "ninja menuconfig"
-        logging.debug(command)
-        subprocess.run(shlex.split(command), env=env, cwd=zephyr_cwd, check=True)
+        command("ninja menuconfig", env, os.path.join(cwd, f"build/{soc}/{board}/zephyr"))
 
 
 def generate(args, env, cwd):
@@ -194,10 +195,27 @@ def generate(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}.{}Top generate'.format(soc.lower(), board)]
-    logging.debug(command)
-    subprocess.run(command, env=env, cwd=cwd, check=True)
+    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Top generate\"", env,
+            os.path.join(cwd, "zibal"))
+
+
+def functional_simulation(args, env, cwd):
+    """Runs a functional simulation and shows the waveform."""
+    soc = get_soc_name(args.soc)
+    board = get_board_name(args.board)
+    env['SOC'] = soc
+    env['BOARD'] = board
+    top = f"{board}Top"
+
+    if not os.path.exists(f"build/{soc}/{board}/zibal/{top}.v"):
+        raise SystemExit(f"No SOC design found. Run \"./elements-fpga.py {args.soc} "
+                         f"{args.board} generate\" before.")
+
+    build_cwd = os.path.join(cwd, f"build/{soc}/{board}/zibal/{board}Board/")
+    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Board generated simulate\"", env,
+            os.path.join(cwd, "zibal"))
+
+    command("gtkwave -o simulate.vcd", env, build_cwd)
 
 
 def flash(args, env, cwd):
@@ -212,8 +230,7 @@ def flash(args, env, cwd):
         debug(args, env, cwd, type_="flash")
     else:
         if not args.destination in board_data.get('flash_bridge', {}):
-            raise SystemExit("Unsupported destination {} for board {}".format(args.destination,
-                                                                              args.board))
+            raise SystemExit(f"Unsupported destination {args.destination} for board {args.board}")
 
         vivado_bit = os.path.exists(f"build/{soc}/{board}/vivado/syn/{top}.bit")
         symbiflow_bit = os.path.exists(f"build/{soc}/{board}/symbiflow/{top}.bit")
@@ -227,16 +244,11 @@ def flash(args, env, cwd):
             bitstream_origin = "symbiflow" if symbiflow_bit else "vivado"
         destination = board_data['flash_bridge'][args.destination]
         transport = board_data['flash_bridge']["transport"]
-        command = ['src/openocd',
-                   '-c', 'set SOC {}'.format(soc),
-                   '-c', 'set BOARD {}'.format(board),
-                   '-c', 'set TOP {}'.format(top),
-                   '-c', 'set BASE_PATH {}'.format(env['ELEMENTS_BASE']),
-                   '-c', 'set TRANSPORT {}'.format(transport),
-                   '-c', 'set BITSTREAM_ORIGIN {}'.format(bitstream_origin),
-                   '-f', '../zibal/openocd/flash_{}.cfg'.format(destination)]
-        logging.debug(command)
-        subprocess.run(command, env=env, cwd=openocd_cwd, check=True)
+        cmd = f"src/openocd -c \"set SOC {soc}\" -c \"set BOARD {board}\" -c \"set TOP {top}\" " \
+              f"-c \"set BASE_PATH {env['ELEMENTS_BASE']}\" -c \"set TRANSPORT {transport}\" " \
+              f"-c \"set BITSTREAM_ORIGIN {bitstream_origin}\" " \
+              f"-f ../zibal/openocd/flash_{destination}.cfg"
+        command(cmd, env, openocd_cwd)
 
 
 def debug(args, env, cwd, type_="debug"):
@@ -250,25 +262,19 @@ def debug(args, env, cwd, type_="debug"):
 
     openocd_cwd = os.path.join(cwd, "openocd")
     yaml_path = f"../build/{soc}/{board}/zibal/VexRiscv.yaml"
-    command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML {}'.format(yaml_path),
-               '-f', 'tcl/interface/jlink.cfg',
-               '-f', '../zibal/gdb/{}.cfg'.format(platform)]
-    logging.debug(command)
-    with subprocess.Popen(command, env=env, cwd=openocd_cwd, stdout=subprocess.DEVNULL) as \
-        openocd_process:
+    cmd = f"./src/openocd -c \"set HYDROGEN_CPU0_YAML {yaml_path}\" " \
+          f"-f tcl/interface/jlink.cfg -f ../zibal/gdb/{platform}.cfg"
 
+    def openocd_handler(_):
         toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
-        command = ['{}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb'.format(toolchain),
-                   '-x', 'zibal/gdb/{}.cmd'.format(type_),
-                   'build/{}/{}/zephyr/zephyr/zephyr.elf'.format(soc, board)]
-        logging.debug(command)
+        cmd = f"{toolchain}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb " \
+              f"-x zibal/gdb/{type_}.cmd build/{soc}/{board}/zephyr/zephyr/zephyr.elf"
         if type_ == "flash":
-            with subprocess.Popen(command, env=env, cwd=cwd) as gdb_process:
-                time.sleep(15)
-                gdb_process.terminate()
+            command(cmd, env, cwd, handler=lambda _: time.sleep(15))
         else:
-            subprocess.run(command, env=env, cwd=cwd, check=True)
-        openocd_process.terminate()
+            command(cmd, env, cwd)
+
+    command(cmd, env, openocd_cwd, subprocess.DEVNULL, handler=openocd_handler)
 
 
 def benchmark(args, env, cwd): # pylint: disable=too-many-locals
@@ -293,31 +299,23 @@ def benchmark(args, env, cwd): # pylint: disable=too-many-locals
     cpu_frequency = int(cpu_frequency / 1000000)
 
     embench_cwd = os.path.join(cwd, "embench-iot")
-    command = "{} build_all.py --arch riscv32 --board {} --clean --cc {}".format(python, platform,
-                                                                                 gcc)
-    logging.debug(command)
-    subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+    command(f"{python} build_all.py --arch riscv32 --board {platform} --clean --cc {gcc}", env,
+            embench_cwd)
 
     openocd_cwd = os.path.join(cwd, "openocd")
     yaml_path = f"../build/{soc}/{board}/zibal/VexRiscv.yaml"
-    command = ['./src/openocd', '-c', 'set HYDROGEN_CPU0_YAML {}'.format(yaml_path),
-               '-f', 'tcl/interface/jlink.cfg',
-               '-f', '../zibal/gdb/{}.cfg'.format(platform)]
-    logging.debug(command)
-    with subprocess.Popen(command, env=env, cwd=openocd_cwd, stdout=subprocess.DEVNULL,
-                          stderr=subprocess.DEVNULL) as openocd_process:
+    cmd = f"./src/openocd -c \"set HYDROGEN_CPU0_YAML {yaml_path}\" " \
+          f"-f tcl/interface/jlink.cfg -f ../zibal/gdb/{platform}.cfg"
 
+    def benchmark_handler(_):
         print(f"CPU performance is {cpu_frequency} MHz")
-        command = "{} benchmark_speed.py --gdb-command {} --target-module run_vexriscv_gdb" \
-                  " --timeout 60 --cpu-mhz {}".format(python, gdb, cpu_frequency)
-        logging.debug(command)
-        subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+        cmd = f"{python} benchmark_speed.py --gdb-command {gdb} --target-module run_vexriscv_gdb" \
+              " --timeout 60 --cpu-mhz 100"
+        command(cmd, env, embench_cwd)
 
-        openocd_process.terminate()
+        command(f"{python} benchmark_size.py", env, embench_cwd)
 
-        command = "{} benchmark_size.py".format(python)
-        logging.debug(command)
-        subprocess.run(shlex.split(command), env=env, cwd=embench_cwd, check=True)
+    command(cmd, env, openocd_cwd, subprocess.DEVNULL, handler=benchmark_handler)
 
 
 def get_variable(env, localenv, key):
@@ -326,7 +324,7 @@ def get_variable(env, localenv, key):
         return env[key]
     if key in localenv:
         return localenv[key]
-    raise SystemExit("Variable {} has no value".format(key))
+    raise SystemExit(f"Variable {key} has no value")
 
 
 def get_soc_name(soc):
@@ -341,7 +339,7 @@ def get_board_name(board):
 
 def open_board(board):
     """Opens a board file and checks a mandatory fields exist."""
-    board_file = "zibal/eda/boards/{}.yaml".format(board)
+    board_file = f"zibal/eda/boards/{board}.yaml"
     if not os.path.exists(board_file):
         raise SystemExit(f"Board {board} does not exist.")
     board = open_yaml(board_file)
@@ -369,6 +367,9 @@ def environment():
         config = configparser.ConfigParser()
         config.read("env.ini")
         localenv.update(config['DEFAULT'].items())
+        for pdk in ('SG13S', 'SG13S2'):
+            if pdk in config:
+                localenv.update(config[pdk].items())
 
     zephyr_sdk_version = get_variable(env, localenv, 'zephyr_sdk_version')
     vivado_path = get_variable(env, localenv, 'vivado_path')

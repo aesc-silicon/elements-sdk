@@ -2,19 +2,18 @@
 """Tool to handle all FPGA projects in the elements SDK."""
 # pylint: disable=invalid-name
 
-import subprocess
 import os
 import logging
-import glob
 
 from base import prepare_build, environment, open_board, get_soc_name, get_board_name, parse_args
-from base import prepare, compile_, generate
+from base import command
+from base import prepare, compile_, generate, functional_simulation
 
 
 _FORMAT = "%(asctime)s - %(message)s"
 
 
-def parse_fpga_args(subparsers):
+def parse_fpga_args(subparsers, _):
     """Parses all FPGA related arguments."""
     parser_simulate = subparsers.add_parser('simulate', help="Simulates a design")
     parser_simulate.set_defaults(func=simulate)
@@ -40,27 +39,7 @@ def parse_fpga_args(subparsers):
 
 def simulate(args, env, cwd):
     """Command to simulate a SOC on a virtual board."""
-    soc = get_soc_name(args.soc)
-    board = get_board_name(args.board)
-    env['SOC'] = soc
-    env['BOARD'] = board
-    top = f"{board}Top"
-
-    if not os.path.exists(f"build/{soc}/{board}/zibal/{top}.v"):
-        raise SystemExit(f"No SOC design found. Run \"./elements-fpga.py {args.soc} "
-                         f"{args.board} generate\" before.")
-
-    build_cwd = os.path.join(cwd, f"build/{soc}/{board}/zibal/{board}Board/")
-    zibal_cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}.{}Board {} simulate'.format(soc.lower(), board,
-                                                                        "generated")]
-    logging.debug(command)
-    subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
-
-    command = "gtkwave -o simulate.vcd"
-    logging.debug(command)
-    subprocess.run(command.split(' '), env=env, cwd=build_cwd, check=True,
-                   stdin=subprocess.PIPE)
+    functional_simulation(args, env, cwd)
 
 
 def synthesize(args, env, cwd):
@@ -82,10 +61,8 @@ def synthesize(args, env, cwd):
         env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/syn")
 
         xilinx_cwd = os.path.join(cwd, f"build/{soc}/{board}/vivado/syn")
-        command = "vivado -mode batch -source ../../../../../zibal/eda/Xilinx/vivado/syn/syn.tcl" \
-                  " -log ./logs/vivado.log -journal ./logs/vivado.jou"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=xilinx_cwd, check=True)
+        command("vivado -mode batch -source ../../../../../zibal/eda/Xilinx/vivado/syn/syn.tcl" \
+                " -log ./logs/vivado.log -journal ./logs/vivado.jou", env, xilinx_cwd)
     if args.toolchain == 'symbiflow':
         if not 'xilinx' in board_data:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
@@ -94,13 +71,8 @@ def synthesize(args, env, cwd):
         env['DEVICE'] = "{}_test".format(board_data['xilinx']['device'])
 
         symbiflow_cwd = os.path.join(cwd, "zibal/eda/Xilinx/symbiflow")
-        command = "make clean"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=symbiflow_cwd, check=True)
-
-        command = "./syn.sh"
-        logging.debug(command)
-        subprocess.run(command.split(' '), env=env, cwd=symbiflow_cwd, check=True)
+        command("make clean", env, symbiflow_cwd)
+        command("./syn.sh", env, symbiflow_cwd)
 
 
 def build(args, env, cwd):
@@ -121,15 +93,8 @@ def test(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    zibal_cwd = os.path.join(cwd, "zibal")
-    command = ['sbt', 'runMain zibal.soc.{}.{}Board generated {}'.format(soc.lower(), board,
-                                                                         args.case)]
-    logging.debug(command)
-    subprocess.run(command, env=env, cwd=zibal_cwd, check=True)
-
-    binary_files = glob.glob("zibal/{}Top.v*bin".format(board))
-    for binary_file in binary_files:
-        os.remove(binary_file)
+    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Board generated {args.case}\"", env,
+            os.path.join(cwd, "zibal"))
 
 
 def main():
