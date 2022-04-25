@@ -1,0 +1,55 @@
+# This workflow checks the scala format
+
+name: Scala Format Check
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Prepare internal
+        run: |
+          mkdir -p internal
+
+      - name: Checkout VexRiscv
+        uses: actions/checkout@v2
+        with:
+          repository: aesc-silicon/elements-vexriscv
+          ref: main
+          path: internal/vexriscv
+
+      - name: Checkout Nafarr
+        uses: actions/checkout@v2
+        with:
+          repository: aesc-silicon/elements-nafarr
+          ref: main
+          path: internal/nafarr
+
+      - name: Checkout Zibal
+        uses: actions/checkout@v2
+        with:
+          repository: aesc-silicon/elements-zibal
+          ref: main
+          path: internal/zibal
+
+      - name: Checkout SpinalCrypto
+        uses: actions/checkout@v2
+        with:
+          repository: SpinalHDL/SpinalCrypto
+          ref: master
+          path: internal/SpinalCrypto
+
+      - name: Check Format
+        run: |
+          sbt scalafmtCheck

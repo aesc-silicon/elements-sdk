@@ -52,7 +52,7 @@ Installation
 
 - Install required packages for elements::
 
-        . venv/bin/activate && pip install pyyaml packaging
+        venv/bin/pip install pyyaml packaging
 
 - Initialise the SDK::
 

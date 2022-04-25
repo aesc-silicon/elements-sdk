@@ -1,0 +1,7 @@
+xilinx:
+  part: XC7A35TFGG484-2
+  device: xc7a50t
+flash_bridge:
+  transport: alinx
+  fpga: xc7
+  spi: spi_xc7a35t

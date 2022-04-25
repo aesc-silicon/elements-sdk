@@ -58,11 +58,12 @@ def synthesize(args, env, cwd):
         if 'xilinx' not in board_data:
             raise SystemExit(f"No xilinx definitions in board {args.board}")
         env['PART'] = board_data['xilinx']['part']
-        env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Xilinx/vivado/syn")
+        env['TCL_PATH'] = os.path.join(cwd, "internal/zibal/eda/Xilinx/vivado/syn")
 
         xilinx_cwd = os.path.join(cwd, f"build/{soc}/{board}/vivado/syn")
-        command("vivado -mode batch -source ../../../../../zibal/eda/Xilinx/vivado/syn/syn.tcl" \
-                " -log ./logs/vivado.log -journal ./logs/vivado.jou", env, xilinx_cwd)
+        command("vivado -mode batch " \
+                "-source ../../../../../internal/zibal/eda/Xilinx/vivado/syn/syn.tcl " \
+                "-log ./logs/vivado.log -journal ./logs/vivado.jou", env, xilinx_cwd)
     if args.toolchain == 'symbiflow':
         if not 'xilinx' in board_data:
             raise SystemExit("No xilinx definitions in board {}".format(args.board))
@@ -70,7 +71,7 @@ def synthesize(args, env, cwd):
         env['PART'] = board_data['xilinx']['part'].lower()
         env['DEVICE'] = "{}_test".format(board_data['xilinx']['device'])
 
-        symbiflow_cwd = os.path.join(cwd, "zibal/eda/Xilinx/symbiflow")
+        symbiflow_cwd = os.path.join(cwd, "internal/zibal/eda/Xilinx/symbiflow")
         command("make clean", env, symbiflow_cwd)
         command("./syn.sh", env, symbiflow_cwd)
 
@@ -78,10 +79,7 @@ def synthesize(args, env, cwd):
 def build(args, env, cwd):
     """Command to compile, generate and synthesize a board."""
     prepare(args, env, cwd)
-    board_data = open_board(args.board)
-    for firmware in board_data.get('firmwares', []):
-        args.type = firmware
-        compile_(args, env, cwd)
+    compile_(args, env, cwd)
     generate(args, env, cwd)
     synthesize(args, env, cwd)
 
@@ -93,8 +91,7 @@ def test(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Board generated {args.case}\"", env,
-            os.path.join(cwd, "zibal"))
+    command(f"sbt \"runMain elements.soc.{soc.lower()}.{board}Simulate {args.case}\"", env, cwd)
 
 
 def main():

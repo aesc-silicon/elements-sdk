@@ -71,11 +71,16 @@ def parse_args(parse_tool_args):
 
     parser_compile = subparsers.add_parser('compile', help="Compiles a firmwares")
     parser_compile.set_defaults(func=compile_)
-    parser_compile.add_argument('type', choices=['zephyr', 'bootrom', 'menuconfig'],
-                                help="Type of firmware")
+    parser_compile.add_argument('storage', nargs='?', default="",
+                                help="Name of the software storege")
     parser_compile.add_argument('application', nargs='?', default="",
                                 help="Name of the application")
     parser_compile.add_argument('-f', action='store_true', help="Force build")
+
+    parser_menuconfig = subparsers.add_parser('menuconfig',
+                                              help="Opens the menuconfig for a firmware")
+    parser_menuconfig.set_defaults(func=menuconfig)
+    parser_menuconfig.add_argument('storage', help="Name of the software storege")
 
     parser_generate = subparsers.add_parser('generate', help="Generates a SOC")
     parser_generate.set_defaults(func=generate)
@@ -84,9 +89,12 @@ def parse_args(parse_tool_args):
     parser_flash.set_defaults(func=flash)
     parser_flash.add_argument('--destination', default='fpga', choices=['fpga', 'spi', 'memory'],
                               help="Destination of the bitstream or firmware")
+    parser_flash.add_argument('storage', nargs='?', default="",
+                              help="Name of the software storege. Required for memory destination")
 
     parser_debug = subparsers.add_parser('debug', help="Debugs a firmware with GDB.")
     parser_debug.set_defaults(func=debug)
+    parser_debug.add_argument('storage', help="Name of the software storege")
 
     parser_benchmark = subparsers.add_parser('benchmark', help="Benchmark tests for a kit")
     parser_benchmark.set_defaults(func=benchmark)
@@ -112,19 +120,19 @@ def open_yaml(path):
 
 def get_socs():
     """Returns a list of all available SOCs."""
-    all_socs = glob.glob("zibal/eda/socs/*yaml")
+    all_socs = glob.glob("meta/socs/*yaml")
     return list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
 
 
 def get_boards():
     """Returns a list of all available boards."""
-    all_socs = glob.glob("zibal/eda/boards/*yaml")
+    all_socs = glob.glob("meta/boards/*yaml")
     return list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
 
 
 def get_boards_for_soc(soc):
     """Returns a list of all available boards for a SOC."""
-    soc_file = f"zibal/eda/socs/{soc}.yaml"
+    soc_file = f"meta/socs/{soc}.yaml"
     if not os.path.exists(soc_file):
         raise SystemExit(f"SOC {soc} does not exist.")
     return open_yaml(soc_file).get('boards', [])
@@ -152,8 +160,33 @@ def prepare(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Top prepare\"", env,
-            os.path.join(cwd, "zibal"))
+    command(f"sbt \"runMain elements.soc.{soc.lower()}.{board}Prepare\"", env, cwd)
+
+
+def compile_baremetal(_, env, cwd, name, soc, board):
+    """Compiles a bare metal firmware."""
+    env['STORAGE'] = name
+
+    fpl_cwd = os.path.join(cwd, "internal/zibal/software/bootrom/")
+    command("make", env, fpl_cwd)
+
+    build_cwd = os.path.join(cwd, f"build/{soc}/{board}/software/{name}")
+    with open(f"{build_cwd}/kernel.rom", 'w', encoding='UTF-8') as rom_file:
+        command(f"python {fpl_cwd}/scripts/gen_rom.py", env, build_cwd, rom_file)
+
+
+def compile_zephyr(args, env, cwd, name, soc, board, application):
+    """Compiles a Zephyr firmware."""
+    force = "always" if args.f else "auto"
+    kit = f"{soc}-{board}".lower()
+    output = f"../build/{soc}/{board}/software/{name}/zephyr/"
+    include_path = os.path.join(cwd, f"build/{soc}/{board}/software/{name}/")
+    project_path = os.path.join(cwd, f"build/{soc}/{board}/software/{name}/zephyr-boards/")
+    application_path = os.path.join(cwd, application)
+    include = f"-DDTC_INCLUDE_FLAG_FOR_DTS=\"-isystem;{include_path}/\" " \
+              f"-DBOARD_ROOT={project_path}"
+    command(f"../venv/bin/west build -p {force} -b {kit} -d {output} {application_path} -- " \
+            f"{include}", env, os.path.join(cwd, "internal"))
 
 
 def compile_(args, env, cwd):  # pylint: disable=too-many-locals
@@ -163,29 +196,52 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
     env['SOC'] = soc
     env['BOARD'] = board
 
-    if args.type == "bootrom":
-        fpl_cwd = os.path.join(cwd, "zibal/software/bootrom/")
-        command("make", env, os.path.join(fpl_cwd, soc.lower))
+    storages = open_yaml(f"build/{soc}/{board}/software/storages.yaml")
+    if hasattr(args, 'storage') and args.storage:
+        if args.storage not in storages:
+            raise SystemExit(f"Storage {args.storage} not found.")
+        os_type = storages[args.storage]["os"]
+        if os_type == "baremetal":
+            #  pyline: disable=too-many-function-args
+            compile_baremetal(args, env, cwd, args.storage, soc, board)
+        if os_type == "zephyr":
+            if args.application:
+                application = args.application
+            else:
+                application = storages[args.storage].get("application",
+                    "internal/zephyr-samples/demo/leds/")
+            #  pyline: disable=too-many-function-args
+            compile_zephyr(args, env, cwd, args.storage, soc, board, application)
+    else:
+        for storage, data in storages.items():
+            os_type = data.get('os')
+            if os_type == "baremetal":
+                #  pyline: disable=too-many-function-args
+                compile_baremetal(args, env, cwd, storage, soc, board)
+            if os_type == "zephyr":
+                if args.application:
+                    application = args.application
+                else:
+                    application = data.get('application', "internal/zephyr-samples/demo/leds/")
+                #  pyline: disable=too-many-function-args
+                compile_zephyr(args, env, cwd, storage, soc, board, application)
 
-        build_cwd = os.path.join(cwd, f"build/{soc}/{board}/fpl")
-        with open(f"{build_cwd}/kernel.rom", 'w', encoding='UTF-8') as rom_file:
-            command(f"python {fpl_cwd}/scripts/gen_rom.py", env, build_cwd, rom_file)
 
-    if args.type == "zephyr":
-        if not args.application:
-            raise SystemExit("Firmware type 'zephyr' requires an application. Please define one.")
-        force = "always" if args.f else "auto"
-        output = f"build/{soc}/{board}/zephyr/"
-        kit = f"{soc}-{board}".lower()
-        include_path = os.path.join(cwd, f"build/{soc}/{board}")
-        project_path = os.path.join(cwd, f"build/{soc}/{board}/zephyr-boards/")
-        include = f"-DDTC_INCLUDE_FLAG_FOR_DTS=\"-isystem;{include_path}/\" " \
-                  f"-DBOARD_ROOT={project_path}"
-        command(f"venv/bin/west build -p {force} -b {kit} -d {output} {args.application} -- " \
-                f"{include}", env, cwd)
+def menuconfig(args, env, cwd):
+    """Opens the menuconfig for a firmware."""
+    soc = get_soc_name(args.soc)
+    board = get_board_name(args.board)
+    env['SOC'] = soc
+    env['BOARD'] = board
 
-    if args.type == "menuconfig":
-        command("ninja menuconfig", env, os.path.join(cwd, f"build/{soc}/{board}/zephyr"))
+    storages = open_yaml(f"build/{soc}/{board}/software/storages.yaml")
+    if args.storage not in storages:
+        raise SystemExit(f"Storage {args.storage} not found.")
+    os_type = storages[args.storage]
+
+    if os_type == "zephyr":
+        build_path = os.path.join(cwd, f"build/{soc}/{board}/software/{args.storage}/zephyr/")
+        command("ninja menuconfig", env, build_path)
 
 
 def generate(args, env, cwd):
@@ -195,8 +251,7 @@ def generate(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Top generate\"", env,
-            os.path.join(cwd, "zibal"))
+    command(f"sbt \"runMain elements.soc.{soc.lower()}.{board}Generate\"", env, cwd)
 
 
 def functional_simulation(args, env, cwd):
@@ -212,15 +267,14 @@ def functional_simulation(args, env, cwd):
                          f"{args.board} generate\" before.")
 
     build_cwd = os.path.join(cwd, f"build/{soc}/{board}/zibal/{board}Board/")
-    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Board generated simulate\"", env,
-            os.path.join(cwd, "zibal"))
+    command(f"sbt \"runMain elements.soc.{soc.lower()}.{board}Simulate\"", env, cwd)
 
     command("gtkwave -o simulate.vcd", env, build_cwd)
 
 
 def flash(args, env, cwd):
     """Command to flash the design to a fpga or spi nor."""
-    openocd_cwd = os.path.join(cwd, "openocd")
+    openocd_cwd = os.path.join(cwd, "internal/openocd")
     soc = get_soc_name(args.soc)
     board = get_board_name(args.board)
     board_data = open_board(args.board)
@@ -235,8 +289,8 @@ def flash(args, env, cwd):
         vivado_bit = os.path.exists(f"build/{soc}/{board}/vivado/syn/{top}.bit")
         symbiflow_bit = os.path.exists(f"build/{soc}/{board}/symbiflow/{top}.bit")
         if not (vivado_bit or symbiflow_bit):
-            raise SystemExit("No bitstream found. Run \"./elements-fpga.py synthesize " \
-                             f"{args.soc} {args.board}\" before.")
+            raise SystemExit("No bitstream found. Run \"./elements-fpga.py " \
+                             f"{args.soc} {args.board} synthesize\" before.")
 
         if args.destination == "spi":
             bitstream_origin = "vivado"
@@ -256,19 +310,29 @@ def debug(args, env, cwd, type_="debug"):
     soc = get_soc_name(args.soc)
     board = get_board_name(args.board)
     platform = ''.join(i.lower() for i in soc if not i.isdigit())
-    if not os.path.exists(f"build/{soc}/{board}/zephyr/zephyr/zephyr.elf"):
-        raise SystemExit("No Zephyr elf found. Run \"./elements-fpga.py compile " \
-                         f"{args.soc} {args.board} <app>\" before.")
+    if not args.storage:
+        raise SystemExit("Flashing a software requires the 'storage' argument.")
+    storages = open_yaml(f"build/{soc}/{board}/software/storages.yaml")
+    if args.storage not in storages:
+        raise SystemExit(f"Storage {args.storage} not found.")
+    os_type = storages[args.storage]
 
-    openocd_cwd = os.path.join(cwd, "openocd")
-    yaml_path = f"../build/{soc}/{board}/zibal/VexRiscv.yaml"
+    if os_type == "zephyr":
+        if not os.path.exists(
+                f"build/{soc}/{board}/software/{args.storage}/zephyr/zephyr/zephyr.elf"):
+            raise SystemExit("No Zephyr elf found. Run \"./elements-fpga.py " \
+                             f"{args.soc} {args.board} compile {args.storage}\" before.")
+        elf = f"build/{soc}/{board}/software/{args.storage}/zephyr/zephyr/zephyr.elf"
+
+    openocd_cwd = os.path.join(cwd, "internal/openocd")
+    yaml_path = f"../../build/{soc}/{board}/zibal/VexRiscv.yaml"
     cmd = f"./src/openocd -c \"set HYDROGEN_CPU0_YAML {yaml_path}\" " \
           f"-f tcl/interface/jlink.cfg -f ../zibal/gdb/{platform}.cfg"
 
     def openocd_handler(_):
         toolchain = env['ZEPHYR_SDK_INSTALL_DIR']
         cmd = f"{toolchain}/riscv64-zephyr-elf/bin/riscv64-zephyr-elf-gdb " \
-              f"-x zibal/gdb/{type_}.cmd build/{soc}/{board}/zephyr/zephyr/zephyr.elf"
+              f"-x internal/zibal/gdb/{type_}.cmd {elf}"
         if type_ == "flash":
             command(cmd, env, cwd, handler=lambda _: time.sleep(15))
         else:
@@ -282,13 +346,14 @@ def benchmark(args, env, cwd): # pylint: disable=too-many-locals
     soc = get_soc_name(args.soc)
     board = get_board_name(args.board)
     platform = ''.join(i.lower() for i in soc if not i.isdigit())
-    toolchain = os.path.join(env['ELEMENTS_BASE'], 'riscv32-unknown-elf/bin/riscv32-unknown-elf-')
+    toolchain = os.path.join(env['ELEMENTS_INTERNAL'],
+        'riscv32-unknown-elf/bin/riscv32-unknown-elf-')
     gcc = toolchain + 'gcc'
     gdb = toolchain + 'gdb'
-    python = "../venv/bin/python3"
+    python = "../../venv/bin/python3"
 
 
-    yaml_file = "build/{0}/{1}/zibal/{1}Top.yaml".format(soc, board)
+    yaml_file = f"build/{soc}/{board}/zibal/{board}Top.yaml"
     if not os.path.exists(yaml_file):
         raise SystemExit(f"{board}Top.yaml does not exist. Run prepare command first!")
 
@@ -298,12 +363,12 @@ def benchmark(args, env, cwd): # pylint: disable=too-many-locals
         raise SystemExit(f"No cpu frequency found in {board}Top.yaml")
     cpu_frequency = int(cpu_frequency / 1000000)
 
-    embench_cwd = os.path.join(cwd, "embench-iot")
+    embench_cwd = os.path.join(cwd, "internal/embench-iot")
     command(f"{python} build_all.py --arch riscv32 --board {platform} --clean --cc {gcc}", env,
             embench_cwd)
 
-    openocd_cwd = os.path.join(cwd, "openocd")
-    yaml_path = f"../build/{soc}/{board}/zibal/VexRiscv.yaml"
+    openocd_cwd = os.path.join(cwd, "internal/openocd")
+    yaml_path = f"../../build/{soc}/{board}/zibal/VexRiscv.yaml"
     cmd = f"./src/openocd -c \"set HYDROGEN_CPU0_YAML {yaml_path}\" " \
           f"-f tcl/interface/jlink.cfg -f ../zibal/gdb/{platform}.cfg"
 
@@ -339,7 +404,7 @@ def get_board_name(board):
 
 def open_board(board):
     """Opens a board file and checks a mandatory fields exist."""
-    board_file = f"zibal/eda/boards/{board}.yaml"
+    board_file = f"meta/boards/{board}.yaml"
     if not os.path.exists(board_file):
         raise SystemExit(f"Board {board} does not exist.")
     board = open_yaml(board_file)
@@ -362,6 +427,7 @@ def environment():
     """Reads the OS environment and adds extra variables for Elements."""
     env = os.environ.copy()
     base = os.path.dirname(os.path.abspath(__file__))
+    internal = os.path.join(base, "internal")
     localenv = {}
     if os.path.exists("env.ini"):
         config = configparser.ConfigParser()
@@ -375,18 +441,19 @@ def environment():
     vivado_path = get_variable(env, localenv, 'vivado_path')
 
     env['ELEMENTS_BASE'] = base
-    env['NAFARR_BASE'] = os.path.join(base, 'nafarr')
+    env['ELEMENTS_INTERNAL'] = internal
+    env['NAFARR_BASE'] = os.path.join(internal, 'nafarr')
     env['ZEPHYR_TOOLCHAIN_VARIANT'] = 'zephyr'
     env['ZEPHYR_SDK_VERSION'] = zephyr_sdk_version
-    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(base, f'zephyr-sdk-{zephyr_sdk_version}')
-    env['Zephyr_DIR'] = os.path.join(base, 'zephyr')
+    env['ZEPHYR_SDK_INSTALL_DIR'] = os.path.join(internal, f'zephyr-sdk-{zephyr_sdk_version}')
+    env['Zephyr_DIR'] = os.path.join(internal, 'zephyr')
     env['FPGA_FAM'] = "xc7"
-    env['INSTALL_DIR'] = os.path.join(base, 'symbiflow')
+    env['INSTALL_DIR'] = os.path.join(internal, 'symbiflow')
     env['PATH'] += os.pathsep + vivado_path
-    env['PATH'] += os.pathsep + os.path.join(base, 'symbiflow/xc7/install/bin')
-    env['PATH'] = os.path.join(base, 'cmake/bin') + os.pathsep + env['PATH']
-    env['PATH'] = os.path.join(base, 'verilator/bin') + os.pathsep + env['PATH']
-    env['VERILATOR_ROOT'] = os.path.join(base, 'verilator')
+    env['PATH'] += os.pathsep + os.path.join(internal, 'symbiflow/xc7/install/bin')
+    env['PATH'] = os.path.join(internal, 'cmake/bin') + os.pathsep + env['PATH']
+    env['PATH'] = os.path.join(internal, 'verilator/bin') + os.pathsep + env['PATH']
+    env['VERILATOR_ROOT'] = os.path.join(internal, 'verilator')
     env['VIVADO_PATH'] = vivado_path
     env['PDK_BASE'] = get_variable(env, localenv, 'pdk_base')
     env['IHP_TECH'] = os.path.join(get_variable(env, localenv, 'pdk_base'), 'tech')
@@ -395,7 +462,7 @@ def environment():
 
 def verify_soc_board_combination(args):
     """Verifies the given board exists for the SOC."""
-    soc_file = f"zibal/eda/socs/{args.soc}.yaml"
+    soc_file = f"meta/socs/{args.soc}.yaml"
     if not os.path.exists(soc_file):
         raise SystemExit(f"SOC {args.soc} does not exist.")
     all_boards = open_yaml(soc_file).get('boards', [])
@@ -412,9 +479,8 @@ def prepare_build(args):
     path = f"build/{soc}/{board}"
     if not os.path.exists(path):
         os.makedirs(path)
-    pathes = ["zibal", "fpl", "vivado/sim/logs", "vivado/syn/logs", "cadence/synthesize",
-              "cadence/place", "cadence/sim", "symbiflow/logs",
-              f"zephyr-boards/boards/riscv/{soc}"]
+    pathes = ["zibal", "vivado/sim/logs", "vivado/syn/logs", "cadence/synthesize",
+              "cadence/place", "cadence/sim", "symbiflow/logs", "software"]
     pathes = list(map(lambda x: os.path.join(path, x), pathes))
     for path in pathes:
         if not os.path.exists(path):

@@ -49,28 +49,25 @@ def parse_args():
 
 def checkout(args, env, cwd):
     """Checks out all repositories."""
-    if args.f:
-        command("rm -rf .repo", env, cwd)
+    cwd_internal = os.path.join(cwd, "internal")
 
-    if os.path.exists(".repo"):
+    if args.f:
+        command("rm -rf internal/.repo", env, cwd)
+    if os.path.exists("internal/.repo"):
         raise SystemExit("Repo exists! Either the SDK is already initialized or force init.")
 
-    if not os.path.exists("./repo"):
+    if not os.path.exists("internal/repo"):
+        with open("internal/repo", "w", encoding='UTF-8') as text_file:
+            command("curl https://storage.googleapis.com/git-repo-downloads/repo-1", env, cwd,
+                    stdout=text_file)
 
-        def repo_handler(process):
-            with open("./repo", "w", encoding='UTF-8') as text_file:
-                text_file.write(process.stdout.decode())
+            command("chmod a+x repo", env, cwd_internal)
 
-        command("curl https://storage.googleapis.com/git-repo-downloads/repo-1", env, cwd,
-                handler=repo_handler)
-
-        command("chmod a+x ./repo", env, cwd)
-
-    cmd = "python3 ./repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
+    cmd = "python3 repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
           " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
-    command(cmd, env, cwd)
+    command(cmd, env, cwd_internal)
 
-    command("python3 ./repo sync", env, cwd)
+    command("python3 repo sync", env, cwd_internal)
 
     print("Checkout done")
 

@@ -62,7 +62,7 @@ def simulate(args, env, cwd):
         env['TOP'] = top
 
         env['PDK'] = board_data['cadence']['pdk']
-        env['TCL_PATH'] = os.path.join(cwd, "zibal/eda/Cadence/tcl/")
+        env['TCL_PATH'] = os.path.join(cwd, "internal/zibal/eda/Cadence/tcl/")
         cadence_cwd = os.path.join(cwd, f"build/{soc}/{board}/cadence/sim")
 
         for binary in glob.glob(f"build/{soc}/{board}/fpl/*.rom"):
@@ -90,7 +90,7 @@ def synthesize(args, env, cwd):
         env['PDK'] = board_data['cadence']['pdk']
 
         logs_path = os.path.join(cwd, f"build/{soc}/{board}/cadence/synthesize", now, "logs")
-        cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
+        cadence_cwd = os.path.join(cwd, "internal/zibal/eda/Cadence/")
         command(f"genus -f tcl/synthesize.tcl -log {logs_path}", env, cadence_cwd)
 
         command("rm -rf latest", env,
@@ -119,7 +119,7 @@ def place(args, env, cwd):
         env['PDK'] = board_data['cadence']['pdk']
 
         logs_path = os.path.join(cwd, f"build/{soc}/{board}/cadence/synthesize", now, "logs")
-        cadence_cwd = os.path.join(cwd, "zibal/eda/Cadence/")
+        cadence_cwd = os.path.join(cwd, "internal/zibal/eda/Cadence/")
         command(f"innovus -files tcl/place.tcl -log {logs_path}", env, cadence_cwd)
 
         command("rm -rf latest", env,
@@ -151,8 +151,7 @@ def test(args, env, cwd):
     env['SOC'] = soc
     env['BOARD'] = board
 
-    command(f"sbt \"runMain zibal.soc.{soc.lower()}.{board}Board generated {args.case}\"", env,
-            os.path.join(cwd, "zibal"))
+    command(f"sbt \"runMain elementssoc.{soc.lower()}.{board}Simulate {args.case}\"", env, cwd)
 
 
 def main():

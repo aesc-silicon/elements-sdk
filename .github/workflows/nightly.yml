@@ -37,9 +37,9 @@ jobs:
 
     - name: Debugging
       run: |
-        ls -lh
-        ./repo info
         echo $PWD
+        ls -lh
+        cd internal && ./repo info
 
     - name: Test Hydrogen1 Nexys4-DDR boot
       uses: ./.github/actions/nightly-fpga-test

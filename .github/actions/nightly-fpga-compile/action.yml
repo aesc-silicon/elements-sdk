@@ -4,6 +4,10 @@ inputs:
   kit:
     description: 'Name of the kit like Hydrogen1 Nexys4-DDR'
     required: true
+  storage:
+    description: 'Name of the software storage'
+    required: false
+    default: 'zephyr0'
   application:
     description: 'Name of the application'
     required: true
@@ -16,7 +20,7 @@ runs:
       shell: bash
     - name: Compile
       run: |
-        ./elements-fpga.py ${{ inputs.kit }} compile zephyr zephyr-samples/demo/${{ inputs.application }}
+        ./elements-fpga.py ${{ inputs.kit }} compile ${{ inputs.storage }} internal/zephyr-samples/demo/${{ inputs.application }}
       shell: bash
     - name: Clean
       run: |

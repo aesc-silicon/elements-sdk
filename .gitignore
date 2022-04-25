@@ -18,9 +18,13 @@ repo
 *tar.gz
 __pycache__/
 cmake
-project/
+project/project/*
+project/target/*
 target/
 embench-iot/
 verilator/
 *sh
 *log
+internal/*
+!internal/.keep
+tmp/

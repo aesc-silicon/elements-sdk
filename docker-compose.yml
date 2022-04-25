@@ -15,13 +15,14 @@ services:
 #      - ./elements.py:/elements-sdk/elements.py
 #      - ./elements-fpga.py:/elements-sdk/elements-fpga.py
 #      - ./elements-asic.py:/elements-sdk/elements-asic.py
-#      - ./embench-iot/:/elements-sdk/embench-iot/
-#      - ./openocd/:/elements-sdk/openocd/
-#      - ./vexriscv/:/elements-sdk/vexriscv/
-#      - ./zephyr/:/elements-sdk/zephyr/
-#      - ./zephyr-samples/:/elements-sdk/zephyr-samples/
-#      - ./zibal/:/elements-sdk/zibal/
-#      - ./zibal-fpl/:/elements-sdk/zibal-fpl/
+#      - ./internal/embench-iot/:/elements-sdk/internal/embench-iot/
+#      - ./internal/nafarr/:/elements-sdk/internal/nafarr/
+#      - ./internal/openocd/:/elements-sdk/internal/openocd/
+#      - ./internal/SpinalCrypto/:/elements-sdk/internal/SpinalCrypto/
+#      - ./internal/vexriscv/:/elements-sdk/internal/vexriscv/
+#      - ./internal/zephyr/:/elements-sdk/internal/zephyr/
+#      - ./internal/zephyr-samples/:/elements-sdk/internal/zephyr-samples/
+#      - ./internal/zibal/:/elements-sdk/internal/zibal/
 # Mount tmp directory for X11 support
       - /tmp/.X11-unix:/tmp/.X11-unix
     command: ["sleep", "infinity"]
