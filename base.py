@@ -175,12 +175,18 @@ def compile_baremetal(_, env, cwd, name, soc, board):
         command(f"python {fpl_cwd}/scripts/gen_rom.py", env, build_cwd, rom_file)
 
 
-def compile_zephyr(args, env, cwd, name, soc, board, application):
+def compile_zephyr(args, env, cwd, name, soc, board, data):
     """Compiles a Zephyr firmware."""
     force = "always" if args.f else "auto"
     kit = f"{soc}-{board}".lower()
-    output = f"../build/{soc}/{board}/software/{name}/zephyr/"
+    if args.application:
+        application = args.application
+    else:
+        application = data.get('application', "internal/zephyr-samples/demo/leds/")
     include_path = os.path.join(cwd, f"build/{soc}/{board}/software/{name}/")
+    if data.get("include", "") == "hardware":
+        include_path = os.path.join(cwd, f"hardware/scala/soc/{soc}/{board}/{name}/")
+    output = f"../build/{soc}/{board}/software/{name}/zephyr/"
     project_path = os.path.join(cwd, f"build/{soc}/{board}/software/{name}/zephyr-boards/")
     application_path = os.path.join(cwd, application)
     include = f"-DDTC_INCLUDE_FLAG_FOR_DTS=\"-isystem;{include_path}/\" " \
@@ -205,13 +211,8 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
             #  pyline: disable=too-many-function-args
             compile_baremetal(args, env, cwd, args.storage, soc, board)
         if os_type == "zephyr":
-            if args.application:
-                application = args.application
-            else:
-                application = storages[args.storage].get("application",
-                    "internal/zephyr-samples/demo/leds/")
             #  pyline: disable=too-many-function-args
-            compile_zephyr(args, env, cwd, args.storage, soc, board, application)
+            compile_zephyr(args, env, cwd, args.storage, soc, board, storages[args.storage])
     else:
         for storage, data in storages.items():
             os_type = data.get('os')
@@ -219,12 +220,8 @@ def compile_(args, env, cwd):  # pylint: disable=too-many-locals
                 #  pyline: disable=too-many-function-args
                 compile_baremetal(args, env, cwd, storage, soc, board)
             if os_type == "zephyr":
-                if args.application:
-                    application = args.application
-                else:
-                    application = data.get('application', "internal/zephyr-samples/demo/leds/")
                 #  pyline: disable=too-many-function-args
-                compile_zephyr(args, env, cwd, storage, soc, board, application)
+                compile_zephyr(args, env, cwd, storage, soc, board, data)
 
 
 def menuconfig(args, env, cwd):
