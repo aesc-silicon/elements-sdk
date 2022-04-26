@@ -1,0 +1,81 @@
+/*
+ * Copyright (c) 2022 Daniel Schultz
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+#include <dt-bindings/gpio/gpio.h>
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		cpu@0 {
+			compatible = "vexriscv", "riscv";
+			reg = <0>;
+			device_type = "cpu";
+			riscv,isa = "rv32i";
+		};
+	};
+
+	memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		ram0: memory@0 {
+			device_type = "memory";
+			compatible = "mmio-sram";
+			reg = <0x00000000 0x10000>;
+		};
+	};
+
+	soc {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "elements,elements-soc", "simple-bus";
+		ranges;
+
+		plic: interrupt-controller@f01f0000 {
+			compatible = "elements,plic-0";
+			#interrupt-cells = <2>;
+			interrupt-controller;
+			reg = <0xF01F0000 0x2000
+			       0xF01F2000 0xF000
+			       0xF01FF000 0x10000>;
+			reg-names = "prio", "irq_en", "reg";
+			riscv,max-priority = <7>;
+			riscv,ndev = <0>;
+		};
+
+		mtimer: machine-timer0@f0220000 {
+			reg = <0xF0220000 0x1000>;
+			status = "okay";
+		};
+
+		uartStdCtrl: uartStdCtrl@f0200000 {
+			compatible = "elements,uart";
+			reg = <0xf0200000 0x1000>;
+			status = "okay";
+			label = "uartStdCtrl";
+			interrupt-parent = <&plic>;
+			interrupts = <1 1>;
+			clock-frequency = <90000000>;
+			current-speed = <115200>;
+		};
+
+		gpioBCtrl: gpioBCtrl@1010000 {
+			compatible = "elements,gpio";
+			reg = <0x01010000 0x1000>;
+			status = "okay";
+			label = "gpioStatusCtrl";
+			interrupt-parent = <&plic>;
+			interrupts = <2 1>;
+			gpio-controller;
+			#gpio-cells = <2>;
+		};
+	};
+};
