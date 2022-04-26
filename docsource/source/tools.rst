@@ -12,7 +12,7 @@ or a custom file given with the ``--manifest`` parameter.
 
 .. code-block:: text
 
-    ./elements.py init [--manifest next.xml] [-f]
+    ./elements.py checkout [--manifest next.xml] [-f]
 
 
 Init
@@ -94,28 +94,30 @@ Example to prepare a kit with a Hydrogen1 SOC for the Nexys4-DDR board:
     ./elements-fpga.py Hydrogen1 Nexys4-DDR prepare
 
 
-Compile (Zephyr)
-----------------
+Compile
+-------
 
-The ``compile`` command compiles an application for a board. Both values must be passed as
-mandatory argument. An optional flag ``-f`` can force to not use the build cache and compile
-entirely new.
+The ``compile`` command compiles one or more firmwares for a board. It takes all information
+from data which are generated during the ``prepare`` stage. Be default, this command compiles
+all firmwares. Otherwise, only one ``storage`` can be compiled by passing the storage name.
+Moreover, for Zephyr firmwares, the storage parameter can be extended with an optional
+``application`` parameter to define the path to a custom application. Lastly, the optional
+flag ``-f`` can force to not use the build cache and compile entirely new.
 
 .. code-block:: text
 
-    ./elements-fpga.py <soc> <board> compile zephyr <application> [-f]
+    ./elements-fpga.py <soc> <board> compile [storage] [application] [-f]
 
 Example to compile the LED demo for a kit with the Hydrogen1 SOC and the Nexys4-DDR board:
 
 .. code-block:: text
 
-    ./elements-fpga.py Hydrogen1 Nexys4-DDR compile zephyr-samples/demo/leds
+    ./elements-fpga.py Hydrogen1 Nexys4-DDR compile zephyr0 internal/zephyr-samples/demo/leds
 
-Generate (Zibal)
-----------------
+Generate
+--------
 
-The ``generate`` command can build a SOC designs for a kit. Moreover, it will create files for
-the toolchains.
+The ``generate`` command creates SOC designs for the given kit.
 
 .. tip::
 
