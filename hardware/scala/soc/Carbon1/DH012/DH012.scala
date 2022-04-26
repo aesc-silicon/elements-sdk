@@ -239,7 +239,7 @@ object DH012Simulate extends ElementsApp {
     val board = DH012Board()
     BinTools.initRam(
       board.spiNor.deviceOut.data,
-      elementsConfig.swStorageBaremetalBinary("baremetal0")
+      elementsConfig.swStorageBaremetalRom("baremetal0")
     )
     board
   }
