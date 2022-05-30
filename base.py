@@ -323,7 +323,7 @@ def debug(args, env, cwd, type_="debug"):
 
     openocd_cwd = os.path.join(cwd, "internal/openocd")
     yaml_path = f"../../build/{soc}/{board}/zibal/VexRiscv.yaml"
-    cmd = f"./src/openocd -c \"set HYDROGEN_CPU0_YAML {yaml_path}\" " \
+    cmd = f"./src/openocd -c \"set ELEMENTS_CPU0_YAML {yaml_path}\" " \
           f"-f tcl/interface/jlink.cfg -f ../zibal/gdb/{platform}.cfg"
 
     def openocd_handler(_):
