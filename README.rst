@@ -174,8 +174,6 @@ Documentation
 
 The complete documentation is hosted on `https://aesc-silicon.github.io/elements-sdk/`_.
 
-.. _https://aesc-silicon.github.io/elements-sdk/: https://aesc-silicon.github.io/elements-sdk/
-
 It describes the FPGA and ASIC flows and explains basic information and how to develop a simple
 Design.
 
