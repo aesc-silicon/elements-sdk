@@ -4,8 +4,12 @@ Elements SDK
 The Elements software development kit (SDK) is a hard-/software co-design tool to develop, debug
 and maintain all stacks of an open-source System on Chip (SoC).
 
-It has various different projects included and supports to choose between open-source or vendor
-toolchains for FPGA and ASIC flows.
+It has various different projects included and supports choosing between open-source or vendor
+toolchains for FPGA and ASIC flow.
+
+The full documentation is available at `https://aesc-silicon.github.io/elements-sdk/`_.
+
+.. _https://aesc-silicon.github.io/elements-sdk/: https://aesc-silicon.github.io/elements-sdk/
 
 .. inclusion-start-marker-do-not-remove
 
@@ -19,7 +23,7 @@ Features
 * Toolchain files are generated automatically
 * Nightly checks
 
-Focus on defining a custom SOC and writing your applcation!
+Focus on defining a custom SOC and writing your application!
 
 Prerequisites
 #############
@@ -64,8 +68,8 @@ Vivado
 The Vivado toolchain is not part of this SDK and needs to be installed separately for Xilinx
 platforms from `Xilinx's homepage`_. Download the Linux Self Extracting Web Installer for Version
 2020.2 and install it. Select Vivado as product and Vivado HL WebPACK as Edition. You can use this
-edition's license for free, if you do not sell the bitsream, and disable everything except the
-Artix-7 Platform to save disk storage. Elements excepts to find the Vivado toolchain under
+edition's license for free if you do not sell the bitstream, and disable everything except the
+Artix-7 Platform to save disk storage. Elements except to find the Vivado toolchain under
 ``/opt/xilinx``.
 
 .. code-block:: text
@@ -78,14 +82,14 @@ Artix-7 Platform to save disk storage. Elements excepts to find the Vivado toolc
 Docker
 ######
 
-The Elements SDK supports to run inside Docker. Currently, only self-build images can be used
-due a lack of uploading pre-build images.
+The Elements SDK supports running inside Docker. Currently, only self-build images can be used
+due to a lack of uploading pre-build images.
 
 Custom Image
 ************
 
-A Docker Compose configuration is provided for systems which do not run with the recommended
-versions. The Docker will have included all required packages for the SDK, expect vendor toolchains.
+A Docker Compose configuration is provided for systems that do not run with the recommended
+versions. The Docker will have included all required packages for the SDK, except vendor toolchains.
 Build the image (which can take some minutes).
 
 .. code-block:: text
@@ -98,7 +102,7 @@ Next, start the Docker in the background.
 
     docker-compose up -d
 
-Afterwards, all Python tools can be used identical to the CLI.
+Afterward, all Python tools can be used identical to the CLI.
 
 .. code-block:: text
 
@@ -108,7 +112,7 @@ Afterwards, all Python tools can be used identical to the CLI.
 
 .. tip::
 
-    Add ``--toolchain symbiflow`` as parameter for the synthesize command to use the open-source
+    Add ``--toolchain symbiflow`` as a parameter for the synthesize command to use the open-source
     toolchain.
 
 Finally, stop the Docker.
@@ -122,7 +126,7 @@ Development
 
 The docker image can also be used to develop. Therefore, the repos on the host system should be
 forwarded to the container to make all changes public. Open the ``docker-compose.yml`` file and
-uncomment the lines in ``volumnes`` which should be made public.
+uncomment the lines in ``volumes`` which should be made public.
 
 GUI Support
 ***********
