@@ -121,13 +121,14 @@ def open_yaml(path):
 def get_socs():
     """Returns a list of all available SOCs."""
     all_socs = glob.glob("meta/socs/*yaml")
-    return list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
+    # TODO sort list by periodic table order
+    return sorted(list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs)))
 
 
 def get_boards():
     """Returns a list of all available boards."""
     all_socs = glob.glob("meta/boards/*yaml")
-    return list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs))
+    return sorted(list(map(lambda x: os.path.splitext(os.path.basename(x))[0], all_socs)))
 
 
 def get_boards_for_soc(soc):
