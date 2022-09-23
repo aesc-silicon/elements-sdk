@@ -63,11 +63,11 @@ def checkout(args, env, cwd):
 
             command("chmod a+x repo", env, cwd_internal)
 
-    cmd = "python3 repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
+    cmd = "../venv/bin/python repo init -u https://github.com/aesc-silicon/elements-manifest.git" \
           " -m {}".format(args.manifest if args.manifest else _RELEASE + ".xml")
     command(cmd, env, cwd_internal)
 
-    command("python3 repo sync", env, cwd_internal)
+    command("../venv/bin/python repo sync", env, cwd_internal)
 
     print("Checkout done")
 

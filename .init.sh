@@ -15,14 +15,20 @@ pip3 install -r requirements.txt
 
 west init -l internal/zephyr
 
-wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
-if ! test -f zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run; then
-	echo "wget error: Unable to fetch SDK"
+wget -q https://github.com/zephyrproject-rtos/sdk-ng/releases/download/v${ZEPHYR_SDK_VERSION}/zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.gz
+if ! test -f zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.gz; then
+	echo "wget error: Unable to fetch Zephyr SDK"
 	exit 2
 fi
-chmod +x zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
-./zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run -- -d $PWD/internal/zephyr-sdk-${ZEPHYR_SDK_VERSION} -y -nocmake
-rm zephyr-toolchain-riscv64-${ZEPHYR_SDK_VERSION}-linux-x86_64-setup.run
+
+wget -O - https://github.com/zephyrproject-rtos/sdk-ng/releases/download/${ZEPHYR_SDK_VERSION}/sha256.sum | shasum --check --ignore-missing
+tar -xvf zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.gz
+
+cd zephyr-sdk-${ZEPHYR_SDK_VERSION}/
+./setup.sh -t riscv64-zephyr-elf -c
+
+cd ../
+rm zephyr-sdk-${ZEPHYR_SDK_VERSION}_linux-x86_64_minimal.tar.gz
 
 wget -q https://github.com/stnolting/riscv-gcc-prebuilt/releases/download/rv32i-2.0.0/riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz
 if ! test -f riscv32-unknown-elf.gcc-10.2.0.rv32i.ilp32.newlib.tar.gz; then

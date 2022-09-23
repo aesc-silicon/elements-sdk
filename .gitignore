@@ -14,6 +14,7 @@ openocd
 docsource/source/docsource
 symbiflow/
 riscv32-unknown-elf
+riscv64-zephyr-elf
 repo
 *tar.gz
 __pycache__/
