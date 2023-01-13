@@ -234,7 +234,7 @@ def menuconfig(args, env, cwd):
     storages = open_yaml(f"build/{soc}/{board}/software/storages.yaml")
     if args.storage not in storages:
         raise SystemExit(f"Storage {args.storage} not found.")
-    os_type = storages[args.storage]
+    os_type = storages[args.storage]['os']
 
     if os_type == "zephyr":
         build_path = os.path.join(cwd, f"build/{soc}/{board}/software/{args.storage}/zephyr/")
