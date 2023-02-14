@@ -43,7 +43,7 @@ RUN ssh-keyscan github.com > ~/.ssh/known_hosts
 RUN git clone https://github.com/aesc-silicon/elements-sdk.git
 WORKDIR elements-sdk/
 
-RUN virtualenv -p python3 venv
+RUN virtualenv -p python3.8 venv
 
 RUN . venv/bin/activate && pip3 install pyyaml packaging
 

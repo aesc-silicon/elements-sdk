@@ -52,7 +52,7 @@ Installation
 
 - Create a virtualenv::
 
-        virtualenv -p python3 venv
+        virtualenv -p python3.8 venv
 
 - Install required packages for elements::
 
