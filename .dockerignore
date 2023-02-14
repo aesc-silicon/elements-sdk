@@ -2,7 +2,7 @@ build/
 cmake/
 project/
 riscv32*
-symbiflow/
+internal/symbiflow/
 venv/
 zephyr*
 .git/
