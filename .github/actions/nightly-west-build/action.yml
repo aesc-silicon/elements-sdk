@@ -1,0 +1,33 @@
+name: 'Nightly Zephyr Build'
+description: 'Runs the build Zephyr flow with an open-source toolchain.'
+inputs:
+  board:
+    description: 'Name of the Zephyr board name like hydrogen1-nexys4ddr'
+    required: true
+  application:
+    description: 'Path to the Zephyr samples accplication'
+    required: false
+    default: 'elements-zephyr-samples/demo/leds/'
+runs:
+  using: 'composite'
+  steps:
+    - name: Build
+      run: |
+        west build -p always -b ${{ inputs.board }} ${{ inputs.application }}
+      shell: bash
+      working-directory: zephyr/
+    - name: Generate
+      run: |
+        west generate
+      shell: bash
+      working-directory: zephyr/
+    - name: Synthesize
+      run: |
+        west synthesize
+      shell: bash
+      working-directory: zephyr/
+    - name: Remove build
+      run: |
+         rm -rf build/
+      shell: bash
+      working-directory: zephyr/

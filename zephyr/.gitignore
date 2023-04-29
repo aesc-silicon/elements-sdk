@@ -1,0 +1,11 @@
+bootloader/
+build/
+elements-examples/
+elements-zephyr/
+f4pga/
+f4pga-examples
+modules/
+tools/
+venv/
+verilator/
+zephyr-*/

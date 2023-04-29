@@ -1,0 +1,30 @@
+version: "2"
+services:
+  zephyr:
+    build: zephyr/
+    environment:
+      - DISPLAY=${DISPLAY}
+    device_cgroup_rules:
+      - 'c *:* rmw'
+    volumes:
+      # Uncomment one of the follow three lines to map host directories.
+      #- ./zephyr/elements-zephyr:/home/elements-sdk/zephyr/elements-zephyr
+      #- ./zephyr/elements-zephyr-examples:/home/elements-sdk/zephyr/elements-zephyr-samples
+      #- ./zephyr/modules/elements:/home/elements-sdk/zephyr/modules/elements
+
+      # Comment out the volume if host directory mapping was enabled
+      - zephyr-dev-zephyr:/home/elements-sdk/zephyr/elements-zephyr
+      - zephyr-dev-zephyr-samples:/home/elements-sdk/zephyr/elements-zephyr-samples
+      - zephyr-dev-elements:/home/elements-sdk/zephyr/modules/elements
+
+      # Internal. Do not modify.
+      - zephyr-build:/home/elements-sdk/zephyr/build/
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev/serial/:/dev/serial/
+    command: ["sleep", "infinity"]
+
+volumes:
+  zephyr-build: {}
+  zephyr-dev-zephyr: {}
+  zephyr-dev-zephyr-samples: {}
+  zephyr-dev-elements: {}
