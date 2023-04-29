@@ -1,0 +1,11 @@
+bootloader/
+build/
+elements-examples/
+elements-zephyr/
+f4pga*
+modules/
+openFPGALoader
+openocd/
+tools/
+verilator/
+zephyr-sdk*
