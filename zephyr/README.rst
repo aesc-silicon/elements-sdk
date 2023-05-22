@@ -122,13 +122,17 @@ Support
 
 The following boards are supported with this version.
 
-+------------------------+--------------+---------------+----------+------------+
-| Board                  | Elements SoC | FPGA Board    | Vendor   | FPGA Chip  |
-+========================+==============+===============+==========+============+
-| hydrogen1-nexys4ddr    | Hydrogen1    | Nexys4-DDR    | Digilent | Artix-7    |
-+------------------------+--------------+---------------+----------+------------+
-| helium1-nexys4ddr      | Helium1      | Nexys4-DDR    | Digilent | Artix-7    |
-+------------------------+--------------+---------------+----------+------------+
++------------------------+--------------+------------------+----------+------------+
+| Board                  | Elements SoC | FPGA Board       | Vendor   | FPGA Chip  |
++========================+==============+==================+==========+============+
+| hydrogen1-nexys4ddr    | Hydrogen1    | Nexys4-DDR       | Digilent | Artix-7    |
++------------------------+--------------+------------------+----------+------------+
+| hydrogen1-ecp5_evn     | Hydrogen1    | ECP5 Eval. Board | Lattice  | ECP5       |
++------------------------+--------------+------------------+----------+------------+
+| helium1-nexys4ddr      | Helium1      | Nexys4-DDR       | Digilent | Artix-7    |
++------------------------+--------------+------------------+----------+------------+
+| helium1-ecp5_evn       | Helium1      | ECP5 Eval. Board | Lattice  | ECP5       |
++------------------------+--------------+------------------+----------+------------+
 
 Usage
 #####
@@ -162,6 +166,7 @@ Known Issues
 ############
 
 * ``west debug`` only works with bitstreams synthesized with Vivado.
+* F4PGA does not support PLLs on Xilinx architectures right now.
 
 .. inclusion-end-marker-do-not-remove
 

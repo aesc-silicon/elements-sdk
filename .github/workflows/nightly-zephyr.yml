@@ -48,3 +48,13 @@ jobs:
       uses: ./.github/actions/nightly-west-build
       with:
         board: "helium1-nexys4ddr"
+
+    - name: Hydrogen1 ECP5 Evaluation Board build
+      uses: ./.github/actions/nightly-west-build
+      with:
+        board: "hydrogen1-ecp5_evn"
+
+    - name: Helium1 ECP5 Evaluation Board build
+      uses: ./.github/actions/nightly-west-build
+      with:
+        board: "helium1-ecp5_evn"

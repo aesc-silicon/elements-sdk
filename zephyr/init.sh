@@ -3,6 +3,9 @@
 ELEMENTS_RELEASE=release-v23.1
 ZEPHYR_SDK_RELEASE=0.16.0
 
+OSS_CAD_SUITE_DATE="2023-05-26"
+OSS_CAD_SUITE_STAMP="20230526"
+
 F4PGA_INSTALL_DIR="${PWD}/f4pga"
 F4PGA_XC7_PACKAGES='install-xc7 xc7a50t_test xc7a100t_test'
 F4PGA_XC7_TIMESTAMP='20220920-124259'
@@ -36,6 +39,12 @@ function fetch_zephyr_sdk {
 	rm zephyr-sdk-${ZEPHYR_SDK_RELEASE}_linux-x86_64.tar.xz
 }
 
+function fetch_oss_cad_suite_build {
+	wget https://github.com/YosysHQ/oss-cad-suite-build/releases/download/${OSS_CAD_SUITE_DATE}/oss-cad-suite-linux-x64-${OSS_CAD_SUITE_STAMP}.tgz
+	tar -xvf oss-cad-suite-linux-x64-${OSS_CAD_SUITE_STAMP}.tgz
+	rm oss-cad-suite-linux-x64-${OSS_CAD_SUITE_STAMP}.tgz
+}
+
 function fetch_f4pga {
 	git clone https://github.com/chipsalliance/f4pga-examples
 	wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O f4pga-examples/conda_installer.sh
@@ -57,17 +66,6 @@ function fetch_f4pga_xc7 {
 	cd ../
 }
 
-function install_f4pga_ecp5 {
-	source .venv/bin/activate
-
-	if ! pip show yowasp-yosys; then
-		pip install yowasp-yosys
-	fi
-	if ! pip show yowasp-nextpnr-ecp5; then
-		pip install yowasp-nextpnr-ecp5
-	fi
-}
-
 function build_custom_verilator {
 	git clone https://github.com/verilator/verilator verilator -b v4.218
 	cd verilator
@@ -75,24 +73,9 @@ function build_custom_verilator {
 	cd ../
 
 	if ! test -f "verilator/bin/verilator"; then
-		echo "verilator does not exist."
-		exit 2
+		 echo "verilator does not exist."
+		 exit 2
 	fi
-}
-
-function build_custom_openfpgaloader {
-	git clone https://github.com/trabucayre/openFPGALoader
-	cd openFPGALoader
-	mkdir build
-	cd build
-	cmake .. && make -j$(nproc)
-	cd ../../
-
-	if ! test -f "openFPGALoader/build/openFPGALoader"; then
-		echo "openFPGAloader does not exist."
-		exit 2
-	fi
-
 }
 
 function print_usage {
@@ -105,12 +88,12 @@ function print_usage {
 no_venv=false
 while getopts zvh flag
 do
-    case "${flag}" in
-        z) scope="ZEPHYR";;
-	v) no_venv=true;;
-        h) print_usage
-           exit 1;;
-    esac
+	case "${flag}" in
+		z) scope="ZEPHYR";;
+		v) no_venv=true;;
+		h) print_usage
+			exit 1;;
+	esac
 done
 
 if ! test -d ".venv"; then
@@ -125,16 +108,13 @@ fi
 if ! test -d "zephyr-sdk-${ZEPHYR_SDK_RELEASE}"; then
 	fetch_zephyr_sdk
 fi
+if ! test -d "oss-cad-build"; then
+	fetch_oss_cad_suite_build
+fi
 if ! test -d "f4pga-examples"; then
 	fetch_f4pga
 	fetch_f4pga_xc7
 fi
-if test -d ".venv"; then
-	install_f4pga_ecp5
-fi
 if ! test -f "verilator/bin/verilator"; then
 	build_custom_verilator
-fi
-if ! test -f "openFPGALoader/build/openFPGALoader"; then
-	build_custom_openfpgaloader
 fi
