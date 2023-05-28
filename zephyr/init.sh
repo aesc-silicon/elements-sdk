@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ELEMENTS_RELEASE=release-v23.1
+ELEMENTS_DEV=v3.3.0-aesc
 ZEPHYR_SDK_RELEASE=0.16.0
 
 OSS_CAD_SUITE_DATE="2023-05-26"
@@ -22,7 +23,11 @@ function init_venv {
 	pip install west
 	pip install checksumdir
 
-	git clone https://github.com/aesc-silicon/elements-zephyr -b $ELEMENTS_RELEASE
+	if [ "$2" = false ]; then
+		git clone https://github.com/aesc-silicon/elements-zephyr -b $ELEMENTS_RELEASE
+	else
+		git clone https://github.com/aesc-silicon/elements-zephyr -b $ELEMENTS_DEV
+	fi
 	west init --local --mf west.yml elements-zephyr/
 	west update
 	west zephyr-export
@@ -79,25 +84,28 @@ function build_custom_verilator {
 }
 
 function print_usage {
-	echo "init.sh [-z] [-v] [-h]"
+	echo "init.sh [-z] [-v] [-d] [-h]"
 	echo "\t-z: Download and install Zephyr only"
 	echo "\t-v: Don't install into virtualenv"
+	echo "\t-d: Download Zephyr development branch"
 	echo "\t-h: Show this help message"
 }
 
 no_venv=false
-while getopts zvh flag
+dev=false
+while getopts zvhn flag
 do
 	case "${flag}" in
 		z) scope="ZEPHYR";;
 		v) no_venv=true;;
+		d) dev=true;;
 		h) print_usage
 			exit 1;;
 	esac
 done
 
 if ! test -d ".venv"; then
-	init_venv $no_venv
+	init_venv $no_venv $dev
 fi
 
 if test "$scope" == "ZEPHYR"; then

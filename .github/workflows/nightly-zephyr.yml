@@ -37,7 +37,7 @@ jobs:
       working-directory: zephyr/
       run: |
         chmod +x init.sh
-        ./init.sh -v
+        ./init.sh -v -d
 
     - name: Hydrogen1 Nexys4-DDR build
       uses: ./.github/actions/nightly-west-build
