@@ -39,7 +39,7 @@ RUN chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
 RUN apt-get update && apt-get install -y sbt
 
 WORKDIR home/
-RUN git clone https://github.com/aesc-silicon/elements-sdk.git -b WIP/dnltz/new-approach
+RUN git clone https://github.com/aesc-silicon/elements-sdk.git
 WORKDIR elements-sdk/zephyr/
 RUN chmod +x init.sh
 RUN ./init.sh -v
