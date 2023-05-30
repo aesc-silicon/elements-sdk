@@ -4,8 +4,8 @@ elements-examples/
 elements-zephyr/
 f4pga*
 modules/
-openFPGALoader
 openocd/
+oss-cad-suite/
 tools/
 verilator/
 zephyr-sdk*
