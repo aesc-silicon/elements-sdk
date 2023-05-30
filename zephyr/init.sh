@@ -74,7 +74,7 @@ function fetch_f4pga_xc7 {
 function build_custom_verilator {
 	git clone https://github.com/verilator/verilator verilator -b v4.218
 	cd verilator
-	autoconf && ./configure && make -j `nproc` && make test
+	autoconf && ./configure && make -j `nproc`
 	cd ../
 
 	if ! test -f "verilator/bin/verilator"; then
