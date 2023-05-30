@@ -93,7 +93,7 @@ function print_usage {
 
 no_venv=false
 dev=false
-while getopts zvhn flag
+while getopts zvdh flag
 do
 	case "${flag}" in
 		z) scope="ZEPHYR";;
