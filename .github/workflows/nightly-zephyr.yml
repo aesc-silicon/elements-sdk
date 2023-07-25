@@ -37,24 +37,25 @@ jobs:
       working-directory: zephyr/
       run: |
         chmod +x init.sh
-        ./init.sh -v -d
+        ./init.sh -v -d -f
 
-    - name: Hydrogen1 Nexys4-DDR build
+    # Github runners have only 14GB of storage and F4PGA is too large.
+    #- name: Hydrogen1 Nexys4-DDR build
+    #  uses: ./.github/actions/nightly-west-build
+    #  with:
+    #    board: "hydrogen1-nexys4ddr"
+
+    #- name: Helium1 Nexys4-DDR build
+    #  uses: ./.github/actions/nightly-west-build
+    #  with:
+    #    board: "helium1-nexys4ddr"
+
+    - name: Hydrogen1 ECPIX-5 Development Board build
       uses: ./.github/actions/nightly-west-build
       with:
-        board: "hydrogen1-nexys4ddr"
+        board: "hydrogen1-ecpix5"
 
-    - name: Helium1 Nexys4-DDR build
+    - name: Helium1 ECPIX-5 Development Board build
       uses: ./.github/actions/nightly-west-build
       with:
-        board: "helium1-nexys4ddr"
-
-    - name: Hydrogen1 ECP5 Evaluation Board build
-      uses: ./.github/actions/nightly-west-build
-      with:
-        board: "hydrogen1-ecp5_evn"
-
-    - name: Helium1 ECP5 Evaluation Board build
-      uses: ./.github/actions/nightly-west-build
-      with:
-        board: "helium1-ecp5_evn"
+        board: "helium1-ecpix5"
