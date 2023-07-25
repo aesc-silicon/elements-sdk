@@ -84,21 +84,24 @@ function build_custom_verilator {
 }
 
 function print_usage {
-	echo "init.sh [-z] [-v] [-d] [-h]"
+	echo "init.sh [-z] [-v] [-d] [-f] [-h]"
 	echo "\t-z: Download and install Zephyr only"
 	echo "\t-v: Don't install into virtualenv"
 	echo "\t-d: Download Zephyr development branch"
+	echo "\t-f: Don't download the F4PGA toolchain"
 	echo "\t-h: Show this help message"
 }
 
 no_venv=false
 dev=false
-while getopts zvdh flag
+skip_f4pga=false
+while getopts zvdfh flag
 do
 	case "${flag}" in
 		z) scope="ZEPHYR";;
 		v) no_venv=true;;
 		d) dev=true;;
+		f) skip_f4pga=true;;
 		h) print_usage
 			exit 1;;
 	esac
@@ -116,12 +119,16 @@ fi
 if ! test -d "zephyr-sdk-${ZEPHYR_SDK_RELEASE}"; then
 	fetch_zephyr_sdk
 fi
-if ! test -d "oss-cad-build"; then
+if ! test -d "oss-cad-suite"; then
 	fetch_oss_cad_suite_build
 fi
 if ! test -d "f4pga-examples"; then
-	fetch_f4pga
-	fetch_f4pga_xc7
+	if [ "$skip_f4pga" = false ]; then
+		fetch_f4pga
+		fetch_f4pga_xc7
+	else
+		echo "Skipped fetching F4PGA toolchain."
+	fi
 fi
 if ! test -f "verilator/bin/verilator"; then
 	build_custom_verilator
