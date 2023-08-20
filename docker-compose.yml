@@ -20,7 +20,7 @@ services:
       # Internal. Do not modify.
       - zephyr-build:/home/elements-sdk/zephyr/build/
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - /dev/serial/:/dev/serial/
+      - /dev/:/dev/
     command: ["sleep", "infinity"]
 
 volumes:
