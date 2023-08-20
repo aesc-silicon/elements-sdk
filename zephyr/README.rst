@@ -167,7 +167,8 @@ Known Issues
 
 * ``west debug`` only works with bitstreams synthesized with Vivado.
 * F4PGA does not support PLLs on Xilinx architectures right now.
-* ECPIX-5 cannot boot from Flash.
+* PLLs are not working on the ECPIX-5 board when the bitstream gets
+  loaded from the flash.
 
 .. inclusion-end-marker-do-not-remove
 
