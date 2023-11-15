@@ -147,6 +147,12 @@ design.
     west synthesize
     west flash
 
+Run `flash` with the `--spi`` argument to flash the bitstream into the SPI flash.
+
+.. code-block:: text
+
+    west flash --spi
+
 Additionally, a design can only be generated instead of synthesized to inspect the generated
 Verilog code.
 
