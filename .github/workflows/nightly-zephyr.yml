@@ -50,12 +50,48 @@ jobs:
     #  with:
     #    board: "helium1-nexys4ddr"
 
-    - name: Hydrogen1 ECPIX-5 Development Board build
+    - name: Hydrogen1 ECPIX-5 build
       uses: ./.github/actions/nightly-west-build
       with:
         board: "hydrogen1-ecpix5"
 
-    - name: Helium1 ECPIX-5 Development Board build
+    - name: Hydrogen1 ECPIX-5 boot test
+      uses: ./.github/actions/nightly-west-test
+      with:
+        board: "hydrogen1-ecpix5"
+        application: "boot"
+
+    - name: Hydrogen1 ECPIX-5 mtimer test
+      uses: ./.github/actions/nightly-west-test
+      with:
+        board: "hydrogen1-ecpix5"
+        application: "mtimer"
+
+    - name: Hydrogen1 ECPIX-5 reset test
+      uses: ./.github/actions/nightly-west-test
+      with:
+        board: "hydrogen1-ecpix5"
+        application: "reset"
+
+    - name: Helium1 ECPIX-5 build
       uses: ./.github/actions/nightly-west-build
       with:
         board: "helium1-ecpix5"
+
+    - name: Helium1 ECPIX-5 boot test
+      uses: ./.github/actions/nightly-west-test
+      with:
+        board: "helium1-ecpix5"
+        application: "boot"
+
+    - name: Helium1 ECPIX-5 mtimer test
+      uses: ./.github/actions/nightly-west-test
+      with:
+        board: "helium1-ecpix5"
+        application: "mtimer"
+
+    - name: Helium1 ECPIX-5 reset test
+      uses: ./.github/actions/nightly-west-test
+      with:
+        board: "helium1-ecpix5"
+        application: "reset"
