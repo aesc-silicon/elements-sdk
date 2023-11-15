@@ -71,16 +71,24 @@ function fetch_f4pga_xc7 {
 	cd ../
 }
 
-function build_custom_verilator {
-	git clone https://github.com/verilator/verilator verilator -b v4.218
-	cd verilator
-	autoconf && ./configure && make -j `nproc`
-	cd ../
+function build_nextpnr_xilinx {
+	mkdir nextpnr-xilinx
+	cd nextpnr-xilinx
 
-	if ! test -f "verilator/bin/verilator"; then
-		 echo "verilator does not exist."
-		 exit 2
-	fi
+	git clone --recurse-submodules -j8 https://github.com/f4pga/prjxray.git
+	cd prjxray
+	mkdir build
+	cd build
+	cmake -DCMAKE_INSTALL_PREFIX=${PWD}/../../ ..
+	make -j$(nproc)
+	cd ../../
+
+	git clone --recurse-submodules -j8 https://github.com/openXC7/nextpnr-xilinx.git
+	cd nextpnr-xilinx
+	cmake -DARCH=xilinx -DBUILD_GUI=OFF -DCMAKE_INSTALL_PREFIX=${PWD}/../ .
+	make -j$(nproc)
+	make install
+	cd ../
 }
 
 function print_usage {
@@ -130,6 +138,7 @@ if ! test -d "f4pga-examples"; then
 		echo "Skipped fetching F4PGA toolchain."
 	fi
 fi
-if ! test -f "verilator/bin/verilator"; then
-	build_custom_verilator
+
+if ! test -f "nextpnr-xilinx/bin/nextpnr-xilinx"; then
+	build_nextpnr_xilinx
 fi
