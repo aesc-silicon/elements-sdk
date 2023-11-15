@@ -8,5 +8,5 @@ modules/
 tools/
 venv/
 verilator/
-zephyr-*/
+zephyr-*
 oss-cad-suite/
