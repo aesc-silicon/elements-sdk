@@ -1,9 +1,10 @@
 bootloader/
 build/
-elements-examples/
 elements-zephyr/
+elements-zephyr-samples/
 f4pga*
 modules/
+nextpnr-xilinx/
 openocd/
 oss-cad-suite/
 tools/
