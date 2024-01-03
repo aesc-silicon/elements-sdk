@@ -84,7 +84,7 @@ Afterwards, west can be used identical to the CLI.
 
 .. code-block:: text
 
-    sudo docker exec -it elements-sdk_zephyr_1 west build -p always -b hydrogen1-nexys4ddr \
+    sudo docker exec -it elements-sdk_zephyr_1 west build -p always -b hydrogen1-ecpix5 \
         elements-zephyr-samples/demo/leds/
 
 Finally, stop the Docker.
@@ -125,13 +125,13 @@ The following boards are supported with this version.
 +------------------------+--------------+------------------+---------------+------------+
 | Board                  | Elements SoC | FPGA Board       | Vendor        | FPGA Chip  |
 +========================+==============+==================+===============+============+
-| hydrogen1-nexys4ddr    | Hydrogen1    | Nexys4-DDR       | Digilent      | Artix-7    |
-+------------------------+--------------+------------------+---------------+------------+
 | hydrogen1-ecpix5       | Hydrogen1    | ECPIX-5          | LambdaConcept | ECP5       |
 +------------------------+--------------+------------------+---------------+------------+
-| helium1-nexys4ddr      | Helium1      | Nexys4-DDR       | Digilent      | Artix-7    |
+| hydrogen2-nexysa7      | Hydrogen1    | Nexys A7         | Digilent      | Artix-7    |
 +------------------------+--------------+------------------+---------------+------------+
 | helium1-ecpix5         | Helium1      | ECPIX-5          | LambdaConcept | ECP5       |
++------------------------+--------------+------------------+---------------+------------+
+| helium2-nexysa7        | Helium1      | Nexys A7         | Digilent      | Artix-7    |
 +------------------------+--------------+------------------+---------------+------------+
 
 Usage
@@ -143,7 +143,7 @@ design.
 
 .. code-block:: text
 
-    west build -p always -b hydrogen1-nexys4ddr elements-zephyr-samples/demo/leds/
+    west build -p always -b hydrogen1-ecpix5 elements-zephyr-samples/demo/leds/
     west synthesize
     west flash
 
@@ -158,14 +158,14 @@ Verilog code.
 
 .. code-block:: text
 
-    west build -p always -b hydrogen1-nexys4ddr elements-zephyr-samples/demo/leds/
+    west build -p always -b hydrogen1-ecpix5 elements-zephyr-samples/demo/leds/
     west generate
 
 Lastly, a design can be simulated and viewed with GTKWave.
 
 .. code-block:: text
 
-    west build -p always -b hydrogen1-nexys4ddr elements-zephyr-samples/demo/leds/
+    west build -p always -b hydrogen1-ecpix5 elements-zephyr-samples/demo/leds/
     west simulate
 
 Known Issues
@@ -181,6 +181,6 @@ Known Issues
 License
 #######
 
-Copyright (c) 2023 aesc silicon. Released under the `MIT license`_.
+Copyright (c) 2024 aesc silicon. Released under the `MIT license`_.
 
 .. _MIT license: ../COPYING.MIT
