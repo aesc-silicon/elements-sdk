@@ -127,11 +127,13 @@ The following boards are supported with this version.
 +========================+==============+==================+===============+============+
 | hydrogen1-ecpix5       | Hydrogen1    | ECPIX-5          | LambdaConcept | ECP5       |
 +------------------------+--------------+------------------+---------------+------------+
-| hydrogen2-nexysa7      | Hydrogen1    | Nexys A7         | Digilent      | Artix-7    |
+| hydrogen1-nexysa7      | Hydrogen1    | Nexys A7         | Digilent      | Artix-7    |
 +------------------------+--------------+------------------+---------------+------------+
 | helium1-ecpix5         | Helium1      | ECPIX-5          | LambdaConcept | ECP5       |
 +------------------------+--------------+------------------+---------------+------------+
-| helium2-nexysa7        | Helium1      | Nexys A7         | Digilent      | Artix-7    |
+| helium1-nexysa7        | Helium1      | Nexys A7         | Digilent      | Artix-7    |
++------------------------+--------------+------------------+---------------+------------+
+| lithium1-ecpix5        | Lithium1     | ECPIX-5          | LambdaConcept | ECP5       |
 +------------------------+--------------+------------------+---------------+------------+
 
 Usage
