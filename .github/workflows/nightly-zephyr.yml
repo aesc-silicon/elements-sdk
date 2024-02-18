@@ -95,3 +95,8 @@ jobs:
       with:
         board: "helium1-ecpix5"
         application: "reset"
+
+    - name: Lithium1 ECPIX-5 build
+      uses: ./.github/actions/nightly-west-build
+      with:
+        board: "lithium1-ecpix5"
