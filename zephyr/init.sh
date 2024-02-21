@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ELEMENTS_RELEASE=release-v23.2
+ELEMENTS_RELEASE=release-v24.1
 ELEMENTS_DEV=v3.5.0-aesc
 ZEPHYR_SDK_RELEASE=0.16.5
 
