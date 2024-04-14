@@ -84,7 +84,7 @@ Afterwards, west can be used identical to the CLI.
 
 .. code-block:: text
 
-    sudo docker exec -it elements-sdk_zephyr_1 west build -p always -b hydrogen1-ecpix5 \
+    sudo docker exec -it elements-sdk_zephyr_1 west build -p always -b helium1-ecpix5 \
         elements-zephyr-samples/demo/leds/
 
 Finally, stop the Docker.
@@ -125,15 +125,15 @@ The following boards are supported with this version.
 +------------------------+--------------+------------------+---------------+------------+
 | Board                  | Elements SoC | FPGA Board       | Vendor        | FPGA Chip  |
 +========================+==============+==================+===============+============+
-| hydrogen1-ecpix5       | Hydrogen1    | ECPIX-5          | LambdaConcept | ECP5       |
-+------------------------+--------------+------------------+---------------+------------+
-| hydrogen1-nexysa7      | Hydrogen1    | Nexys A7         | Digilent      | Artix-7    |
-+------------------------+--------------+------------------+---------------+------------+
 | helium1-ecpix5         | Helium1      | ECPIX-5          | LambdaConcept | ECP5       |
 +------------------------+--------------+------------------+---------------+------------+
 | helium1-nexysa7        | Helium1      | Nexys A7         | Digilent      | Artix-7    |
 +------------------------+--------------+------------------+---------------+------------+
-| lithium1-ecpix5        | Lithium1     | ECPIX-5          | LambdaConcept | ECP5       |
+| neon1-ecpix5           | Neon1        | ECPIX-5          | LambdaConcept | ECP5       |
++------------------------+--------------+------------------+---------------+------------+
+| neon1-nexysa7          | Neon1        | Nexys A7         | Digilent      | Artix-7    |
++------------------------+--------------+------------------+---------------+------------+
+| argon1-ecpix5          | Argon1       | ECPIX-5          | LambdaConcept | ECP5       |
 +------------------------+--------------+------------------+---------------+------------+
 
 Usage
@@ -145,7 +145,7 @@ design.
 
 .. code-block:: text
 
-    west build -p always -b hydrogen1-ecpix5 elements-zephyr-samples/demo/leds/
+    west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
     west synthesize
     west flash
 
@@ -160,15 +160,30 @@ Verilog code.
 
 .. code-block:: text
 
-    west build -p always -b hydrogen1-ecpix5 elements-zephyr-samples/demo/leds/
+    west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
     west generate
 
 Lastly, a design can be simulated and viewed with GTKWave.
 
 .. code-block:: text
 
-    west build -p always -b hydrogen1-ecpix5 elements-zephyr-samples/demo/leds/
+    west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
     west simulate
+
+Flash SPI-Nor Flash
+###################
+
+Pad the Zephyr binary because flashrom can't handle images which not align with pages.
+
+.. code-block:: text
+
+    dd if=/dev/zero of=flash.bin bs=1MiB count=32
+    dd if=build/zephyr/zephyr.bin of=flash.bin conv=notrunc
+
+Use a bus pirate to flash the padded Zephyr image to the SPI-Nor flash.
+
+.. code-block:: text
+    flashrom -p buspirate_spi:dev=/dev/ttyUSB0,spispeed=1M -c MT25QL256 -l layout.txt -i ROM -N -w flash.bin
 
 Known Issues
 ############
