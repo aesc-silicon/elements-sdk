@@ -23,7 +23,7 @@ Installation
         sudo apt install libssl-dev gdb ninja-build flex bison libfl-dev cmake libftdi1-dev
         sudo apt install python3 python3.10-dev python3-pip virtualenv openjdk-11-jdk-headless
         sudo apt install verilator gtkwave libcanberra-gtk-module libcanberra-gtk3-module
-        sudo apt install libtinfo5 libncurses5
+        sudo apt install libtinfo5 libncurses5 libboost-all-dev
 
 - Install sbt::
 
