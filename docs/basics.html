@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prerequisites &mdash; Elements SDK 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=9a2dae69"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Application" href="developer.html" />
+    <link rel="prev" title="Welcome to Elements SDK" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Elements SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Basic Information</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Prerequisites</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#installation">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#vivado">Vivado</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#docker">Docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#custom-image">Custom Image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gui-support">GUI Support</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#support">Support</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#flash-spi-nor-flash">Flash SPI-Nor Flash</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#known-issues">Known Issues</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developer's Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html#system-on-chip">System on Chip</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html#board">Board</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html#kit">Kit</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Platforms</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="platforms.html">Hydrogen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="platforms.html#helium">Helium</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Elements SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Prerequisites</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/basics.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <p>Elements is fully integrated into Zephyr’s meta-tool West and aims to provide RISC-V designs to
+developers without deep knowledge about hardware design. Therefore, extra commands were added to
+West to generate, synthesize, and simulate designs.</p>
+<section id="prerequisites">
+<h1>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p>Linux host system (Ubuntu 22.04 recommended)</p></li>
+<li><p>Python 3 (python3.10-dev)</p></li>
+<li><p>Vivado for Xilinx platforms (optional)</p></li>
+</ul>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<ul>
+<li><p>Install required packages:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">ssh</span> <span class="n">git</span> <span class="n">curl</span> <span class="n">libtool</span><span class="o">-</span><span class="nb">bin</span> <span class="n">autotools</span><span class="o">-</span><span class="n">dev</span> <span class="n">automake</span> <span class="n">pkg</span><span class="o">-</span><span class="n">config</span> <span class="n">libyaml</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libssl</span><span class="o">-</span><span class="n">dev</span> <span class="n">gdb</span> <span class="n">ninja</span><span class="o">-</span><span class="n">build</span> <span class="n">flex</span> <span class="n">bison</span> <span class="n">libfl</span><span class="o">-</span><span class="n">dev</span> <span class="n">cmake</span> <span class="n">libftdi1</span><span class="o">-</span><span class="n">dev</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">python3</span> <span class="n">python3</span><span class="mf">.10</span><span class="o">-</span><span class="n">dev</span> <span class="n">python3</span><span class="o">-</span><span class="n">pip</span> <span class="n">virtualenv</span> <span class="n">openjdk</span><span class="o">-</span><span class="mi">11</span><span class="o">-</span><span class="n">jdk</span><span class="o">-</span><span class="n">headless</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">verilator</span> <span class="n">gtkwave</span> <span class="n">libcanberra</span><span class="o">-</span><span class="n">gtk</span><span class="o">-</span><span class="n">module</span> <span class="n">libcanberra</span><span class="o">-</span><span class="n">gtk3</span><span class="o">-</span><span class="n">module</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">libtinfo5</span> <span class="n">libncurses5</span> <span class="n">libboost</span><span class="o">-</span><span class="nb">all</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+<li><p>Install sbt:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s2">&quot;deb https://repo.scala-sbt.org/scalasbt/debian all main&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">sbt</span><span class="o">.</span><span class="n">list</span>
+<span class="n">echo</span> <span class="s2">&quot;deb https://repo.scala-sbt.org/scalasbt/debian /&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="n">tee</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">sources</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">sbt_old</span><span class="o">.</span><span class="n">list</span>
+<span class="n">curl</span> <span class="o">-</span><span class="n">sL</span> <span class="s2">&quot;https://keyserver.ubuntu.com/pks/lookup?op=get&amp;search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823&quot;</span> <span class="o">|</span> <span class="n">sudo</span> <span class="o">-</span><span class="n">H</span> <span class="n">gpg</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">default</span><span class="o">-</span><span class="n">keyring</span> <span class="o">--</span><span class="n">keyring</span> <span class="n">gnupg</span><span class="o">-</span><span class="n">ring</span><span class="p">:</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">trusted</span><span class="o">.</span><span class="n">gpg</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">scalasbt</span><span class="o">-</span><span class="n">release</span><span class="o">.</span><span class="n">gpg</span> <span class="o">--</span><span class="kn">import</span>
+<span class="nn">sudo</span> <span class="n">chmod</span> <span class="mi">644</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">apt</span><span class="o">/</span><span class="n">trusted</span><span class="o">.</span><span class="n">gpg</span><span class="o">.</span><span class="n">d</span><span class="o">/</span><span class="n">scalasbt</span><span class="o">-</span><span class="n">release</span><span class="o">.</span><span class="n">gpg</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">update</span>
+<span class="n">sudo</span> <span class="n">apt</span> <span class="n">install</span> <span class="n">sbt</span>
+</pre></div>
+</div>
+</li>
+<li><p>Download and build all components:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="n">init</span><span class="o">.</span><span class="n">sh</span>
+<span class="o">./</span><span class="n">init</span><span class="o">.</span><span class="n">sh</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>Afterwards, everything should be installed and <cite>west</cite> can be used to generate RISC-V designs.</p>
+<section id="vivado">
+<h2>Vivado<a class="headerlink" href="#vivado" title="Link to this heading"></a></h2>
+<p>The Vivado toolchain is not part of this SDK and needs to be installed separately for Xilinx
+platforms from <a class="reference external" href="https://www.xilinx.com/support/download.html">Xilinx’s homepage</a>. Download the Linux Self Extracting Web Installer for Version
+2022.2 and install it. Select Vivado as product and Vivado HL WebPACK as Edition. You can use this
+edition’s license for free if you do not sell the bitstream, and disable everything except the
+Artix-7 Platform to save disk storage. Elements except to find the Vivado toolchain under
+<code class="docutils literal notranslate"><span class="pre">/opt/xilinx</span></code>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chmod +x ~/Downloads/Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+~/Downloads/Xilinx_Unified_2022.2_1014_8888_Lin64.bin
+</pre></div>
+</div>
+</section>
+</section>
+<section id="docker">
+<h1>Docker<a class="headerlink" href="#docker" title="Link to this heading"></a></h1>
+<p>The Elements SDK supports running inside Docker. Currently, only self-build images can be used.</p>
+<section id="custom-image">
+<h2>Custom Image<a class="headerlink" href="#custom-image" title="Link to this heading"></a></h2>
+<p>A Docker Compose configuration is provided for systems that do not run with the recommended
+versions. The Docker will have included all required packages for the SDK, except vendor toolchains.
+Build the image (which can take some minutes).</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>docker-compose build
+</pre></div>
+</div>
+<p>Next, start the Docker in the background.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>docker-compose up -d
+</pre></div>
+</div>
+<p>Afterwards, west can be used identical to the CLI.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>sudo docker exec -it elements-sdk_zephyr_1 west build -p always -b helium1-ecpix5 \
+    elements-zephyr-samples/demo/leds/
+</pre></div>
+</div>
+<p>Finally, stop the Docker.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>docker-compose stop
+</pre></div>
+</div>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading"></a></h2>
+<p>The docker image can also be used to develop. Therefore, the repos on the host system should be
+forwarded to the container to make all changes public. Open the <code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> file and
+uncomment the lines in <code class="docutils literal notranslate"><span class="pre">volumes</span></code> which should be made public.</p>
+<p>Afterwards, go into <cite>zephyr/</cite> and download Zephyr with all repositories.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>chmod +x init.sh
+.init.sh -z
+</pre></div>
+</div>
+</section>
+<section id="gui-support">
+<h2>GUI Support<a class="headerlink" href="#gui-support" title="Link to this heading"></a></h2>
+<p>Some GUI applications require access to the host system’s X server. Run the following command in
+the host shell to grant them.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>xhost local:root
+</pre></div>
+</div>
+</section>
+</section>
+<section id="support">
+<h1>Support<a class="headerlink" href="#support" title="Link to this heading"></a></h1>
+<p>The following boards are supported with this version.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Board</p></th>
+<th class="head"><p>Elements SoC</p></th>
+<th class="head"><p>FPGA Board</p></th>
+<th class="head"><p>Vendor</p></th>
+<th class="head"><p>FPGA Chip</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>helium1-ecpix5</p></td>
+<td><p>Helium1</p></td>
+<td><p>ECPIX-5</p></td>
+<td><p>LambdaConcept</p></td>
+<td><p>ECP5</p></td>
+</tr>
+<tr class="row-odd"><td><p>helium1-nexysa7</p></td>
+<td><p>Helium1</p></td>
+<td><p>Nexys A7</p></td>
+<td><p>Digilent</p></td>
+<td><p>Artix-7</p></td>
+</tr>
+<tr class="row-even"><td><p>neon1-ecpix5</p></td>
+<td><p>Neon1</p></td>
+<td><p>ECPIX-5</p></td>
+<td><p>LambdaConcept</p></td>
+<td><p>ECP5</p></td>
+</tr>
+<tr class="row-odd"><td><p>neon1-nexysa7</p></td>
+<td><p>Neon1</p></td>
+<td><p>Nexys A7</p></td>
+<td><p>Digilent</p></td>
+<td><p>Artix-7</p></td>
+</tr>
+<tr class="row-even"><td><p>argon1-ecpix5</p></td>
+<td><p>Argon1</p></td>
+<td><p>ECPIX-5</p></td>
+<td><p>LambdaConcept</p></td>
+<td><p>ECP5</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
+<p>Elements is fully integrated into the Zephyr west development process. Simply build software for
+a Elements board. Afterwards, the build cache contains enough information to <cite>synthesize</cite> the
+design.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
+west synthesize
+west flash
+</pre></div>
+</div>
+<p>Run <cite>flash</cite> with the <cite>–spi`</cite> argument to flash the bitstream into the SPI flash.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>west flash --spi
+</pre></div>
+</div>
+<p>Additionally, a design can only be generated instead of synthesized to inspect the generated
+Verilog code.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
+west generate
+</pre></div>
+</div>
+<p>Lastly, a design can be simulated and viewed with GTKWave.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
+west simulate
+</pre></div>
+</div>
+</section>
+<section id="flash-spi-nor-flash">
+<h1>Flash SPI-Nor Flash<a class="headerlink" href="#flash-spi-nor-flash" title="Link to this heading"></a></h1>
+<p>Pad the Zephyr binary because flashrom can’t handle images which not align with pages.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>dd if=/dev/zero of=flash.bin bs=1MiB count=32
+dd if=build/zephyr/zephyr.bin of=flash.bin conv=notrunc
+</pre></div>
+</div>
+<p>Use a bus pirate to flash the padded Zephyr image to the SPI-Nor flash.</p>
+</section>
+<section id="known-issues">
+<h1>Known Issues<a class="headerlink" href="#known-issues" title="Link to this heading"></a></h1>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">west</span> <span class="pre">debug</span></code> only works with bitstreams synthesized with Vivado.</p></li>
+<li><p>F4PGA does not support PLLs on Xilinx architectures right now.</p></li>
+<li><p>PLLs are not working on the ECPIX-5 board when the bitstream gets
+loaded from the flash.</p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Elements SDK" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="developer.html" class="btn btn-neutral float-right" title="Application" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, aesc silicon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
