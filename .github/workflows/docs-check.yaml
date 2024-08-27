@@ -1,0 +1,20 @@
+name: "Check Docs"
+on:
+  pull_request:
+    types:
+      - opened
+  push:
+    branches:
+      - main
+
+jobs:
+  docs:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - uses: ammaraskar/sphinx-action@dev
+        with:
+          docs-folder: "docs/"

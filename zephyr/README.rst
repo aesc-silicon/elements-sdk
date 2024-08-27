@@ -183,6 +183,7 @@ Pad the Zephyr binary because flashrom can't handle images which not align with 
 Use a bus pirate to flash the padded Zephyr image to the SPI-Nor flash.
 
 .. code-block:: text
+
     flashrom -p buspirate_spi:dev=/dev/ttyUSB0,spispeed=1M -c MT25QL256 -l layout.txt -i ROM -N -w flash.bin
 
 Known Issues
