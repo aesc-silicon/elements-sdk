@@ -1,8 +1,8 @@
 #!/bin/bash
 
 ELEMENTS_RELEASE=release-v24.2
-ELEMENTS_DEV=v3.6.0-aesc
-ZEPHYR_SDK_RELEASE=0.16.5
+ELEMENTS_DEV=v3.7.0-aesc
+ZEPHYR_SDK_RELEASE=0.16.8
 
 OSS_CAD_SUITE_DATE="2024-04-14"
 OSS_CAD_SUITE_STAMP="${OSS_CAD_SUITE_DATE//-}"
@@ -24,11 +24,11 @@ function init_venv {
 	pip install checksumdir
 
 	if [ "$2" = false ]; then
-		git clone https://github.com/aesc-silicon/elements-zephyr -b $ELEMENTS_RELEASE
+		git clone https://github.com/aesc-silicon/elements-zephyr-application -b $ELEMENTS_RELEASE
 	else
-		git clone https://github.com/aesc-silicon/elements-zephyr -b $ELEMENTS_DEV
+		git clone https://github.com/aesc-silicon/elements-zephyr-application -b $ELEMENTS_DEV
 	fi
-	west init --local --mf west.yml elements-zephyr/
+	west init --local --mf west.yml elements-zephyr-application/
 	west update
 	west zephyr-export
 	pip install -r elements-zephyr/scripts/requirements.txt
