@@ -18,12 +18,12 @@ runs:
       working-directory: zephyr/
     - name: Generate
       run: |
-        west generate
+        west elements-generate
       shell: bash
       working-directory: zephyr/
     - name: Synthesize
       run: |
-        west synthesize
+        west elements-synthesize
       shell: bash
       working-directory: zephyr/
     - name: Remove build
