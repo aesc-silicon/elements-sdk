@@ -7,7 +7,7 @@ inputs:
   application:
     description: 'Path to the Zephyr samples accplication'
     required: false
-    default: 'elements-zephyr-samples/demo/leds/'
+    default: 'elements-zephyr-application/app/demo/'
 runs:
   using: 'composite'
   steps:

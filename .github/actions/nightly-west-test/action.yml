@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Build
       run: |
-        west build -p always -b ${{ inputs.board }} elements-zephyr-samples/startup/${{ inputs.application }}
+        west build -p always -b ${{ inputs.board }} elements-zephyr-application/app/test/${{ inputs.application }}
       shell: bash
       working-directory: zephyr/
     - name: Test

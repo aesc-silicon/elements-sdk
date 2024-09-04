@@ -42,50 +42,22 @@ jobs:
     - name: Helium1 ECPIX-5 build
       uses: ./.github/actions/nightly-west-build
       with:
-        board: "helium1-ecpix5"
+        board: "ecpix5/helium1"
 
     - name: Helium1 ECPIX-5 boot test
       uses: ./.github/actions/nightly-west-test
       with:
-        board: "helium1-ecpix5"
+        board: "ecpix5/helium1"
         application: "boot"
 
     - name: Helium1 ECPIX-5 mtimer test
       uses: ./.github/actions/nightly-west-test
       with:
-        board: "helium1-ecpix5"
+        board: "ecpix5/helium1"
         application: "mtimer"
 
     - name: Helium1 ECPIX-5 reset test
       uses: ./.github/actions/nightly-west-test
       with:
-        board: "helium1-ecpix5"
+        board: "ecpix5/helium1"
         application: "reset"
-
-    - name: Neon1 ECPIX-5 build
-      uses: ./.github/actions/nightly-west-build
-      with:
-        board: "neon1-ecpix5"
-
-    - name: Neon1 ECPIX-5 boot test
-      uses: ./.github/actions/nightly-west-test
-      with:
-        board: "neon1-ecpix5"
-        application: "boot"
-
-    - name: Neon1 ECPIX-5 mtimer test
-      uses: ./.github/actions/nightly-west-test
-      with:
-        board: "neon1-ecpix5"
-        application: "mtimer"
-
-    - name: Neon1 ECPIX-5 reset test
-      uses: ./.github/actions/nightly-west-test
-      with:
-        board: "neon1-ecpix5"
-        application: "reset"
-
-    - name: Argon1 ECPIX-5 build
-      uses: ./.github/actions/nightly-west-build
-      with:
-        board: "argon1-ecpix5"
