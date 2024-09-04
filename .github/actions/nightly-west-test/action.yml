@@ -17,7 +17,7 @@ runs:
       working-directory: zephyr/
     - name: Test
       run: |
-        west test ${{ inputs.application }}
+        west elements-test ${{ inputs.application }}
       shell: bash
       working-directory: zephyr/
     - name: Remove build

@@ -1,3 +1,4 @@
 !workflows/
 !actions/
 !actions/nightly-west-build
+!actions/nightly-west-test
