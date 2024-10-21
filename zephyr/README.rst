@@ -145,8 +145,8 @@ design.
 
 .. code-block:: text
 
-    west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
-    west synthesize
+    west build -p always -b ecpix5/helium1 elements-zephyr-application/app/demo/
+    west elements-synthesize
     west flash
 
 Run `flash` with the `--spi`` argument to flash the bitstream into the SPI flash.
@@ -155,20 +155,26 @@ Run `flash` with the `--spi`` argument to flash the bitstream into the SPI flash
 
     west flash --spi
 
+Run `debug` and pass the OpenOCD binary path as well as search path.
+
+.. code-block:: text
+
+    west debug --openocd elements-openocd/src/openocd --openocd-search elements-openocd/
+
 Additionally, a design can only be generated instead of synthesized to inspect the generated
 Verilog code.
 
 .. code-block:: text
 
-    west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
-    west generate
+    west build -p always -b ecpix5/helium1 elements-zephyr-application/app/demo/
+    west elements-generate
 
 Lastly, a design can be simulated and viewed with GTKWave.
 
 .. code-block:: text
 
-    west build -p always -b helium1-ecpix5 elements-zephyr-samples/demo/leds/
-    west simulate
+    west build -p always -b ecpix5/helium1 elements-zephyr-application/app/demo/
+    west elements-simulate
 
 Flash SPI-Nor Flash
 ###################
