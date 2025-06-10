@@ -13,7 +13,7 @@ linuxdoc==20240509
 MarkupSafe==2.1.5
 packaging==24.1
 Pygments==2.18.0
-requests==2.32.3
+requests==2.32.4
 six==1.16.0
 snowballstemmer==2.2.0
 soupsieve==2.6
